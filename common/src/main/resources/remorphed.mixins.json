@@ -4,6 +4,7 @@
   "package": "tocraft.remorphed.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "LivingEntityMixin",
 	  "PlayerEntityMixin",
 	  "ServerPlayerEntityMixin"
   ],
