@@ -186,7 +186,7 @@ public class RemorphedScreen extends Screen {
 
         // collect current unlocked identities (or allow all for creative users)
         renderEntities.forEach((type, instance) -> {
-            if(((RemorphedPlayerDataProvider) player).getUnlockedShapes().contains(type) || player.isCreative()) {
+            if(((RemorphedPlayerDataProvider) player).getUnlockedShapes().containsKey(type) || player.isCreative()) {
                 unlocked.add(type);
             }
         });

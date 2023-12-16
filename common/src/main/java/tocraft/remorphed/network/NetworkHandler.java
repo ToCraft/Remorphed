@@ -41,7 +41,7 @@ public class NetworkHandler {
 				
 				// make the default ShapeType null, doing it this way, it's ensured that invalid 2ndShapes won't cause crashes.
 				@Nullable
-				ShapeType<LivingEntity> type = ShapeType.from(eType, typeVariant);;;
+				ShapeType<LivingEntity> type = ShapeType.from(eType, typeVariant);
 
 				// update Player
 				PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
@@ -53,7 +53,7 @@ public class NetworkHandler {
 		});
 	}
 	
-	public static <T extends LivingEntity> void sendUnlockRequest(@NotNull ShapeType<T> type) {
+	public static <T extends LivingEntity> void sendSwap2ndShapeRequest(@NotNull ShapeType<T> type) {
 		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
 		CompoundTag compound = new CompoundTag();

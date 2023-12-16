@@ -1,7 +1,7 @@
 package tocraft.remorphed.network;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
@@ -28,12 +28,13 @@ public class ClientNetworking {
 	public static void handleUnlockedSyncPacket(FriendlyByteBuf packet, NetworkManager.PacketContext context) {
 		final UUID uuid = packet.readUUID();
 		final CompoundTag compound = packet.readNbt();
-		final Set<ShapeType<?>> unlockedShapes = new HashSet<ShapeType<?>>();
+		final Map<ShapeType<?>, Integer> unlockedShapes = new HashMap<ShapeType<?>, Integer>();
 		if (compound.get("UnlockedShapes") instanceof ListTag list) {
 			list.forEach(entryTag -> {
 				EntityType<?> eType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(((CompoundTag) entryTag).getString("id")));
 				int variant = ((CompoundTag) entryTag).getInt("variant");
-				unlockedShapes.add(ShapeType.from(eType, variant));
+				int killAmount = ((CompoundTag) entryTag).getInt("killAmount");
+				unlockedShapes.put(ShapeType.from(eType, variant), killAmount);
 			});
 		}
 		

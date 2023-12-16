@@ -2,7 +2,7 @@ package tocraft.remorphed;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,14 +66,15 @@ public class Remorphed {
         CompoundTag compoundTag = new CompoundTag();
 
         // serialize current shape data to tag if it exists
-        Set<ShapeType<?>> unlockedShapes = ((RemorphedPlayerDataProvider) changed).getUnlockedShapes();
+        Map<ShapeType<?>, Integer> unlockedShapes = ((RemorphedPlayerDataProvider) changed).getUnlockedShapes();
         
         ListTag list = new ListTag();
         
-        unlockedShapes.forEach(shape -> {
+        unlockedShapes.forEach((shape, killAmount) -> {
 			CompoundTag compound = new CompoundTag();
 			compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
 			compound.putInt("variant", shape.getVariantData());
+			compound.putInt("killAmount", killAmount);
 			list.add(compound);
 		});
         

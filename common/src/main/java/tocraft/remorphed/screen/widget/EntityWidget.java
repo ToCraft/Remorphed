@@ -40,7 +40,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
         if(bl) {
             // Update 2nd Shape
-            NetworkHandler.sendUnlockRequest(type);
+            NetworkHandler.sendSwap2ndShapeRequest(type);
             parent.disableAll();
             // close active screen handler
             parent.onClose();

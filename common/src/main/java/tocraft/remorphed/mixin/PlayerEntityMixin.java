@@ -1,7 +1,7 @@
 package tocraft.remorphed.mixin;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,7 +25,7 @@ import tocraft.walkers.api.variant.ShapeType;
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
 	@Unique
-	private Set<ShapeType<? extends LivingEntity>> unlockedShapes = new HashSet<ShapeType<? extends LivingEntity>>();
+	private Map<ShapeType<? extends LivingEntity>, Integer> unlockedShapes = new HashMap<ShapeType<? extends LivingEntity>, Integer>();
 	@Unique
 	private String UNLOCKED_SHAPES = "UnlockedShapes";
 
@@ -52,10 +52,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 	@Unique
 	private CompoundTag writeData(CompoundTag tag) {
 		ListTag list = new ListTag();
-		unlockedShapes.forEach(shape -> {
+		unlockedShapes.forEach((shape, killAmount) -> {
 			CompoundTag entryTag = new CompoundTag();
 			entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
 			entryTag.putInt("variant", shape.getVariantData());
+			entryTag.putInt("killAmount", killAmount);
 			list.add(entryTag);
 		});
 		if (list != null)
@@ -73,8 +74,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 				if (entry instanceof CompoundTag) {
 					ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
 					int typeVariantId = ((CompoundTag) entry).getInt("variant");
+					int killAmount = ((CompoundTag) entry).getInt("killAmount");
 					
-					unlockedShapes.add(ShapeType.from(BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId));
+					unlockedShapes.put(ShapeType.from(BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
 				}
 			});
 		}
@@ -83,25 +85,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 	
 	@Unique
 	@Override
-	public void setUnlockedShapes(Set<ShapeType<? extends LivingEntity>> types) {
+	public void setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types) {
 		unlockedShapes = types;
 	};
 	
 	@Unique
 	@Override
-	public Set<ShapeType<? extends LivingEntity>> getUnlockedShapes() {
+	public Map<ShapeType<? extends LivingEntity>, Integer> getUnlockedShapes() {
 		return unlockedShapes;
 	};
 	
 	@Unique
 	@Override
 	public void addUnlockShape(ShapeType<? extends LivingEntity> type) {
-		unlockedShapes.add(type);
-	};
-	
-	@Unique
-	@Override
-	public void removeUnlockedShape(ShapeType<? extends LivingEntity> type) {
-		unlockedShapes.remove(type);
+		int killAmount = unlockedShapes.containsKey(type)? unlockedShapes.get(type) + 1 : 1;
+		unlockedShapes.put(type, killAmount);
 	};
 }
