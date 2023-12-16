@@ -19,7 +19,7 @@ public class Remorphed {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(Remorphed.class);
 	public static final String MODID = "remorphed";
-	public static String versionURL = "https://raw.githubusercontent.com/ToCraft/remorphed/1.20.2/gradle.properties";
+	public static String versionURL = "https://raw.githubusercontent.com/ToCraft/Remorphed/1.20.2/gradle.properties";
 	public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
 	public static List<String> devs = new ArrayList<>();
 	static {

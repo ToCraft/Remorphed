@@ -77,7 +77,7 @@ modrinth {
     uploadFile = remapJar
     gameVersions = [rootProject.minecraft_version]
     loaders = [project.name]
-    changelog = "https://github.com/ToCraft/potionabilities/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
+    changelog = "https://github.com/ToCraft/Remorphed/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
     dependencies {
         required.version "crafted-core", rootProject.minecraft_version + "-" + project.name + "-" + rootProject.craftedcore_version
         required.version "woodwalkers", rootProject.minecraft_version + "-" + project.name + "-" + rootProject.woodwalkers_version
@@ -94,5 +94,5 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     mainFile.addModLoader(project.name)
     mainFile.addRequirement("crafted-core")
     mainFile.addRequirement("woodwalkers");
-    mainFile.changelog = "https://github.com/ToCraft/potionabilities/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
+    mainFile.changelog = "https://github.com/ToCraft/Remorphed/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
 }
