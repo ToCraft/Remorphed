@@ -2,18 +2,30 @@ package tocraft.remorphed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.events.common.PlayerEvents;
+import tocraft.craftedcore.network.NetworkManager;
 import tocraft.craftedcore.platform.Platform;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.config.RemorphedConfig;
+import tocraft.remorphed.events.UnlockShapeCallback;
+import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
+import tocraft.walkers.api.event.ShapeEvents;
+import tocraft.walkers.api.variant.ShapeType;
 
 public class Remorphed {
 
@@ -38,10 +50,38 @@ public class Remorphed {
 		
 		NetworkHandler.registerPacketReceiver();
 		
-		//ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
+		ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
 	}
 
 	public static ResourceLocation id(String name) {
 		return new ResourceLocation(MODID, name);
 	}
+	
+	public static void sync(ServerPlayer player) {
+        sync(player, player);
+    }
+	
+	public static void sync(ServerPlayer changed, ServerPlayer packetTarget) {
+        FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
+        CompoundTag compoundTag = new CompoundTag();
+
+        // serialize current shape data to tag if it exists
+        Set<ShapeType<?>> unlockedShapes = ((RemorphedPlayerDataProvider) changed).getUnlockedShapes();
+        
+        ListTag list = new ListTag();
+        
+        unlockedShapes.forEach(shape -> {
+			CompoundTag compound = new CompoundTag();
+			compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+			compound.putInt("variant", shape.getVariantData());
+			list.add(compound);
+		});
+        
+		if (list != null)
+			compoundTag.put("UnlockedShapes", list);
+
+		packet.writeUUID(changed.getUUID());
+        packet.writeNbt(compoundTag);
+        NetworkManager.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, packet);
+    }
 }

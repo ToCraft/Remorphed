@@ -20,6 +20,6 @@ public class RemorphedClient {
 		// Register event handlers
 		ClientTickEvents.CLIENT_PRE.register(new KeyPressHandler());
 		
-		ClientNetworking.registerPAcketHandlers();
+		ClientNetworking.registerPacketHandlers();
 	}
 }

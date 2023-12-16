@@ -23,6 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import tocraft.remorphed.Remorphed;
+import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
 import tocraft.remorphed.screen.widget.HelpWidget;
@@ -33,7 +34,7 @@ import tocraft.walkers.registry.WalkersEntityTags;
 
 public class RemorphedScreen extends Screen {
 
-    private final List<ShapeType<?>> rendered = new ArrayList<>();
+	private final List<ShapeType<?>> unlocked = new ArrayList<>();
     private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
@@ -54,10 +55,10 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
 
-        rendered.addAll(collectEntities(minecraft.player));
+        unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
         // add entity widgets
-        populateEntityWidgets(minecraft.player, rendered);
+        populateEntityWidgets(minecraft.player, unlocked);
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -69,7 +70,7 @@ public class RemorphedScreen extends Screen {
                 children().removeIf(button -> button instanceof EntityWidget);
                 entityWidgets.clear();
 
-                List<ShapeType<?>> filtered = rendered
+                List<ShapeType<?>> filtered = unlocked
                         .stream()
                         .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text))
                         .collect(Collectors.toList());
@@ -179,16 +180,18 @@ public class RemorphedScreen extends Screen {
             Walkers.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
         }
     }
+    
+    private List<ShapeType<?>> collectUnlockedEntities(LocalPlayer player) {
+        List<ShapeType<?>> unlocked = new ArrayList<>();
 
-    private List<ShapeType<?>> collectEntities(LocalPlayer player) {
-        List<ShapeType<?>> entities = new ArrayList<>();
-
-        // collect current unlocked second shape
+        // collect current unlocked identities (or allow all for creative users)
         renderEntities.forEach((type, instance) -> {
-            entities.add(type);
+            if(((RemorphedPlayerDataProvider) player).getUnlockedShapes().contains(type) || player.isCreative()) {
+                unlocked.add(type);
+            }
         });
 
-        return entities;
+        return unlocked;
     }
 
     private SearchWidget createSearchBar() {

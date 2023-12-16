@@ -40,7 +40,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
         if(bl) {
             // Update 2nd Shape
-            NetworkHandler.sendSwapRequest(type);
+            NetworkHandler.sendUnlockRequest(type);
             parent.disableAll();
             // close active screen handler
             parent.onClose();
@@ -56,6 +56,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             // Some entities (namely Aether mobs) crash when rendered in a GUI.
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
+            	// ARGH
                 InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + this.getWidth() / 2, (int) (this.getY() + this.getHeight() * .75f), 0, 0, size, 0, -10, -10, entity);
             } catch (Exception ignored) {
                 crashed = true;
