@@ -27,8 +27,10 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "die", at = @At("HEAD"))
     public void onDeath(DamageSource damageSource, CallbackInfo ci) {
     	if (!((Object) this instanceof Player) && damageSource.getEntity() instanceof ServerPlayer killer) {
-    		((RemorphedPlayerDataProvider) killer).addUnlockShape(ShapeType.from((LivingEntity) (Object) this));
-    		if (Remorphed.CONFIG.autoTransform)
+    		ShapeType<?> type = ShapeType.from((LivingEntity) (Object) this);
+    		((RemorphedPlayerDataProvider) killer).addKill(type);
+    		
+    		if (Remorphed.CONFIG.autoTransform && ((RemorphedPlayerDataProvider) killer).getKills(type) >= Remorphed.CONFIG.killToUnlock)
     			PlayerShape.updateShapes(killer, ShapeType.from((LivingEntity) (Object) this), ShapeType.from((LivingEntity) (Object) this).create(killer.level()));
     	}
     }
