@@ -25,6 +25,9 @@ public class NetworkHandler {
 	
 	public static void registerPacketReceiver() {
 		NetworkManager.registerReceiver(NetworkManager.Side.C2S, NetworkHandler.SHAPE_REQUEST, (buf, context) -> {
+			if (Remorphed.CONFIG.lockTransform)
+				return;
+			
 			CompoundTag compound = buf.readNbt(); 
 			
 			context.getPlayer().getServer().execute(() -> {			
