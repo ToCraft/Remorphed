@@ -15,13 +15,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.Level;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
@@ -30,7 +26,6 @@ import tocraft.remorphed.screen.widget.HelpWidget;
 import tocraft.remorphed.screen.widget.SearchWidget;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.variant.ShapeType;
-import tocraft.walkers.registry.WalkersEntityTags;
 
 public class RemorphedScreen extends Screen {
 
@@ -169,7 +164,7 @@ public class RemorphedScreen extends Screen {
 
     private void populateRenderEntities() {
         if(renderEntities.isEmpty()) {
-            List<ShapeType<?>> types = getAllShapeTypes(Minecraft.getInstance().level);
+            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
                 if(entity instanceof Mob living) {
@@ -232,26 +227,5 @@ public class RemorphedScreen extends Screen {
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }
-    }
-    
-    public static List<ShapeType<?>> getAllShapeTypes(Level world) {
-    	List<EntityType<? extends LivingEntity>> LIVING_TYPE_CASH = new ArrayList<>();
-    	
-        for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
-            Entity instance = type.create(world);
-            if(instance instanceof LivingEntity) {
-                LIVING_TYPE_CASH.add((EntityType<? extends LivingEntity>) type);
-            }
-        }
-
-        List<ShapeType<?>> types = new ArrayList<>();
-        for (EntityType<?> type : LIVING_TYPE_CASH) {
-            // check blacklist
-            if (!type.is(WalkersEntityTags.BLACKLISTED)) {
-            	types.add(new ShapeType(type));
-            }
-        }
-
-        return types;
     }
 }

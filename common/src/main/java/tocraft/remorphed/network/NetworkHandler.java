@@ -48,7 +48,7 @@ public class NetworkHandler {
 
 				// update Player
 				PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
-				PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type, type.create(context.getPlayer().level()));
+				PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
 
 				// Refresh player dimensions
 				context.getPlayer().refreshDimensions();
