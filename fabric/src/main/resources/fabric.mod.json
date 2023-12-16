@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "remorphed",
+  "version": "${version}",
+  "name": "ReMorphed",
+  "description": "Play as your favorite entities!",
+  "authors": [
+    "To_Craft"
+  ],
+  "contributors": [
+  ],
+  "license": "",
+  "icon": "",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "tocraft.remorphed.fabric.RemorphedFabric"
+    ],
+    "client": [
+    ]
+  },
+  "mixins": [
+	  "remorphed.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.8.7+build.201",
+    "fabric": "*",
+    "fabric-api": "*",
+    "craftedcore": "*"
+  }
+}
