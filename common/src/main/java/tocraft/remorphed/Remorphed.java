@@ -57,6 +57,10 @@ public class Remorphed {
 		return new ResourceLocation(MODID, name);
 	}
 	
+	public static boolean canUseShape(ServerPlayer player, ShapeType<?> type) {
+		return player.isCreative() || (((RemorphedPlayerDataProvider) player).getUnlockedShapes().containsKey(type) && ((RemorphedPlayerDataProvider) player).getUnlockedShapes().get(type) >= Remorphed.CONFIG.killToUnlock);
+	}
+	
 	public static void sync(ServerPlayer player) {
         sync(player, player);
     }
