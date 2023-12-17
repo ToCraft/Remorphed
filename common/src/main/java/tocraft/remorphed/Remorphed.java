@@ -15,12 +15,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.events.common.PlayerEvents;
 import tocraft.craftedcore.network.NetworkManager;
 import tocraft.craftedcore.platform.Platform;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.config.RemorphedConfig;
+import tocraft.remorphed.events.ShapeSwapCallback;
 import tocraft.remorphed.events.UnlockShapeCallback;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
@@ -51,6 +53,7 @@ public class Remorphed {
 		NetworkHandler.registerPacketReceiver();
 		
 		ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
+		ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
 	}
 
 	public static ResourceLocation id(String name) {
@@ -59,6 +62,10 @@ public class Remorphed {
 	
 	public static boolean canUseShape(ServerPlayer player, ShapeType<?> type) {
 		return player.isCreative() || (((RemorphedPlayerDataProvider) player).getUnlockedShapes().containsKey(type) && ((RemorphedPlayerDataProvider) player).getUnlockedShapes().get(type) >= Remorphed.CONFIG.killToUnlock);
+	}
+	
+	public static boolean transformationIsLocked(Player player) {
+		return Remorphed.CONFIG.lockTransform && !player.isCreative();
 	}
 	
 	public static void sync(ServerPlayer player) {

@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.api.PlayerShape;
+import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
 @Mixin(LivingEntity.class)
@@ -30,8 +31,10 @@ public abstract class LivingEntityMixin extends Entity {
     		ShapeType<?> type = ShapeType.from((LivingEntity) (Object) this);
     		((RemorphedPlayerDataProvider) killer).addKill(type);
     		
-    		if (Remorphed.CONFIG.autoTransform && ((RemorphedPlayerDataProvider) killer).getKills(type) >= Remorphed.CONFIG.killToUnlock)
-    			PlayerShape.updateShapes(killer, ShapeType.from((LivingEntity) (Object) this).create(killer.level()));
+    		if (Remorphed.CONFIG.autoTransform && ((RemorphedPlayerDataProvider) killer).getKills(type) >= Remorphed.CONFIG.killToUnlock) {
+    			PlayerShapeChanger.change2ndShape(killer, type);
+    			PlayerShape.updateShapes(killer, type.create(killer.level()));
+    		}
     	}
     }
 }
