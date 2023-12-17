@@ -17,10 +17,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.config.ConfigLoader;
+import tocraft.craftedcore.events.common.CommandEvents;
 import tocraft.craftedcore.events.common.PlayerEvents;
 import tocraft.craftedcore.network.NetworkManager;
 import tocraft.craftedcore.platform.Platform;
 import tocraft.craftedcore.platform.VersionChecker;
+import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
 import tocraft.remorphed.events.ShapeSwapCallback;
 import tocraft.remorphed.events.UnlockShapeCallback;
@@ -54,6 +56,7 @@ public class Remorphed {
 		
 		ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
 		ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
+		CommandEvents.REGISTRATION.register(new RemorphedCommand());
 	}
 
 	public static ResourceLocation id(String name) {
