@@ -16,7 +16,7 @@
 	"remorphed.help.credits_general": "General: To_Craft, Chronos_Sacaria, Draylar, x64architecture, Pyrofab, AllanChain, James103, lawleagle",
 	"remorphed.help.credits_translators": "Translators: Right now just me (To_Craft), but YOU are welcome the help! There's even a custom texture for devs o.O",
 	"remorphed.help.return": "Press any key to close this menu.",
-	"remorphed.hasShape_success": "%s has %s unlocked.",
+	"remorphed.hasShape_success": "%s has unlocked %s.",
 	"remorphed.hasShape_fail": "%s didn't unlocked %s.",
 	"remorphed.removeShape": "Removed the %s-shape from %s.",
 	"remorphed.addShape": "%s unlocked %s.",
