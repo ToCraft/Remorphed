@@ -117,13 +117,13 @@ public class RemorphedScreen extends Screen {
             float firstPos = entityWidgets.get(0).getY();
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
-            if(scrollX == 1 && firstPos >= 35) {
+            if(scrollY == 1 && firstPos >= 35) {
                 return false;
             }
 
             ((ScreenAccessor) this).getSelectables().forEach(button -> {
                 if(button instanceof EntityWidget widget) {
-                    widget.setPosition(widget.getX(), (int) (widget.getY() + scrollX * 10));
+                    widget.setPosition(widget.getX(), (int) (widget.getY() + scrollY * 10));
                 }
             });
         }
