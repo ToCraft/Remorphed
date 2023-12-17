@@ -15,7 +15,7 @@ public class KeyPressHandler implements ClientTickEvents.Client {
 		assert client.player != null;
 
 		if (RemorphedClient.MENU_KEY.consumeClick()) {
-			if (Remorphed.transformationIsLocked(client.player) || ((RemorphedPlayerDataProvider) client.player).getUnlockedShapes().isEmpty())
+			if ((Remorphed.CONFIG.lockTransform || ((RemorphedPlayerDataProvider) client.player).getUnlockedShapes().isEmpty()) && !client.player.isCreative())
 				Minecraft.getInstance().setScreen(new RemorphedHelpScreen());
 			else
 				Minecraft.getInstance().setScreen(new RemorphedScreen());
