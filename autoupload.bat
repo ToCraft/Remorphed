@@ -16,8 +16,8 @@ for %%m in (%mcversions%) DO (
         call .\gradlew %%l:build
         .\gradlew %%l:modrinth
         .\gradlew %%l:curseforge
-        move "%%l\build\libs\ycdm-%version%-%%l.jar" "%%l\build\ycdm-%%m-%%l-%version%.jar"
+        move "%%l\build\libs\remorphed-%version%-%%l.jar" "%%l\build\remorphed-%%m-%%l-%version%.jar"
         rmdir /s /q "%%l\build\libs"
-        gh release upload "%version%-%%m" "%%l\build\ycdm-%%m-%%l-%version%.jar"
+        gh release upload "%version%-%%m" "%%l\build\remorphed-%%m-%%l-%version%.jar"
     )
 )
