@@ -31,7 +31,7 @@ This mod allows you to unlock a mobs as shapes by killing them.
 
 ## Getting Started
 
-It's rather easy- just search for a mob in the wilderniss and kill it. After killing it, you're able to select it in the Menu (open it by pressing `^`). After selecting it, you can transform into it, just like in the Woodwalkers-mod, by pressing `G`.
+It's rather easy- just search for a mob in the wilderniss and kill it. After killing it, you're able to select it in the Menu (open it by pressing `^`). To instantly switch to your recent shape or to switch back to the normal player skin, press `G`.
 
 ## License
 
