@@ -24,10 +24,7 @@ public class NetworkHandler {
 	public static ResourceLocation UNLOCKED_SYNC = Remorphed.id("unlocked_sync");
 	
 	public static void registerPacketReceiver() {
-		NetworkManager.registerReceiver(NetworkManager.Side.C2S, NetworkHandler.SHAPE_REQUEST, (buf, context) -> {
-			if (Remorphed.transformationIsLocked(context.getPlayer()))
-				return;
-			
+		NetworkManager.registerReceiver(NetworkManager.Side.C2S, NetworkHandler.SHAPE_REQUEST, (buf, context) -> {			
 			CompoundTag compound = buf.readNbt(); 
 			
 			context.getPlayer().getServer().execute(() -> {			
@@ -45,10 +42,10 @@ public class NetworkHandler {
 				// make the default ShapeType null, doing it this way, it's ensured that invalid 2ndShapes won't cause crashes.
 				@Nullable
 				ShapeType<LivingEntity> type = ShapeType.from(eType, typeVariant);
-
 				// update Player
-				PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
-				PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
+				boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
+				if (result)
+					PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
 
 				// Refresh player dimensions
 				context.getPlayer().refreshDimensions();

@@ -10,7 +10,7 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
 	@Override
 	public Result unlock(ServerPlayer player, ShapeType<?> type) {
 		// check if entity is unlocked by remorphed, prevents native unlocks by walkers
-		if (type != null && !Remorphed.canUseShape(player, type))
+		if (!Remorphed.canUseShape(player, type))
 			return Result.interruptFalse();
 		else {
 			return Result.pass();

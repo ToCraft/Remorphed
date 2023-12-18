@@ -15,6 +15,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.events.common.CommandEvents;
@@ -63,12 +64,18 @@ public class Remorphed {
 		return new ResourceLocation(MODID, name);
 	}
 	
-	public static boolean canUseShape(ServerPlayer player, ShapeType<?> type) {
-		return player.isCreative() || (((RemorphedPlayerDataProvider) player).getUnlockedShapes().containsKey(type) && ((RemorphedPlayerDataProvider) player).getUnlockedShapes().get(type) >= Remorphed.CONFIG.killToUnlock);
+	public static boolean canUseShape(Player player, ShapeType<?> type) {
+		return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || ((RemorphedPlayerDataProvider) player).getKills(type) >= Remorphed.CONFIG.killToUnlock);
 	}
 	
-	public static boolean transformationIsLocked(Player player) {
-		return Remorphed.CONFIG.lockTransform && !player.isCreative();
+	public static boolean canUseAnyShape(Player player) {
+		boolean canUseShapes = player.isCreative();
+		
+		for (ShapeType<? extends LivingEntity> shape : ((RemorphedPlayerDataProvider) player).getUnlockedShapes().keySet()) {
+			canUseShapes = canUseShapes ? canUseShapes : canUseShape(player, shape);
+		}
+		
+		return canUseShapes;
 	}
 	
 	public static void sync(ServerPlayer player) {

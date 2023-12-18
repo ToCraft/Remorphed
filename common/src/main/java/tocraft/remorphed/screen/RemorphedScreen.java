@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
 import tocraft.remorphed.screen.widget.HelpWidget;
@@ -181,7 +180,7 @@ public class RemorphedScreen extends Screen {
 
         // collect current unlocked identities (or allow all for creative users)
         renderEntities.forEach((type, instance) -> {
-            if(((RemorphedPlayerDataProvider) player).getUnlockedShapes().containsKey(type) || player.isCreative()) {
+            if(Remorphed.canUseShape(player, type)) {
                 unlocked.add(type);
             }
         });
