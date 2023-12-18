@@ -104,6 +104,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 	@Unique
 	@Override
 	public int getKills(ShapeType<? extends LivingEntity> type) {
-		return unlockedShapes.containsKey(type)? unlockedShapes.get(type) + 1 : 1;
+		return unlockedShapes.containsKey(type)? unlockedShapes.get(type) + 1 : 0;
 	};
 }
