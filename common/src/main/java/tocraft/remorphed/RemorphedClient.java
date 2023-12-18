@@ -12,7 +12,7 @@ import tocraft.remorphed.tick.KeyPressHandler;
 
 public class RemorphedClient {
 	public static final KeyMapping MENU_KEY = new KeyMapping("key.remorphed_menu", InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_R, "key.categories.remorphed");
+			GLFW.GLFW_KEY_GRAVE_ACCENT, "key.categories.remorphed");
 	
 	public void initialize() {		
 		KeyMappingRegistry.register(MENU_KEY);
