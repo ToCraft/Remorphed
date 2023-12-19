@@ -47,7 +47,7 @@ public class Remorphed {
 		PlayerEvents.PLAYER_JOIN.register(player -> {
 			String newestVersion = VersionChecker.checkForNewVersion(versionURL);
 			if (newestVersion != null && !Platform.getMod(MODID).getVersion().equals(newestVersion))
-				player.sendSystemMessage(Component.translatable("ycdm.update", newestVersion));
+				player.sendSystemMessage(Component.translatable("remorphed.update", newestVersion));
 		});			
 		
 		if (Platform.getDist().isClient())
