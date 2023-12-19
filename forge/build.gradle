@@ -11,7 +11,7 @@ architectury {
 
 loom {
     forge {
-        mixinConfigs = [ "ycdm.mixins.json" ]
+        mixinConfigs = [ "remorphed.mixins.json" ]
     }
 }
 
