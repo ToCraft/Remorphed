@@ -1,0 +1,97 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.modrinth.minotaur" version "2.+"
+    id 'net.darkhax.curseforgegradle' version '1.1.15'
+}
+
+architectury {
+    platformSetupLoomIde()
+    neoForge()
+}
+
+loom {
+    neoForge {
+    }
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentNeoForge.extendsFrom common
+}
+
+dependencies {
+    neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
+    modApi "dev.tocraft:craftedcore:${rootProject.minecraft_version}-neoforge-${rootProject.craftedcore_version}"
+    modApi "dev.tocraft:walkers:${rootProject.minecraft_version}-neoforge-${rootProject.woodwalkers_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
+}
+
+processResources {
+    inputs.property "version", project.version.toString()
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version.toString()
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.set("neoforge")
+}
+
+jar {
+    archiveClassifier.set("dev")
+}
+
+sourcesJar {
+    duplicatesStrategy 'exclude'
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "remorphed"
+    versionNumber = rootProject.minecraft_version + "-" + project.name + "-" + rootProject.mod_version
+    versionType = "release"
+    uploadFile = remapJar
+    gameVersions = [rootProject.minecraft_version]
+    loaders = [project.name]
+    changelog = "https://github.com/ToCraft/Remorphed/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
+    dependencies {
+        required.version "crafted-core", rootProject.minecraft_version + "-" + project.name + "-" + rootProject.craftedcore_version
+        required.version "woodwalkers", rootProject.minecraft_version + "-" + project.name + "-" + rootProject.woodwalkers_version
+    }
+}
+
+task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    apiToken = System.getenv("CURSEFORGE_TOKEN")
+
+    // The main file to upload
+    def mainFile = upload(950721, remapJar)
+    mainFile.displayName = rootProject.minecraft_version + "-" + project.name + "-" + rootProject.mod_version
+    mainFile.releaseType = 'release'
+    mainFile.addModLoader(project.name)
+    mainFile.addRequirement("crafted-core")
+    mainFile.addRequirement("woodwalkers");
+    mainFile.changelog = "https://github.com/ToCraft/Remorphed/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
+}
