@@ -48,9 +48,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!crashed) {
             // Some entities (namely Aether mobs) crash when rendered in a GUI.
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
@@ -67,11 +65,6 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 Lighting.setupFor3DItems();
             }
         }
-    }
-
-    @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-
     }
 
     public void setActive(boolean active) {
