@@ -5,10 +5,10 @@ dependencies {
 
     // uses my own API
     modApi "dev.tocraft:craftedcore:${rootProject.minecraft_version}-common-${rootProject.craftedcore_version}"
-    
+
     // add support for my woodwalkers-mod
     modApi "dev.tocraft:walkers:${rootProject.minecraft_version}-common-${rootProject.woodwalkers_version}"
-    
+
 }
 
 architectury {

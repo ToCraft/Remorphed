@@ -5,8 +5,8 @@ import tocraft.remorphed.Remorphed;
 
 public class RemorphedFabric implements ModInitializer {
 
-	@Override
-	public void onInitialize() {
-		new Remorphed().initialize();
-	}
+    @Override
+    public void onInitialize() {
+        new Remorphed().initialize();
+    }
 }

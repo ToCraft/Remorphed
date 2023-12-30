@@ -9,8 +9,7 @@
   ],
   "contributors": [
   ],
-  "license": "",
-  "icon": "",
+  "license": "LGPL-3.0",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -20,7 +19,7 @@
     ]
   },
   "mixins": [
-	  "remorphed.mixins.json"
+    "remorphed.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.8.7+build.201",

@@ -5,7 +5,8 @@
 
 # ReMorphed
 
-ReMorphed is a morph-like mod based on Identity which aims to bring the well-known kill-to-unlock method to new minecraft versions.
+ReMorphed is a morph-like mod based on Identity which aims to bring the well-known kill-to-unlock method to new
+minecraft versions.
 
 #### This features a menu (what walkers doesn't), new unlock-mechanics and the possibility of more than two shape!
 
@@ -33,8 +34,10 @@ This mod allows you to unlock mobs as shapes by killing them.
 
 ## Getting Started
 
-Search for a mob in the wilderniss and kill it. After killing it, you're able to select it in the Menu (open it by pressing `^`). After selecting it, you can transform into it, just like in the Woodwalkers-mod, by pressing `G`.
-**Note: The previous unlocking method from Woodwalkers doesn't work with this addon installed! This unlock mechanic works as a replacement.**
+Search for a mob in the wilderniss and kill it. After killing it, you're able to select it in the Menu (open it by
+pressing `^`). After selecting it, you can transform into it, just like in the Woodwalkers-mod, by pressing `G`.
+**Note: The previous unlocking method from Woodwalkers doesn't work with this addon installed! This unlock mechanic
+works as a replacement.**
 
 ## License
 

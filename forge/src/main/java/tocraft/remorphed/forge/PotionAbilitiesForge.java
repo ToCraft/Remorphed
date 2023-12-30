@@ -6,7 +6,7 @@ import tocraft.remorphed.Remorphed;
 @Mod(Remorphed.MODID)
 public class PotionAbilitiesForge {
 
-	public PotionAbilitiesForge() {
-		new Remorphed().initialize();
-	}
+    public PotionAbilitiesForge() {
+        new Remorphed().initialize();
+    }
 }

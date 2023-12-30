@@ -2,7 +2,6 @@ package tocraft.remorphed.screen.widget;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -38,7 +37,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
-        if(bl) {
+        if (bl) {
             // Update 2nd Shape
             NetworkHandler.sendSwap2ndShapeRequest(type);
             parent.disableAll();
@@ -52,11 +51,11 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
-        if(!crashed) {
+        if (!crashed) {
             // Some entities (namely Aether mobs) crash when rendered in a GUI.
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
-            	// ARGH
+                // ARGH
                 InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + (this.getWidth() / 4), this.getY(), this.getX() + (this.getWidth() / 4 * 3), this.getY() + this.getHeight(), (int) (size * .75f), 0, -10, -10, entity);
             } catch (Exception ignored) {
                 crashed = true;
@@ -85,7 +84,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     }
 
     @Override
-public void updateWidgetNarration(NarrationElementOutput builder) {
+    public void updateWidgetNarration(NarrationElementOutput builder) {
 
     }
 }

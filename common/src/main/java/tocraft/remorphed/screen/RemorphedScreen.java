@@ -1,14 +1,7 @@
 package tocraft.remorphed.screen;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -26,9 +19,15 @@ import tocraft.remorphed.screen.widget.SearchWidget;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.variant.ShapeType;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class RemorphedScreen extends Screen {
 
-	private final List<ShapeType<?>> unlocked = new ArrayList<>();
+    private final List<ShapeType<?>> unlocked = new ArrayList<>();
     private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
@@ -40,7 +39,7 @@ public class RemorphedScreen extends Screen {
         super.init(Minecraft.getInstance(), Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
 
         // don't initialize if the player is null
-        if(minecraft.player == null) {
+        if (minecraft.player == null) {
             minecraft.setScreen(null);
             return;
         }
@@ -59,7 +58,7 @@ public class RemorphedScreen extends Screen {
             magicalSpecialHackyFocus(searchBar);
 
             // Only re-filter if the text contents changed
-            if(!lastSearchContents.equals(text)) {
+            if (!lastSearchContents.equals(text)) {
                 ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
                 children().removeIf(button -> button instanceof EntityWidget);
                 entityWidgets.clear();
@@ -112,16 +111,16 @@ public class RemorphedScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if(entityWidgets.size() > 0) {
+        if (entityWidgets.size() > 0) {
             float firstPos = entityWidgets.get(0).getY();
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
-            if(scrollY == 1 && firstPos >= 35) {
+            if (scrollY == 1 && firstPos >= 35) {
                 return false;
             }
 
             ((ScreenAccessor) this).getSelectables().forEach(button -> {
-                if(button instanceof EntityWidget widget) {
+                if (button instanceof EntityWidget widget) {
                     widget.setPosition(widget.getX(), (int) (widget.getY() + scrollY * 10));
                 }
             });
@@ -140,7 +139,7 @@ public class RemorphedScreen extends Screen {
             for (int xIndex = 0; xIndex < 7; xIndex++) {
                 int listIndex = yIndex * 7 + xIndex;
 
-                if(listIndex < rendered.size()) {
+                if (listIndex < rendered.size()) {
                     ShapeType<?> type = rendered.get(listIndex);
 
                     // TODO: only render selected type, this will show all eg. sheep
@@ -162,11 +161,11 @@ public class RemorphedScreen extends Screen {
     }
 
     private void populateRenderEntities() {
-        if(renderEntities.isEmpty()) {
+        if (renderEntities.isEmpty()) {
             List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
-                if(entity instanceof Mob living) {
+                if (entity instanceof Mob living) {
                     renderEntities.put(type, living);
                 }
             }
@@ -174,13 +173,13 @@ public class RemorphedScreen extends Screen {
             Walkers.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
         }
     }
-    
+
     private List<ShapeType<?>> collectUnlockedEntities(LocalPlayer player) {
         List<ShapeType<?>> unlocked = new ArrayList<>();
 
         // collect current unlocked identities (or allow all for creative users)
         renderEntities.forEach((type, instance) -> {
-            if(Remorphed.canUseShape(player, type)) {
+            if (Remorphed.canUseShape(player, type)) {
                 unlocked.add(type);
             }
         });
@@ -221,7 +220,7 @@ public class RemorphedScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if(mouseY < 35) {
+        if (mouseY < 35) {
             return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);

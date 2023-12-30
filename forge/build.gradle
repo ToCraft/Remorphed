@@ -11,7 +11,7 @@ architectury {
 
 loom {
     forge {
-        mixinConfigs = [ "remorphed.mixins.json" ]
+        mixinConfigs = ["remorphed.mixins.json"]
     }
 }
 
@@ -86,7 +86,7 @@ modrinth {
 
 task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     apiToken = System.getenv("CURSEFORGE_TOKEN")
-    
+
     // The main file to upload
     def mainFile = upload(950721, remapJar)
     mainFile.displayName = rootProject.minecraft_version + "-" + project.name + "-" + rootProject.mod_version
