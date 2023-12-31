@@ -34,7 +34,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void serverTick(CallbackInfo info) {
-        if (!level().isClientSide)
+        if (!level.isClientSide)
             Remorphed.sync((ServerPlayer) (Object) this);
     }
 

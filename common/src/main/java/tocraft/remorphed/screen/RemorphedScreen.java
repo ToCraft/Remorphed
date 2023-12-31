@@ -2,9 +2,9 @@ package tocraft.remorphed.screen;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -34,7 +34,7 @@ public class RemorphedScreen extends Screen {
     private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
-    private final AbstractButton helpButton = createHelpButton();
+    private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
     private String lastSearchContents = "";
 
@@ -86,7 +86,7 @@ public class RemorphedScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
         renderBackground(context);
 
         searchBar.render(context, mouseX, mouseY, delta);
@@ -95,11 +95,11 @@ public class RemorphedScreen extends Screen {
         renderEntityWidgets(context, mouseX, mouseY, delta);
     }
 
-    public void renderEntityWidgets(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void renderEntityWidgets(PoseStack context, int mouseX, int mouseY, float delta) {
         double scaledFactor = this.minecraft.getWindow().getGuiScale();
         int top = 35;
 
-        context.pose().pushPose();
+        context.pushPose();
         RenderSystem.enableScissor(
                 (int) ((double) 0 * scaledFactor),
                 (int) ((double) 0 * scaledFactor),
@@ -112,7 +112,7 @@ public class RemorphedScreen extends Screen {
 
         RenderSystem.disableScissor();
 
-        context.pose().popPose();
+        context.popPose();
     }
 
     @Override
@@ -216,7 +216,7 @@ public class RemorphedScreen extends Screen {
                 20f);
     }
 
-    private AbstractButton createHelpButton() {
+    private Button createHelpButton() {
         Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> {
             Minecraft.getInstance().setScreen(new RemorphedHelpScreen());
         });

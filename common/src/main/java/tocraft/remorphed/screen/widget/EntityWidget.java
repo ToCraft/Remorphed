@@ -2,8 +2,9 @@ package tocraft.remorphed.screen.widget;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -48,8 +49,10 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        if (!crashed) {
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
+
+        if(!crashed) {
             // Some entities (namely Aether mobs) crash when rendered in a GUI.
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
@@ -65,6 +68,11 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 Lighting.setupFor3DItems();
             }
         }
+    }
+
+    @Override
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+
     }
 
     public void setActive(boolean active) {

@@ -32,7 +32,7 @@ public abstract class LivingEntityMixin extends Entity {
 
             if (Remorphed.CONFIG.autoTransform && ((RemorphedPlayerDataProvider) killer).getKills(type) >= Remorphed.CONFIG.killToUnlock) {
                 PlayerShapeChanger.change2ndShape(killer, type);
-                PlayerShape.updateShapes(killer, type.create(killer.level()));
+                PlayerShape.updateShapes(killer, type.create(killer.level));
             }
         }
     }
