@@ -4,9 +4,9 @@ import net.minecraftforge.fml.common.Mod;
 import tocraft.remorphed.Remorphed;
 
 @Mod(Remorphed.MODID)
-public class RemorphedForge {
+public class PotionAbilitiesForge {
 
-    public RemorphedForge() {
+    public PotionAbilitiesForge() {
         new Remorphed().initialize();
     }
 }

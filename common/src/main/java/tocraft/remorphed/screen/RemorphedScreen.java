@@ -87,7 +87,7 @@ public class RemorphedScreen extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        renderTransparentBackground(context);
+        renderBackground(context);
 
         searchBar.render(context, mouseX, mouseY, delta);
         helpButton.render(context, mouseX, mouseY, delta);
@@ -116,7 +116,7 @@ public class RemorphedScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         if (entityWidgets.size() > 0) {
             float firstPos = entityWidgets.get(0).getY();
 

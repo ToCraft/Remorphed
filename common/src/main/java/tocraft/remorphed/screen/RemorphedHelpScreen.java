@@ -17,7 +17,7 @@ public class RemorphedHelpScreen extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        renderTransparentBackground(context);
+        renderBackground(context);
 
         PoseStack matrices = context.pose();
         matrices.pushPose();

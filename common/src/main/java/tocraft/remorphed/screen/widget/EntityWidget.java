@@ -54,7 +54,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
                 // ARGH
-                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + (this.getWidth() / 4), this.getY(), this.getX() + (this.getWidth() / 4 * 3), this.getY() + this.getHeight(), (int) (size * .75f), 0, -10, -10, entity);
+                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + this.getWidth() / 2, (int) (this.getY() + this.getHeight() * .75f), size, -10, -10, entity);
             } catch (Exception ignored) {
                 crashed = true;
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
