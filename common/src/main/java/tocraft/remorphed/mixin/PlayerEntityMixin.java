@@ -26,7 +26,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     private Map<ShapeType<? extends LivingEntity>, Integer> unlockedShapes = new HashMap<ShapeType<? extends LivingEntity>, Integer>();
     @Unique
-    private String UNLOCKED_SHAPES = "UnlockedShapes";
+    private final String UNLOCKED_SHAPES = "UnlockedShapes";
 
     private PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level world) {
         super(type, world);
@@ -67,7 +67,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     public void readData(CompoundTag tag) {
         unlockedShapes.clear();
 
-        if ((ListTag) tag.get(UNLOCKED_SHAPES) != null) {
+        if (tag.get(UNLOCKED_SHAPES) != null) {
             ListTag list = (ListTag) tag.get(UNLOCKED_SHAPES);
             list.forEach(entry -> {
                 if (entry instanceof CompoundTag) {
@@ -87,15 +87,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         return unlockedShapes;
     }
 
-    ;
-
     @Unique
     @Override
     public void setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types) {
         unlockedShapes = types;
     }
-
-    ;
 
     @Unique
     @Override
@@ -103,13 +99,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         unlockedShapes.put(type, getKills(type) + 1);
     }
 
-    ;
-
     @Unique
     @Override
     public int getKills(ShapeType<? extends LivingEntity> type) {
         return unlockedShapes.containsKey(type) ? unlockedShapes.get(type) : 0;
     }
 
-    ;
 }

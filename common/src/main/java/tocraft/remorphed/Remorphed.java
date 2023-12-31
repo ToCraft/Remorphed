@@ -37,6 +37,7 @@ public class Remorphed {
     public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
     public static String VERSION_URL = "https://raw.githubusercontent.com/ToCraft/Remorphed/1.20.2/gradle.properties";
     public static List<String> devs = new ArrayList<>();
+    public static boolean displayVariantsInMenu = true;
 
     static {
         devs.add("1f63e38e-4059-4a4f-b7c4-0fac4a48e744");

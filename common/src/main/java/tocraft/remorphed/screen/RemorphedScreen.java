@@ -4,20 +4,23 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
-import tocraft.remorphed.screen.widget.HelpWidget;
 import tocraft.remorphed.screen.widget.SearchWidget;
-import tocraft.walkers.Walkers;
 import tocraft.walkers.api.variant.ShapeType;
+import tocraft.walkers.registry.WalkersEntityTags;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -31,7 +34,8 @@ public class RemorphedScreen extends Screen {
     private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
-    private final Button helpButton = createHelpButton();
+    private final AbstractButton helpButton = createHelpButton();
+    private final Button variantsButton = createVariantsButton();
     private String lastSearchContents = "";
 
     public RemorphedScreen() {
@@ -47,6 +51,7 @@ public class RemorphedScreen extends Screen {
         populateRenderEntities();
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
+        addRenderableWidget(variantsButton);
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
@@ -86,6 +91,7 @@ public class RemorphedScreen extends Screen {
 
         searchBar.render(context, mouseX, mouseY, delta);
         helpButton.render(context, mouseX, mouseY, delta);
+        variantsButton.render(context, mouseX, mouseY, delta);
         renderEntityWidgets(context, mouseX, mouseY, delta);
     }
 
@@ -161,7 +167,7 @@ public class RemorphedScreen extends Screen {
     }
 
     private void populateRenderEntities() {
-        if (renderEntities.isEmpty()) {
+        if (Remorphed.displayVariantsInMenu && renderEntities.isEmpty()) {
             List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
@@ -170,7 +176,28 @@ public class RemorphedScreen extends Screen {
                 }
             }
 
-            Walkers.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
+            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
+        } else if (!Remorphed.displayVariantsInMenu && renderEntities.isEmpty()) {
+            List<EntityType<? extends LivingEntity>> LIVING_TYPE_CASH = new ArrayList<>();
+
+            for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+                Entity instance = type.create(Minecraft.getInstance().level);
+                if (instance instanceof LivingEntity) {
+                    LIVING_TYPE_CASH.add((EntityType<? extends LivingEntity>) type);
+                }
+            }
+
+            for (EntityType<? extends LivingEntity> type : LIVING_TYPE_CASH) {
+                // check blacklist
+                if (!type.is(WalkersEntityTags.BLACKLISTED)) {
+                    Entity entity = type.create(Minecraft.getInstance().level);
+                    if (entity instanceof Mob living) {
+                        renderEntities.put(ShapeType.from(living), living);
+                    }
+                }
+            }
+
+            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", LIVING_TYPE_CASH.size()));
         }
     }
 
@@ -195,14 +222,27 @@ public class RemorphedScreen extends Screen {
                 20f);
     }
 
-    private Button createHelpButton() {
-        HelpWidget helpWidget = new HelpWidget(
-                (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
-                7,
-                20,
-                20);
-        helpWidget.setTooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".help")));
-        return helpWidget;
+    private AbstractButton createHelpButton() {
+        Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> {
+            Minecraft.getInstance().setScreen(new RemorphedHelpScreen());
+        });
+
+        helpButton.pos((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5), 7);
+        helpButton.size(20, 20);
+        helpButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".help")));
+        return helpButton.build();
+    }
+
+    private Button createVariantsButton() {
+        Button.Builder VariantsButton = Button.builder(Component.translatable("remorphed.display_variants"), (widget) -> {
+            Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
+            Minecraft.getInstance().setScreen(new RemorphedScreen());
+        });
+
+        VariantsButton.pos((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 7);
+        VariantsButton.size(100, 20);
+
+        return VariantsButton.build();
     }
 
     public Window getWindow() {
@@ -221,7 +261,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseY < 35) {
-            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button);
+            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }

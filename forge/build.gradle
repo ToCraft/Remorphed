@@ -93,6 +93,6 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     mainFile.releaseType = 'release'
     mainFile.addModLoader(project.name)
     mainFile.addRequirement("crafted-core")
-    mainFile.addRequirement("woodwalkers");
+    mainFile.addRequirement("woodwalkers")
     mainFile.changelog = "https://github.com/ToCraft/Remorphed/releases/tag/" + rootProject.mod_version + "-" + rootProject.minecraft_version
 }
