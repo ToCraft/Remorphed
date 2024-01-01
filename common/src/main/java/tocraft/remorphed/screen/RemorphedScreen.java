@@ -178,26 +178,20 @@ public class RemorphedScreen extends Screen {
 
             Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
         } else if (!Remorphed.displayVariantsInMenu && renderEntities.isEmpty()) {
-            List<EntityType<? extends LivingEntity>> LIVING_TYPE_CASH = new ArrayList<>();
+            int count = 0;
 
             for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
-                Entity instance = type.create(Minecraft.getInstance().level);
-                if (instance instanceof LivingEntity) {
-                    LIVING_TYPE_CASH.add((EntityType<? extends LivingEntity>) type);
-                }
-            }
-
-            for (EntityType<? extends LivingEntity> type : LIVING_TYPE_CASH) {
                 // check blacklist
                 if (!type.is(WalkersEntityTags.BLACKLISTED)) {
                     Entity entity = type.create(Minecraft.getInstance().level);
                     if (entity instanceof Mob living) {
                         renderEntities.put(ShapeType.from(living), living);
+                        count++;
                     }
                 }
             }
 
-            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", LIVING_TYPE_CASH.size()));
+            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", count));
         }
     }
 
