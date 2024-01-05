@@ -1,10 +1,10 @@
 package tocraft.remorphed.network;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -29,14 +29,14 @@ public class NetworkHandler {
             context.getPlayer().getServer().execute(() -> {
                 // check if player is blacklisted
                 if (Walkers.CONFIG.playerUUIDBlacklist.contains(context.getPlayer().getUUID())) {
-                    context.getPlayer().displayClientMessage(Component.translatable("walkers.player_blacklisted"), true);
+                    context.getPlayer().displayClientMessage(new TranslatableComponent("walkers.player_blacklisted"), true);
                     return;
                 }
 
                 ResourceLocation typeId = new ResourceLocation(compound.getString("id"));
                 int typeVariant = compound.getInt("variant");
 
-                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId);
+                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(typeId);
 
                 // make the default ShapeType null, doing it this way, it's ensured that invalid 2ndShapes won't cause crashes.
                 @Nullable
@@ -56,7 +56,7 @@ public class NetworkHandler {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
         CompoundTag compound = new CompoundTag();
-        compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(type.getEntityType()).toString());
+        compound.putString("id", Registry.ENTITY_TYPE.getKey(type.getEntityType()).toString());
         compound.putInt("variant", type.getVariantData());
 
         buf.writeNbt(compound);

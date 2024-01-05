@@ -1,6 +1,6 @@
 package tocraft.remorphed.mixin;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +53,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         ListTag list = new ListTag();
         unlockedShapes.forEach((shape, killAmount) -> {
             CompoundTag entryTag = new CompoundTag();
-            entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+            entryTag.putString("id", Registry.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
             entryTag.putInt("variant", shape.getVariantData());
             entryTag.putInt("killAmount", killAmount);
             list.add(entryTag);
@@ -75,7 +75,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                     int typeVariantId = ((CompoundTag) entry).getInt("variant");
                     int killAmount = ((CompoundTag) entry).getInt("killAmount");
 
-                    unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
+                    unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
                 }
             });
         }

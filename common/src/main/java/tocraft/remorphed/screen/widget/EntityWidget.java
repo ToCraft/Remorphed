@@ -3,11 +3,10 @@ package tocraft.remorphed.screen.widget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -16,6 +15,8 @@ import net.minecraft.world.entity.LivingEntity;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.variant.ShapeType;
+
+import java.util.Collections;
 
 public class EntityWidget<T extends LivingEntity> extends AbstractButton {
 
@@ -32,12 +33,11 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         size = (int) (25 * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         entity.setGlowingTag(true);
         this.parent = parent;
-        setTooltip(Tooltip.create(type.createTooltipText(entity)));
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
+        boolean bl = mouseX >= (double) this.x && mouseX < (double) (this.x + this.width) && mouseY >= (double) this.y && mouseY < (double) (this.y + this.height);
         if (bl) {
             // Update 2nd Shape
             NetworkHandler.sendSwap2ndShapeRequest(type);
@@ -49,15 +49,13 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     }
 
     @Override
-    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
         if(!crashed) {
             // Some entities (namely Aether mobs) crash when rendered in a GUI.
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
                 // ARGH
-                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + this.getWidth() / 2, (int) (this.getY() + this.getHeight() * .75f), size, -10, -10, entity);
+                InventoryScreen.renderEntityInInventory(this.x + this.getWidth() / 2, (int) (this.y + this.getHeight() * .75f), size, -10, -10, entity);
             } catch (Exception ignored) {
                 crashed = true;
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -70,11 +68,6 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         }
     }
 
-    @Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-
-    }
-
     public void setActive(boolean active) {
         this.active = active;
     }
@@ -85,7 +78,17 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     }
 
     @Override
-    public void updateWidgetNarration(NarrationElementOutput builder) {
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
 
     }
+
+    @Override
+    public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+        Screen currentScreen = Minecraft.getInstance().screen;
+
+        if(currentScreen != null) {
+            currentScreen.renderTooltip(poseStack, type.createTooltipText(entity), mouseX, mouseY);
+        }
+    }
+
 }

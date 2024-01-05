@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[45,)"
+loaderVersion = "[40,)"
 #issueTrackerURL = ""
 license = "LGPLv3"
 
@@ -16,14 +16,14 @@ Transform like in the old-school morph mod!
 [[dependencies.remorphed]]
 modId = "forge"
 mandatory = true
-versionRange = "[45,)"
+versionRange = "[40,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remorphed]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.4,)"
+versionRange = "[1.18.2,)"
 ordering = "NONE"
 side = "BOTH"
 

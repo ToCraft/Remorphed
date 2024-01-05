@@ -3,17 +3,16 @@ package tocraft.remorphed.screen;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
@@ -39,7 +38,7 @@ public class RemorphedScreen extends Screen {
     private String lastSearchContents = "";
 
     public RemorphedScreen() {
-        super(Component.literal(""));
+        super(new TextComponent(""));
         super.init(Minecraft.getInstance(), Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
 
         // don't initialize if the player is null
@@ -118,7 +117,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         if (entityWidgets.size() > 0) {
-            float firstPos = entityWidgets.get(0).getY();
+            float firstPos = entityWidgets.get(0).y;
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
             if (scrollY == 1 && firstPos >= 35) {
@@ -127,7 +126,7 @@ public class RemorphedScreen extends Screen {
 
             ((ScreenAccessor) this).getSelectables().forEach(button -> {
                 if (button instanceof EntityWidget widget) {
-                    widget.setPosition(widget.getX(), (int) (widget.getY() + scrollY * 10));
+                    widget.y += (int) (scrollY * 10);
                 }
             });
         }
@@ -180,7 +179,7 @@ public class RemorphedScreen extends Screen {
         } else if (!Remorphed.displayVariantsInMenu && renderEntities.isEmpty()) {
             int count = 0;
 
-            for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+            for (EntityType<?> type : Registry.ENTITY_TYPE) {
                 // check blacklist
                 if (!type.is(WalkersEntityTags.BLACKLISTED)) {
                     Entity entity = type.create(Minecraft.getInstance().level);
@@ -217,26 +216,16 @@ public class RemorphedScreen extends Screen {
     }
 
     private Button createHelpButton() {
-        Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> {
+        return new Button((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5), 7, 20, 20, Component.nullToEmpty("?"), (widget) -> {
             Minecraft.getInstance().setScreen(new RemorphedHelpScreen());
         });
-
-        helpButton.pos((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5), 7);
-        helpButton.size(20, 20);
-        helpButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".help")));
-        return helpButton.build();
     }
 
     private Button createVariantsButton() {
-        Button.Builder VariantsButton = Button.builder(Component.translatable("remorphed.display_variants"), (widget) -> {
+        return new Button((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 7, 100, 20, new TranslatableComponent("remorphed.display_variants"), (widget) -> {
             Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
             Minecraft.getInstance().setScreen(new RemorphedScreen());
         });
-
-        VariantsButton.pos((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 7);
-        VariantsButton.size(100, 20);
-
-        return VariantsButton.build();
     }
 
     public Window getWindow() {

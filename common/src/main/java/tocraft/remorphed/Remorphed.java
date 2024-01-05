@@ -1,11 +1,11 @@
 package tocraft.remorphed;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -76,7 +76,7 @@ public class Remorphed {
 
         unlockedShapes.forEach((shape, killAmount) -> {
             CompoundTag compound = new CompoundTag();
-            compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+            compound.putString("id", Registry.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
             compound.putInt("variant", shape.getVariantData());
             compound.putInt("killAmount", killAmount);
             list.add(compound);
@@ -91,7 +91,7 @@ public class Remorphed {
     }
 
     public void initialize() {
-        VersionChecker.registerChecker(MODID, VERSION_URL, Component.literal("Remorphed"));
+        VersionChecker.registerChecker(MODID, VERSION_URL, new TextComponent("Remorphed"));
 
         if (Platform.getDist().isClient())
             new RemorphedClient().initialize();
