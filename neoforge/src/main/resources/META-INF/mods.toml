@@ -3,6 +3,9 @@ loaderVersion = "[1,)"
 #issueTrackerURL = ""
 license = "LGPLv3"
 
+[[mixins]]
+config = "remorphed.mixins.json"
+
 [[mods]]
 modId = "remorphed"
 version = "${version}"
