@@ -7,11 +7,11 @@ import java.util.Map;
 
 public interface RemorphedPlayerDataProvider {
 
-    Map<ShapeType<? extends LivingEntity>, Integer> getUnlockedShapes();
+    Map<ShapeType<? extends LivingEntity>, Integer> remorphed$getUnlockedShapes();
 
-    void setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types);
+    void remorphed$setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types);
 
-    void addKill(ShapeType<? extends LivingEntity> type);
+    void remorphed$addKill(ShapeType<? extends LivingEntity> type);
 
-    int getKills(ShapeType<? extends LivingEntity> type);
+    int remorphed$getKills(ShapeType<? extends LivingEntity> type);
 }

@@ -48,13 +48,13 @@ public class Remorphed {
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || ((RemorphedPlayerDataProvider) player).getKills(type) >= Remorphed.CONFIG.killToUnlock);
+        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.CONFIG.killToUnlock <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.CONFIG.killToUnlock);
     }
 
     public static boolean canUseAnyShape(Player player) {
-        boolean canUseShapes = player.isCreative();
+        boolean canUseShapes = player.isCreative() || Remorphed.CONFIG.killToUnlock <= 0;
 
-        for (ShapeType<? extends LivingEntity> shape : ((RemorphedPlayerDataProvider) player).getUnlockedShapes().keySet()) {
+        for (ShapeType<? extends LivingEntity> shape : ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().keySet()) {
             canUseShapes = canUseShapes ? canUseShapes : canUseShape(player, shape);
         }
 
@@ -70,19 +70,21 @@ public class Remorphed {
         CompoundTag compoundTag = new CompoundTag();
 
         // serialize current shape data to tag if it exists
-        Map<ShapeType<?>, Integer> unlockedShapes = ((RemorphedPlayerDataProvider) changed).getUnlockedShapes();
+        Map<ShapeType<?>, Integer> unlockedShapes = ((RemorphedPlayerDataProvider) changed).remorphed$getUnlockedShapes();
 
         ListTag list = new ListTag();
 
         unlockedShapes.forEach((shape, killAmount) -> {
-            CompoundTag compound = new CompoundTag();
-            compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
-            compound.putInt("variant", shape.getVariantData());
-            compound.putInt("killAmount", killAmount);
-            list.add(compound);
+            if (killAmount > 0) {
+                CompoundTag compound = new CompoundTag();
+                compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                compound.putInt("variant", shape.getVariantData());
+                compound.putInt("killAmount", killAmount);
+                list.add(compound);
+            }
         });
 
-        if (list != null)
+        if (!unlockedShapes.isEmpty())
             compoundTag.put("UnlockedShapes", list);
 
         packet.writeUUID(changed.getUUID());

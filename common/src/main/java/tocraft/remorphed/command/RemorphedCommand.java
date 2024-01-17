@@ -33,7 +33,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        if (((RemorphedPlayerDataProvider) player).getUnlockedShapes().containsKey(type)) {
+        if (((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().containsKey(type)) {
             if (Walkers.CONFIG.logCommands) {
                 source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".hasShape_success",
                         player.getDisplayName(), name));
@@ -51,7 +51,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        ((RemorphedPlayerDataProvider) player).getUnlockedShapes().remove(type);
+        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().remove(type);
 
         if (Walkers.CONFIG.logCommands) {
             source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".removeShape", name, player.getDisplayName()));
@@ -62,7 +62,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        ((RemorphedPlayerDataProvider) player).getUnlockedShapes().put(type, Remorphed.CONFIG.killToUnlock);
+        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.CONFIG.killToUnlock);
 
         if (Walkers.CONFIG.logCommands) {
             source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name));
@@ -70,7 +70,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static void clearShapes(CommandSourceStack source, ServerPlayer player) {
-        ((RemorphedPlayerDataProvider) player).getUnlockedShapes().clear();
+        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().clear();
 
         if (Walkers.CONFIG.logCommands) {
             source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()));

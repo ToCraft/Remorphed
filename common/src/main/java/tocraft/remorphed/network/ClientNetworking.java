@@ -43,7 +43,7 @@ public class ClientNetworking {
             Player syncTarget = player.getCommandSenderWorld().getPlayerByUUID(uuid);
 
             if (syncTarget != null)
-                ((RemorphedPlayerDataProvider) syncTarget).setUnlockedShapes(unlockedShapes);
+                ((RemorphedPlayerDataProvider) syncTarget).remorphed$setUnlockedShapes(unlockedShapes);
         });
     }
 
