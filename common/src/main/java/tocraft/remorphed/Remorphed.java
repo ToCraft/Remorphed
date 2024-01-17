@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.events.common.CommandEvents;
+import tocraft.craftedcore.events.common.PlayerEvents;
 import tocraft.craftedcore.network.NetworkManager;
 import tocraft.craftedcore.platform.Platform;
 import tocraft.craftedcore.platform.VersionChecker;
@@ -23,6 +24,7 @@ import tocraft.remorphed.events.ShapeSwapCallback;
 import tocraft.remorphed.events.UnlockShapeCallback;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
+import tocraft.walkers.Walkers;
 import tocraft.walkers.api.event.ShapeEvents;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -103,5 +105,9 @@ public class Remorphed {
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
+
+        PlayerEvents.PLAYER_JOIN.register(player -> {
+            Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+        });
     }
 }
