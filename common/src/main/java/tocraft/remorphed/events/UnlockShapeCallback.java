@@ -1,9 +1,9 @@
 package tocraft.remorphed.events;
 
+import dev.architectury.event.EventResult;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import tocraft.craftedcore.events.Event.Result;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.api.event.ShapeEvents;
@@ -11,7 +11,7 @@ import tocraft.walkers.api.variant.ShapeType;
 
 public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
     @Override
-    public Result unlock(ServerPlayer player, ShapeType<?> type) {
+    public EventResult unlock(ServerPlayer player, ShapeType<?> type) {
         // check if the walkers unlock mechanic should be used
         if (!Remorphed.CONFIG.lockTransform && Remorphed.CONFIG.unlockFriendlyNormal) {
             LivingEntity entityToBeUnlocked = type.create(player.level());
@@ -20,8 +20,8 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
         }
         // check if entity is unlocked by remorphed, prevents native unlock mechanic by walkers
         else if (!Remorphed.canUseShape(player, type))
-            return Result.interruptFalse();
+            return EventResult.interruptFalse();
 
-        return Result.pass();
+        return EventResult.pass();
     }
 }

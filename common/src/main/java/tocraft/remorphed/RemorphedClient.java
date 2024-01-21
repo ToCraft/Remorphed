@@ -1,10 +1,10 @@
 package tocraft.remorphed;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
-import tocraft.craftedcore.events.client.ClientTickEvents;
-import tocraft.craftedcore.registration.client.KeyMappingRegistry;
 import tocraft.remorphed.network.ClientNetworking;
 import tocraft.remorphed.tick.KeyPressHandler;
 
@@ -16,7 +16,7 @@ public class RemorphedClient {
         KeyMappingRegistry.register(MENU_KEY);
 
         // Register event handlers
-        ClientTickEvents.CLIENT_PRE.register(new KeyPressHandler());
+        ClientTickEvent.CLIENT_PRE.register(new KeyPressHandler());
 
         ClientNetworking.registerPacketHandlers();
     }
