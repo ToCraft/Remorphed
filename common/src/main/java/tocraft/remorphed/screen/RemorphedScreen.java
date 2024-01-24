@@ -158,7 +158,7 @@ public class RemorphedScreen extends Screen {
                             type,
                             renderEntities.get(type),
                             this,
-                            currentType.equals(type)
+                            type.equals(currentType)
                     );
 
                     addRenderableWidget(entityWidget);
@@ -226,10 +226,11 @@ public class RemorphedScreen extends Screen {
 
     private PlayerWidget createPlayerButton() {
         return new PlayerWidget(
-                (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
-                5,
-                20,
-                20);
+            (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
+            5,
+            20,
+            20,
+            this);
     }
 
     public Window getWindow() {

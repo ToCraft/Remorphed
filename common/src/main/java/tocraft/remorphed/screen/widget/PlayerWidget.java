@@ -6,13 +6,16 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
 
 public class PlayerWidget extends AbstractButton {
+    private final RemorphedScreen parent;
 
-    public PlayerWidget(int x, int y, int width, int height) {
+    public PlayerWidget(int x, int y, int width, int height, RemorphedScreen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
+        this.parent = parent;
     }
 
     @Override
@@ -27,8 +30,10 @@ public class PlayerWidget extends AbstractButton {
 
     @Override
     public void onPress() {
-        if (Minecraft.getInstance().player != null && ((PlayerDataProvider) Minecraft.getInstance().player).walkers$getCurrentShape() != null)
+        if (Minecraft.getInstance().player != null && ((PlayerDataProvider) Minecraft.getInstance().player).walkers$getCurrentShape() != null) {
             SwapPackets.sendSwapRequest();
+            parent.onClose();
+        }
     }
 
     @Override
