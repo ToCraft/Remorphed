@@ -68,6 +68,12 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 RenderSystem.getModelViewStack().popPose();
                 Lighting.setupFor3DItems();
             }
+            
+            // Render selected outline
+            if (active) {
+                RenderSystem.setShaderTexture(0, Remorphed.id("textures/gui/selected.png"));
+                GuiComponent.blit(context, x, y, getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
+            }
         }
     }
 
