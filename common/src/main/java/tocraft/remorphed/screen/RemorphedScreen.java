@@ -7,19 +7,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
+import tocraft.remorphed.screen.widget.PlayerWidget;
 import tocraft.remorphed.screen.widget.SearchWidget;
+import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
-import tocraft.walkers.registry.WalkersEntityTags;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -35,6 +35,7 @@ public class RemorphedScreen extends Screen {
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
+    private final PlayerWidget playerButton = createPlayerButton();
     private String lastSearchContents = "";
 
     public RemorphedScreen() {
@@ -51,11 +52,12 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
+        addRenderableWidget(playerButton);
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
         // add entity widgets
-        populateEntityWidgets(minecraft.player, unlocked);
+        populateEntityWidgets(unlocked);
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -72,7 +74,7 @@ public class RemorphedScreen extends Screen {
                         .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text))
                         .collect(Collectors.toList());
 
-                populateEntityWidgets(minecraft.player, filtered);
+                populateEntityWidgets(filtered);
             }
 
             lastSearchContents = text;
@@ -91,6 +93,7 @@ public class RemorphedScreen extends Screen {
         searchBar.render(context, mouseX, mouseY, delta);
         helpButton.render(context, mouseX, mouseY, delta);
         variantsButton.render(context, mouseX, mouseY, delta);
+        playerButton.render(context, mouseX, mouseY, delta);
         renderEntityWidgets(context, mouseX, mouseY, delta);
     }
 
@@ -105,9 +108,7 @@ public class RemorphedScreen extends Screen {
                 (int) ((double) width * scaledFactor),
                 (int) ((double) (this.height - top) * scaledFactor));
 
-        entityWidgets.forEach(widget -> {
-            widget.render(context, mouseX, mouseY, delta);
-        });
+        entityWidgets.forEach(widget -> widget.render(context, mouseX, mouseY, delta));
 
         RenderSystem.disableScissor();
 
@@ -116,7 +117,7 @@ public class RemorphedScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
-        if (entityWidgets.size() > 0) {
+        if (!entityWidgets.isEmpty()) {
             float firstPos = entityWidgets.get(0).y;
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
@@ -125,7 +126,7 @@ public class RemorphedScreen extends Screen {
             }
 
             ((ScreenAccessor) this).getSelectables().forEach(button -> {
-                if (button instanceof EntityWidget widget) {
+                if (button instanceof EntityWidget<?> widget) {
                     widget.y += (int) (scrollY * 10);
                 }
             });
@@ -134,11 +135,13 @@ public class RemorphedScreen extends Screen {
         return false;
     }
 
-    private void populateEntityWidgets(LocalPlayer player, List<ShapeType<?>> rendered) {
+    private void populateEntityWidgets(List<ShapeType<?>> rendered) {
         // add widget for each entity to be rendered
         int x = 15;
         int y = 35;
         int rows = (int) Math.ceil(rendered.size() / 7f);
+
+        ShapeType<LivingEntity> currentType = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
         for (int yIndex = 0; yIndex <= rows; yIndex++) {
             for (int xIndex = 0; xIndex < 7; xIndex++) {
@@ -155,7 +158,8 @@ public class RemorphedScreen extends Screen {
                             getWindow().getGuiScaledHeight() / 5f,
                             type,
                             renderEntities.get(type),
-                            this
+                            this,
+                            type.equals(currentType)
                     );
 
                     addRenderableWidget(entityWidget);
@@ -166,8 +170,8 @@ public class RemorphedScreen extends Screen {
     }
 
     private void populateRenderEntities() {
-        if (Remorphed.displayVariantsInMenu && renderEntities.isEmpty()) {
-            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
+        if (renderEntities.isEmpty()) {
+            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level, Remorphed.displayVariantsInMenu);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
                 if (entity instanceof Mob living) {
@@ -176,21 +180,6 @@ public class RemorphedScreen extends Screen {
             }
 
             Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
-        } else if (!Remorphed.displayVariantsInMenu && renderEntities.isEmpty()) {
-            int count = 0;
-
-            for (EntityType<?> type : Registry.ENTITY_TYPE) {
-                // check blacklist
-                if (!type.is(WalkersEntityTags.BLACKLISTED)) {
-                    Entity entity = type.create(Minecraft.getInstance().level);
-                    if (entity instanceof Mob living) {
-                        renderEntities.put(ShapeType.from(living), living);
-                        count++;
-                    }
-                }
-            }
-
-            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", count));
         }
     }
 
@@ -216,16 +205,25 @@ public class RemorphedScreen extends Screen {
     }
 
     private Button createHelpButton() {
-        return new Button((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5), 7, 20, 20, Component.nullToEmpty("?"), (widget) -> {
+        return new Button((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35), 5, 20, 20, Component.nullToEmpty("?"), (widget) -> {
             Minecraft.getInstance().setScreen(new RemorphedHelpScreen());
         });
     }
 
     private Button createVariantsButton() {
-        return new Button((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 7, 100, 20, new TranslatableComponent("remorphed.display_variants"), (widget) -> {
+        return new Button((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 5, 100, 20, new TranslatableComponent("remorphed.display_variants"), (widget) -> {
             Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
             Minecraft.getInstance().setScreen(new RemorphedScreen());
         });
+    }
+
+    private PlayerWidget createPlayerButton() {
+        return new PlayerWidget(
+            (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
+            5,
+            20,
+            20,
+            this);
     }
 
     public Window getWindow() {
@@ -244,7 +242,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseY < 35) {
-            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button);
+            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }

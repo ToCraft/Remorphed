@@ -1,13 +1,13 @@
 package tocraft.remorphed.tick;
 
+import dev.architectury.event.events.client.ClientTickEvent;
 import net.minecraft.client.Minecraft;
-import tocraft.craftedcore.events.client.ClientTickEvents;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.RemorphedClient;
 import tocraft.remorphed.screen.RemorphedHelpScreen;
 import tocraft.remorphed.screen.RemorphedScreen;
 
-public class KeyPressHandler implements ClientTickEvents.Client {
+public class KeyPressHandler implements ClientTickEvent.Client {
     @Override
     public void tick(Minecraft client) {
         assert client.player != null;

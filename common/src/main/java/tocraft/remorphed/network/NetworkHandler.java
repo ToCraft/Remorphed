@@ -1,5 +1,6 @@
 package tocraft.remorphed.network;
 
+import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -11,7 +12,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import tocraft.craftedcore.network.NetworkManager;
 import tocraft.remorphed.Remorphed;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;

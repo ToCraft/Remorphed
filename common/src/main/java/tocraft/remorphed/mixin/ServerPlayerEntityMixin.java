@@ -16,6 +16,6 @@ public class ServerPlayerEntityMixin {
         RemorphedPlayerDataProvider newData = ((RemorphedPlayerDataProvider) this);
 
         // Transfer data from the old ServerPlayer -> new ServerPlayer
-        newData.setUnlockedShapes(oldData.getUnlockedShapes());
+        newData.remorphed$setUnlockedShapes(oldData.remorphed$getUnlockedShapes());
     }
 }
