@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -13,6 +14,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
+import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.variant.ShapeType;
@@ -25,13 +27,14 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     private final RemorphedScreen parent;
     private boolean crashed;
 
-    public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, T entity, RemorphedScreen parent) {
+    public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, T entity, RemorphedScreen parent, boolean current) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty("")); // int x, int y, int width, int height, message
         this.type = type;
         this.entity = entity;
         size = (int) (25 * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         entity.setGlowingTag(true);
         this.parent = parent;
+        this.active = current;
         setTooltip(Tooltip.create(type.createTooltipText(entity)));
     }
 
@@ -66,6 +69,12 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 entityRenderDispatcher.setRenderShadow(true);
                 RenderSystem.getModelViewStack().popPose();
                 Lighting.setupFor3DItems();
+            }
+
+            // Render selected outline
+            if (active) {
+                RenderSystem.setShaderTexture(0, Remorphed.id("textures/gui/selected.png"));
+                GuiComponent.blit(context, getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
         }
     }

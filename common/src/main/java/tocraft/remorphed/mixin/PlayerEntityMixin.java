@@ -24,7 +24,7 @@ import java.util.Map;
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
     @Unique
-    private Map<ShapeType<? extends LivingEntity>, Integer> unlockedShapes = new HashMap<ShapeType<? extends LivingEntity>, Integer>();
+    private Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<ShapeType<? extends LivingEntity>, Integer>();
     @Unique
     private final String UNLOCKED_SHAPES = "UnlockedShapes";
 
@@ -40,42 +40,46 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     private void readNbt(CompoundTag tag, CallbackInfo info) {
-        readData(tag.getCompound(Remorphed.MODID));
+        remorphed$readData(tag.getCompound(Remorphed.MODID));
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
     private void writeNbt(CompoundTag tag, CallbackInfo info) {
-        tag.put(Remorphed.MODID, writeData(new CompoundTag()));
+        tag.put(Remorphed.MODID, remorphed$writeData());
     }
 
     @Unique
-    private CompoundTag writeData(CompoundTag tag) {
+    private CompoundTag remorphed$writeData() {
+        CompoundTag tag = new CompoundTag();
         ListTag list = new ListTag();
-        unlockedShapes.forEach((shape, killAmount) -> {
-            CompoundTag entryTag = new CompoundTag();
-            entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
-            entryTag.putInt("variant", shape.getVariantData());
-            entryTag.putInt("killAmount", killAmount);
-            list.add(entryTag);
+        remorphed$unlockedShapes.forEach((shape, killAmount) -> {
+            if (killAmount > 0) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                entryTag.putInt("variant", shape.getVariantData());
+                entryTag.putInt("killAmount", killAmount);
+                list.add(entryTag);
+            }
         });
-        if (list != null)
+        if (!remorphed$unlockedShapes.isEmpty())
             tag.put(UNLOCKED_SHAPES, list);
         return tag;
     }
 
     @Unique
-    public void readData(CompoundTag tag) {
-        unlockedShapes.clear();
+    public void remorphed$readData(CompoundTag tag) {
+        remorphed$unlockedShapes.clear();
 
         if (tag.get(UNLOCKED_SHAPES) != null) {
             ListTag list = (ListTag) tag.get(UNLOCKED_SHAPES);
+            assert list != null;
             list.forEach(entry -> {
                 if (entry instanceof CompoundTag) {
                     ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
                     int typeVariantId = ((CompoundTag) entry).getInt("variant");
                     int killAmount = ((CompoundTag) entry).getInt("killAmount");
 
-                    unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
+                    remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
                 }
             });
         }
@@ -83,26 +87,26 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Unique
     @Override
-    public Map<ShapeType<? extends LivingEntity>, Integer> getUnlockedShapes() {
-        return unlockedShapes;
+    public Map<ShapeType<? extends LivingEntity>, Integer> remorphed$getUnlockedShapes() {
+        return remorphed$unlockedShapes;
     }
 
     @Unique
     @Override
-    public void setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types) {
-        unlockedShapes = types;
+    public void remorphed$setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types) {
+        remorphed$unlockedShapes = types;
     }
 
     @Unique
     @Override
-    public void addKill(ShapeType<? extends LivingEntity> type) {
-        unlockedShapes.put(type, getKills(type) + 1);
+    public void remorphed$addKill(ShapeType<? extends LivingEntity> type) {
+        remorphed$unlockedShapes.put(type, remorphed$getKills(type) + 1);
     }
 
     @Unique
     @Override
-    public int getKills(ShapeType<? extends LivingEntity> type) {
-        return unlockedShapes.containsKey(type) ? unlockedShapes.get(type) : 0;
+    public int remorphed$getKills(ShapeType<? extends LivingEntity> type) {
+        return remorphed$unlockedShapes.getOrDefault(type, 0);
     }
 
 }

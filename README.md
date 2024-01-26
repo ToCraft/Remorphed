@@ -1,7 +1,7 @@
-[![Build-1.19.4](https://github.com/ToCraft/Remorphed/actions/workflows/gradle-1.19.4.yml/badge.svg)](https://github.com/ToCraft/Remorphed/actions/workflows/gradle-1.19.4.yml)
-![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Ftocraft.ddns.net%2Fmaven%2Freleases%2Fdev%2Ftocraft%2Fremorphed%2Fmaven-metadata.xml&versionPrefix=1.19.4-common&label=remorphed)
-![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Ftocraft.ddns.net%2Fmaven%2Freleases%2Fdev%2Ftocraft%2Fremorphed%2Fmaven-metadata.xml&versionPrefix=1.19.4-forge&label=remorphed)
-![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Ftocraft.ddns.net%2Fmaven%2Freleases%2Fdev%2Ftocraft%2Fremorphed%2Fmaven-metadata.xml&versionPrefix=1.19.4-fabric&label=remorphed)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ToCraft/Remorphed/push_build_and_release.yml?style=for-the-badge)](https://github.com/ToCraft/Remorphed/actions/workflows/push_build_and_release.yml)
+[![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.tocraft.dev%2Fpublic%2Fdev%2Ftocraft%2Fremorphed%2Fmaven-metadata.xml&versionPrefix=1.19.4&style=for-the-badge&label=Remorphed)](https://maven.tocraft.dev/#/public/dev/tocraft/remorphed)
+[![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/ToCraft)
+[![Discord](https://img.shields.io/discord/1183373613508857906?style=for-the-badge&label=Discord)](https://discord.gg/Y3KqxWDUYy)
 
 # ReMorphed
 

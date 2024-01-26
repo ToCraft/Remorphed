@@ -8,4 +8,5 @@ public class RemorphedConfig implements Config {
     public boolean autoTransform = false;
     @Synchronize
     public boolean lockTransform = false;
+    public boolean unlockFriendlyNormal = false;
 }

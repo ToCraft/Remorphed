@@ -1,5 +1,6 @@
 package tocraft.remorphed.network;
 
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -10,7 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.client.CraftedCoreClient;
-import tocraft.craftedcore.network.NetworkManager;
 import tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.api.variant.ShapeType;
@@ -43,7 +43,7 @@ public class ClientNetworking {
             Player syncTarget = player.getCommandSenderWorld().getPlayerByUUID(uuid);
 
             if (syncTarget != null)
-                ((RemorphedPlayerDataProvider) syncTarget).setUnlockedShapes(unlockedShapes);
+                ((RemorphedPlayerDataProvider) syncTarget).remorphed$setUnlockedShapes(unlockedShapes);
         });
     }
 
