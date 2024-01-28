@@ -101,6 +101,10 @@ unifiedPublishing {
                 curseforge = "crafted-core"
                 modrinth = "crafted-core"
             }
+            depends {
+                curseforge = "woodwalkers"
+                modrinth = "woodwalkers"
+            }
         }
 
         String[] supportedVersions = rootProject.supported_versions.split(",")
