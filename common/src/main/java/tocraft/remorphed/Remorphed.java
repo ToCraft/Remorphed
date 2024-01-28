@@ -59,6 +59,8 @@ public class Remorphed {
         PlayerEvent.PLAYER_JOIN.register(player -> {
             // allow unlocking friendly mobs via the "normal" method
             Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+            // makes the special shape still functional
+            Walkers.CONFIG.specialShapeIsThirdShape = true;
             // Sync favorites
             NetworkHandler.sendFavoriteSync(player);
         });

@@ -18,6 +18,8 @@ import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
 import tocraft.remorphed.screen.widget.PlayerWidget;
 import tocraft.remorphed.screen.widget.SearchWidget;
+import tocraft.remorphed.screen.widget.SpecialShapeWidget;
+import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -36,6 +38,7 @@ public class RemorphedScreen extends Screen {
     private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
     private final PlayerWidget playerButton = createPlayerButton();
+    private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
 
     public RemorphedScreen() {
@@ -53,6 +56,8 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
         addRenderableWidget(playerButton);
+        //if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
+        addRenderableWidget(specialShapeButton);
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
@@ -105,6 +110,8 @@ public class RemorphedScreen extends Screen {
         helpButton.render(context, mouseX, mouseY, delta);
         variantsButton.render(context, mouseX, mouseY, delta);
         playerButton.render(context, mouseX, mouseY, delta);
+        if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
+            specialShapeButton.render(context, mouseX, mouseY, delta);
         renderEntityWidgets(context, mouseX, mouseY, delta);
     }
 
@@ -219,7 +226,9 @@ public class RemorphedScreen extends Screen {
     private Button createHelpButton() {
         Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> Minecraft.getInstance().setScreen(new RemorphedHelpScreen()));
 
-        helpButton.pos((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35), 5);
+        int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
+
+        helpButton.pos((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35 + xOffset), 5);
         helpButton.size(20, 20);
         helpButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".help")));
         return helpButton.build();
@@ -246,12 +255,17 @@ public class RemorphedScreen extends Screen {
                 this);
     }
 
-    public Window getWindow() {
-        return Minecraft.getInstance().getWindow();
+    private SpecialShapeWidget createSpecialShapeButton() {
+        return new SpecialShapeWidget(
+                (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35),
+                5,
+                20,
+                20,
+                this);
     }
 
-    public void disableAll() {
-        entityWidgets.forEach(button -> button.setActive(false));
+    public Window getWindow() {
+        return Minecraft.getInstance().getWindow();
     }
 
     @Override
@@ -262,7 +276,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseY < 35) {
-            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button);
+            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }

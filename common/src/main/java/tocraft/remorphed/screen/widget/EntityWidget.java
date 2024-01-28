@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
+import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 
 public class EntityWidget<T extends LivingEntity> extends AbstractButton {
@@ -25,6 +26,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     private final RemorphedScreen parent;
     private boolean crashed;
     private boolean isFavorite;
+    private boolean isCurrent;
 
     public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, T entity, RemorphedScreen parent, boolean isFavorite, boolean current) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty("")); // int x, int y, int width, int height, message
@@ -34,7 +36,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         entity.setGlowingTag(true);
         this.parent = parent;
         this.isFavorite = isFavorite;
-        this.active = current;
+        this.isCurrent = current;
         setTooltip(Tooltip.create(type.createTooltipText(entity)));
     }
 
@@ -43,10 +45,9 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
         if (bl) {
             // switch to new shape
-            if (button == 0) {
+            if (button == 0 && !type.equals(ShapeType.from(PlayerShape.getCurrentShape(Minecraft.getInstance().player)))) {
                 // Update 2nd Shape
                 NetworkHandler.sendSwap2ndShapeRequest(type);
-                parent.disableAll();
                 // close active screen handler
                 parent.onClose();
             }
@@ -79,7 +80,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             }
 
             // Render selected outline
-            if (active) {
+            if (isCurrent) {
                 context.blit(Remorphed.id("textures/gui/selected.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
             // Render favorite
@@ -87,10 +88,6 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 context.blit(Remorphed.id("textures/gui/favorite.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
         }
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     @Override
