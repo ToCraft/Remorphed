@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
+import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
 import tocraft.remorphed.screen.widget.PlayerWidget;
@@ -55,6 +56,17 @@ public class RemorphedScreen extends Screen {
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
+        // handle favorites
+        unlocked.sort((first, second) -> {
+            if (((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first)) {
+                if (((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second))
+                    return 0;
+                return -1;
+            } else if (((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second))
+                return 1;
+            else
+                return 0;
+        });
         // add entity widgets
         populateEntityWidgets(unlocked);
 
@@ -158,6 +170,7 @@ public class RemorphedScreen extends Screen {
                             type,
                             renderEntities.get(type),
                             this,
+                            ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(type),
                             type.equals(currentType)
                     );
 
@@ -226,11 +239,11 @@ public class RemorphedScreen extends Screen {
 
     private PlayerWidget createPlayerButton() {
         return new PlayerWidget(
-            (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
-            5,
-            20,
-            20,
-            this);
+                (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
+                5,
+                20,
+                20,
+                this);
     }
 
     public Window getWindow() {

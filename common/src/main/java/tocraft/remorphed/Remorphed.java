@@ -41,8 +41,27 @@ public class Remorphed {
     private static final String MAVEN_URL = "https://maven.tocraft.dev/public/dev/tocraft/remorphed/maven-metadata.xml";
     public static boolean displayVariantsInMenu = true;
 
-    public static ResourceLocation id(String name) {
-        return new ResourceLocation(MODID, name);
+    public void initialize() {
+        try {
+            VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), Component.literal("Remorphed"));
+        } catch (MalformedURLException ignored) {
+        }
+
+        if (Platform.getEnvironment() == Env.CLIENT)
+            new RemorphedClient().initialize();
+
+        NetworkHandler.registerPacketReceiver();
+
+        ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
+        ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
+        CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
+
+        PlayerEvent.PLAYER_JOIN.register(player -> {
+            // allow unlocking friendly mobs via the "normal" method
+            Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+            // Sync favorites
+            NetworkHandler.sendFavoriteSync(player);
+        });
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
@@ -90,23 +109,7 @@ public class Remorphed {
         NetworkManager.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, packet);
     }
 
-    public void initialize() {
-        try {
-            VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), Component.literal("Remorphed"));
-        } catch (MalformedURLException ignored) {
-        }
-
-        if (Platform.getEnvironment() == Env.CLIENT)
-            new RemorphedClient().initialize();
-
-        NetworkHandler.registerPacketReceiver();
-
-        ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
-        ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
-        CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
-
-        PlayerEvent.PLAYER_JOIN.register(player -> {
-            Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
-        });
+    public static ResourceLocation id(String name) {
+        return new ResourceLocation(MODID, name);
     }
 }

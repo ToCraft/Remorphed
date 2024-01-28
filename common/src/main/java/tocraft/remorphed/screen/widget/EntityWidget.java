@@ -24,14 +24,16 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     private final int size;
     private final RemorphedScreen parent;
     private boolean crashed;
+    private boolean isFavorite;
 
-    public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, T entity, RemorphedScreen parent, boolean current) {
+    public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, T entity, RemorphedScreen parent, boolean isFavorite, boolean current) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty("")); // int x, int y, int width, int height, message
         this.type = type;
         this.entity = entity;
         size = (int) (25 * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         entity.setGlowingTag(true);
         this.parent = parent;
+        this.isFavorite = isFavorite;
         this.active = current;
         setTooltip(Tooltip.create(type.createTooltipText(entity)));
     }
@@ -40,12 +42,21 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
         if (bl) {
-            // Update 2nd Shape
-            NetworkHandler.sendSwap2ndShapeRequest(type);
-            parent.disableAll();
-            // close active screen handler
-            parent.onClose();
+            // switch to new shape
+            if (button == 0) {
+                // Update 2nd Shape
+                NetworkHandler.sendSwap2ndShapeRequest(type);
+                parent.disableAll();
+                // close active screen handler
+                parent.onClose();
+            }
+            // Add to favorites
+            else if (button == 1) {
+                isFavorite = !isFavorite;
+                NetworkHandler.sendFavoriteRequest(type, isFavorite);
+            }
         }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -70,6 +81,10 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             // Render selected outline
             if (active) {
                 context.blit(Remorphed.id("textures/gui/selected.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
+            }
+            // Render favorite
+            if (isFavorite) {
+                context.blit(Remorphed.id("textures/gui/favorite.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
         }
     }
