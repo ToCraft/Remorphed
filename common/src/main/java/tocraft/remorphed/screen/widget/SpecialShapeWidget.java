@@ -23,17 +23,13 @@ public class SpecialShapeWidget extends AbstractButton {
 
         // check if current shape is the special shape
         CompoundTag nbt = new CompoundTag();
-        if (PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf)
-            wolf.saveWithoutId(nbt);
+        if (PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) wolf.saveWithoutId(nbt);
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
     }
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         guiGraphics.blit(Remorphed.id("textures/gui/wolf.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 15, 15, 15, 15);
-        // Render selected outline
-        if (isCurrent)
-            guiGraphics.blit(Remorphed.id("textures/gui/selected.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
     }
 
     @Override
