@@ -32,6 +32,7 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.UUID;
 
 public class Remorphed {
 
@@ -42,6 +43,9 @@ public class Remorphed {
     public static boolean displayVariantsInMenu = true;
 
     public void initialize() {
+        // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
+        Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
+
         try {
             VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), Component.literal("Remorphed"));
         } catch (MalformedURLException ignored) {
