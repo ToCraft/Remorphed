@@ -3,6 +3,7 @@ package tocraft.remorphed.screen.widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +17,7 @@ public class PlayerWidget extends AbstractButton {
     public PlayerWidget(int x, int y, int width, int height, RemorphedScreen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
         this.parent = parent;
+        setTooltip(Tooltip.create(Component.translatable("remorphed.player_icon")));
     }
 
     @Override

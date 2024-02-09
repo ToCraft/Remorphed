@@ -3,19 +3,24 @@ package tocraft.remorphed.screen.widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Wolf;
 import tocraft.remorphed.Remorphed;
+import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
+import tocraft.walkers.api.variant.ShapeType;
 import tocraft.walkers.network.impl.SpecialSwapPackets;
 
 public class SpecialShapeWidget extends AbstractButton {
     private final RemorphedScreen parent;
     private final boolean isCurrent;
+    private final boolean isAvailable;
 
     public SpecialShapeWidget(int x, int y, int width, int height, RemorphedScreen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
@@ -25,16 +30,22 @@ public class SpecialShapeWidget extends AbstractButton {
         CompoundTag nbt = new CompoundTag();
         if (PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) wolf.saveWithoutId(nbt);
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
+        this.isAvailable = ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().map(ShapeType::getEntityType).toList().contains(EntityType.WOLF);
+
+        setTooltip(Tooltip.create(Component.translatable(isAvailable ? "remorphed.special_shape_available" : "remorphed.special_shape_unavailable")));
     }
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         guiGraphics.blit(Remorphed.id("textures/gui/wolf.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 15, 15, 15, 15);
+
+        if (!isCurrent && !isAvailable)
+            guiGraphics.blit(Remorphed.id("textures/gui/unavailable.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 15, 15, 15, 15);
     }
 
     @Override
     public void onPress() {
-        if (!isCurrent && Walkers.hasSpecialShape(Minecraft.getInstance().getUser().getProfileId())) {
+        if (!isCurrent && isAvailable && Walkers.hasSpecialShape(Minecraft.getInstance().getUser().getProfileId())) {
             SpecialSwapPackets.sendSpecialSwapRequest();
             parent.onClose();
         }

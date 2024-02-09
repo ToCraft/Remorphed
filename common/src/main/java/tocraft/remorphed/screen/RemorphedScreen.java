@@ -235,15 +235,16 @@ public class RemorphedScreen extends Screen {
     }
 
     private Button createVariantsButton() {
-        Button.Builder VariantsButton = Button.builder(Component.translatable("remorphed.display_variants"), (widget) -> {
+        Button.Builder variantsButton = Button.builder(Component.translatable("remorphed.display_variants"), (widget) -> {
             Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
             Minecraft.getInstance().setScreen(new RemorphedScreen());
         });
 
-        VariantsButton.pos((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 5);
-        VariantsButton.size(100, 20);
+        variantsButton.pos((int) (getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 110), 5);
+        variantsButton.size(100, 20);
+        variantsButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".variants")));
 
-        return VariantsButton.build();
+        return variantsButton.build();
     }
 
     private PlayerWidget createPlayerButton() {
