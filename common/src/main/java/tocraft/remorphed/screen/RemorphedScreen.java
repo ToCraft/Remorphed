@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
@@ -63,14 +64,13 @@ public class RemorphedScreen extends Screen {
 
         // handle favorites
         unlocked.sort((first, second) -> {
-            if (((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first)) {
-                if (((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second))
-                    return 0;
-                return -1;
-            } else if (((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second))
-                return 1;
-            else
+            boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+            boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+            if (firstIsFav == secondIsFav)
                 return 0;
+            if (firstIsFav)
+                return -1;
+            else return 1;
         });
         // add entity widgets
         populateEntityWidgets(unlocked);
@@ -87,7 +87,7 @@ public class RemorphedScreen extends Screen {
 
                 List<ShapeType<?>> filtered = unlocked
                         .stream()
-                        .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text))
+                        .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text) || EntityType.getKey(type.getEntityType()).toString().contains(text))
                         .collect(Collectors.toList());
 
                 populateEntityWidgets(filtered);
