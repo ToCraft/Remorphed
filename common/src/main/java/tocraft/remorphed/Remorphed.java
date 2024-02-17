@@ -85,7 +85,7 @@ public class Remorphed {
     public static int getKillToUnlock(EntityType<?> entityType) {
         String id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString();
         if (Remorphed.CONFIG.killToUnlockByType.containsKey(id))
-            Remorphed.CONFIG.killToUnlockByType.get(id);
+            return Remorphed.CONFIG.killToUnlockByType.get(id);
         else
             return Remorphed.CONFIG.killToUnlock;
     }
