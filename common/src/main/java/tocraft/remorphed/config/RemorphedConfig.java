@@ -1,6 +1,5 @@
 package tocraft.remorphed.config;
 
-import net.minecraft.world.entity.EntityType;
 import tocraft.craftedcore.config.Config;
 import tocraft.craftedcore.config.annotions.Synchronize;
 

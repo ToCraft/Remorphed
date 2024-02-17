@@ -28,7 +28,6 @@ import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.event.ShapeEvents;
-import tocraft.walkers.api.platform.WalkersConfig;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.net.MalformedURLException;
@@ -84,10 +83,8 @@ public class Remorphed {
 
     public static int getKillToUnlock(EntityType<?> entityType) {
         String id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString();
-        if (Remorphed.CONFIG.killToUnlockByType.containsKey(id))
-            return Remorphed.CONFIG.killToUnlockByType.get(id);
-        else
-            return Remorphed.CONFIG.killToUnlock;
+        if (Remorphed.CONFIG.killToUnlockByType.containsKey(id)) return Remorphed.CONFIG.killToUnlockByType.get(id);
+        else return Remorphed.CONFIG.killToUnlock;
     }
 
     public static void sync(ServerPlayer player) {

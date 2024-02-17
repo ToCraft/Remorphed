@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class RemorphedScreen extends Screen {
 
     private final List<ShapeType<?>> unlocked = new ArrayList<>();
-    private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
+    private static final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -188,7 +188,7 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    private void populateRenderEntities() {
+    public static void populateRenderEntities() {
         if (renderEntities.isEmpty()) {
             List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level, Remorphed.displayVariantsInMenu);
             for (ShapeType<?> type : types) {

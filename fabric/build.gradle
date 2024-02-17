@@ -30,10 +30,10 @@ dependencies {
 
 processResources {
     Map<String, ?> replaceProperties = [
-            minecraft_version: minecraft_version, version: version,
+            minecraft_version   : minecraft_version, version: version,
             architectury_version: architectury_version,
-            craftedcore_version: craftedcore_version,
-            woodwalkers_version: woodwalkers_version,
+            craftedcore_version : craftedcore_version,
+            woodwalkers_version : woodwalkers_version,
     ]
 
     inputs.properties replaceProperties
