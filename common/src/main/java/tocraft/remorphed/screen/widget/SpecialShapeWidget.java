@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Wolf;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
@@ -30,7 +31,7 @@ public class SpecialShapeWidget extends AbstractButton {
         CompoundTag nbt = new CompoundTag();
         if (PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) wolf.saveWithoutId(nbt);
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
-        this.isAvailable = ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().map(ShapeType::getEntityType).toList().contains(EntityType.WOLF);
+        this.isAvailable = Walkers.CONFIG.specialShapeIsThirdShape || Minecraft.getInstance().player.isCreative() || ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().map(ShapeType::getEntityType).toList().contains(EntityType.WOLF);
 
         setTooltip(Tooltip.create(Component.translatable(isAvailable ? "remorphed.special_shape_available" : "remorphed.special_shape_unavailable")));
     }
@@ -46,6 +47,8 @@ public class SpecialShapeWidget extends AbstractButton {
     @Override
     public void onPress() {
         if (!isCurrent && isAvailable && Walkers.hasSpecialShape(Minecraft.getInstance().getUser().getProfileId())) {
+            if (!Walkers.CONFIG.specialShapeIsThirdShape)
+                NetworkHandler.sendSwap2ndShapeRequest(ShapeType.from(EntityType.WOLF, -1));
             SpecialSwapPackets.sendSpecialSwapRequest();
             parent.onClose();
         }

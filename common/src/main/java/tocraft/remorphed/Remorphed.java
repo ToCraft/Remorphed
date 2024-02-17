@@ -51,8 +51,7 @@ public class Remorphed {
         } catch (MalformedURLException ignored) {
         }
 
-        if (Platform.getEnvironment() == Env.CLIENT)
-            new RemorphedClient().initialize();
+        if (Platform.getEnvironment() == Env.CLIENT) new RemorphedClient().initialize();
 
         NetworkHandler.registerPacketReceiver();
 
@@ -60,14 +59,11 @@ public class Remorphed {
         ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
         CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
 
-        PlayerEvent.PLAYER_JOIN.register(player -> {
-            // allow unlocking friendly mobs via the "normal" method
-            Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
-            // makes the special shape still functional
-            Walkers.CONFIG.specialShapeIsThirdShape = true;
-            // Sync favorites
-            NetworkHandler.sendFavoriteSync(player);
-        });
+        // allow unlocking friendly mobs via the "normal" method
+        Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+
+        // Sync favorites
+        PlayerEvent.PLAYER_JOIN.register(NetworkHandler::sendFavoriteSync);
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
@@ -107,8 +103,7 @@ public class Remorphed {
             }
         });
 
-        if (!unlockedShapes.isEmpty())
-            compoundTag.put("UnlockedShapes", list);
+        if (!unlockedShapes.isEmpty()) compoundTag.put("UnlockedShapes", list);
 
         packet.writeUUID(changed.getUUID());
         packet.writeNbt(compoundTag);
