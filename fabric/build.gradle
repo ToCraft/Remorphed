@@ -20,6 +20,7 @@ configurations {
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}+${rootProject.minecraft_version}"
+    modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
     modApi "dev.tocraft:craftedcore-fabric:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
     modApi "dev.tocraft:walkers-fabric:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
 
@@ -28,13 +29,18 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
+    Map<String, ?> replaceProperties = [
+            minecraft_version: minecraft_version, version: version,
+            architectury_version: architectury_version,
+            craftedcore_version: craftedcore_version,
+            woodwalkers_version: woodwalkers_version,
+    ]
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+    inputs.properties replaceProperties
+
+    filesMatching(["fabric.mod.json"]) {
+        expand replaceProperties + [project: project]
     }
-
-    from 'LICENSE'
 }
 
 shadowJar {

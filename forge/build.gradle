@@ -32,15 +32,21 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version.toString()
+    Map<String, ?> replaceProperties = [
+            minecraft_version: minecraft_version, version: version,
+            architectury_version: architectury_version,
+            craftedcore_version: craftedcore_version,
+            woodwalkers_version: woodwalkers_version,
+    ]
 
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version.toString()
+    inputs.properties replaceProperties
+
+    filesMatching(["META-INF/mods.toml"]) {
+        expand replaceProperties + [project: project]
     }
 }
 
 shadowJar {
-    exclude "fabric.mod.json"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier.set("dev-shadow")
 }
