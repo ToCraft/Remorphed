@@ -13,6 +13,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.event.ShapeEvents;
+import tocraft.walkers.api.platform.WalkersConfig;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.net.MalformedURLException;
@@ -67,7 +69,7 @@ public class Remorphed {
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.CONFIG.killToUnlock <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.CONFIG.killToUnlock);
+        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.getKillToUnlock(type.getEntityType()));
     }
 
     public static boolean canUseAnyShape(Player player) {
@@ -78,6 +80,14 @@ public class Remorphed {
         }
 
         return canUseShapes;
+    }
+
+    public static int getKillToUnlock(EntityType<?> entityType) {
+        String id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString();
+        if (Remorphed.CONFIG.killToUnlockByType.containsKey(id))
+            Remorphed.CONFIG.killToUnlockByType.get(id);
+        else
+            return Remorphed.CONFIG.killToUnlock;
     }
 
     public static void sync(ServerPlayer player) {

@@ -62,7 +62,7 @@ public class RemorphedCommand implements CommandRegistrationEvent {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.CONFIG.killToUnlock);
+        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.getKillToUnlock(type.getEntityType()));
 
         if (Walkers.CONFIG.logCommands) {
             source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name));
