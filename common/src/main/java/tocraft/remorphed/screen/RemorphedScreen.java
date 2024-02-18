@@ -2,6 +2,8 @@ package tocraft.remorphed.screen;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -30,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
-
     private final List<ShapeType<?>> unlocked = new ArrayList<>();
     private static final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
@@ -47,6 +49,7 @@ public class RemorphedScreen extends Screen {
         super.init(Minecraft.getInstance(), Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
 
         // don't initialize if the player is null
+        if (minecraft == null) return;
         if (minecraft.player == null) {
             minecraft.setScreen(null);
             return;
@@ -169,7 +172,7 @@ public class RemorphedScreen extends Screen {
                     ShapeType<?> type = rendered.get(listIndex);
 
                     // TODO: only render selected type, this will show all eg. sheep
-                    EntityWidget<?> entityWidget = new EntityWidget(
+                    EntityWidget<?> entityWidget = new EntityWidget<>(
                             (getWindow().getGuiScaledWidth() - 27) / 7f * xIndex + x,
                             getWindow().getGuiScaledHeight() / 5f * yIndex + y,
                             (getWindow().getGuiScaledWidth() - 27) / 7f,

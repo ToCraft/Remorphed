@@ -79,7 +79,7 @@ public class RemorphedCommand implements CommandRegistrationEvent {
     }
 
     private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {
-        ShapeType<LivingEntity> type = new ShapeType(BuiltInRegistries.ENTITY_TYPE.get(id));
+        ShapeType<LivingEntity> type = ShapeType.from(BuiltInRegistries.ENTITY_TYPE.get(id));
 
         if (nbt != null) {
             CompoundTag copy = nbt.copy();
@@ -166,23 +166,18 @@ public class RemorphedCommand implements CommandRegistrationEvent {
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
-                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
-                                    hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                            EntityType.getKey(ResourceArgument
-                                                    .getSummonableEntityType(context, "shape").value()),
-                                            null);
-                                    return 1;
-                                }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                        EntityType.getKey(ResourceArgument
+                                                .getSummonableEntityType(context, "shape").value()),
+                                        null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
 
-                                            hasShape(context.getSource(),
+                                            return hasShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
                                                     EntityType.getKey(ResourceArgument
                                                             .getSummonableEntityType(context, "shape").value()),
                                                     nbt);
-
-                                            return 1;
                                         }))))
                 .build();
 

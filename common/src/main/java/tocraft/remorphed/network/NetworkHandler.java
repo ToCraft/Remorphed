@@ -24,10 +24,10 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.util.Set;
 
 public class NetworkHandler {
-    public static ResourceLocation SHAPE_REQUEST = Remorphed.id("unlock_request");
-    public static ResourceLocation UNLOCKED_SYNC = Remorphed.id("unlocked_sync");
-    public static ResourceLocation FAVORITE_SYNC = Remorphed.id("favorite_sync");
-    public static ResourceLocation FAVORITE_UPDATE = Remorphed.id("favorite_update");
+    public static final ResourceLocation SHAPE_REQUEST = Remorphed.id("unlock_request");
+    public static final ResourceLocation UNLOCKED_SYNC = Remorphed.id("unlocked_sync");
+    public static final ResourceLocation FAVORITE_SYNC = Remorphed.id("favorite_sync");
+    public static final ResourceLocation FAVORITE_UPDATE = Remorphed.id("favorite_update");
 
     public static void registerPacketReceiver() {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, NetworkHandler.SHAPE_REQUEST, NetworkHandler::handleShapeRequestPacket);
@@ -47,6 +47,7 @@ public class NetworkHandler {
         NetworkManager.sendToServer(NetworkHandler.SHAPE_REQUEST, buf);
     }
 
+    @SuppressWarnings({"ALL"})
     private static void handleShapeRequestPacket(FriendlyByteBuf packet, NetworkManager.PacketContext context) {
         CompoundTag compound = packet.readNbt();
 
@@ -67,7 +68,7 @@ public class NetworkHandler {
             ShapeType<? extends LivingEntity> type = ShapeType.from(eType, typeVariant);
             // update Player
             boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
-            if (result)
+            if (result && type != null)
                 PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
 
             // Refresh player dimensions
@@ -107,6 +108,7 @@ public class NetworkHandler {
         NetworkManager.sendToServer(FAVORITE_UPDATE, packet);
     }
 
+    @SuppressWarnings("ALL")
     private static void handleFavoriteRequestPacket(FriendlyByteBuf packet, NetworkManager.PacketContext context) {
         EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(packet.readResourceLocation());
         int variant = packet.readInt();

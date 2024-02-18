@@ -2,6 +2,8 @@ package tocraft.remorphed.screen.widget;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -18,6 +20,7 @@ import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 
+@Environment(EnvType.CLIENT)
 public class EntityWidget<T extends LivingEntity> extends AbstractButton {
 
     private final ShapeType<T> type;
@@ -26,7 +29,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     private final RemorphedScreen parent;
     private boolean crashed;
     private boolean isFavorite;
-    private boolean isCurrent;
+    private final boolean isCurrent;
 
     public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, T entity, RemorphedScreen parent, boolean isFavorite, boolean current) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty("")); // int x, int y, int width, int height, message
@@ -43,7 +46,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
-        if (bl) {
+        if (bl && Minecraft.getInstance().player != null) {
             // switch to new shape
             if (button == 0 && !type.equals(ShapeType.from(PlayerShape.getCurrentShape(Minecraft.getInstance().player)))) {
                 // Update 2nd Shape

@@ -1,5 +1,7 @@
 package tocraft.remorphed.screen.widget;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -18,6 +20,7 @@ import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 import tocraft.walkers.network.impl.SpecialSwapPackets;
 
+@Environment(EnvType.CLIENT)
 public class SpecialShapeWidget extends AbstractButton {
     private final RemorphedScreen parent;
     private final boolean isCurrent;
@@ -29,7 +32,7 @@ public class SpecialShapeWidget extends AbstractButton {
 
         // check if current shape is the special shape
         CompoundTag nbt = new CompoundTag();
-        if (PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) wolf.saveWithoutId(nbt);
+        if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) wolf.saveWithoutId(nbt);
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
         this.isAvailable = Walkers.CONFIG.specialShapeIsThirdShape || Minecraft.getInstance().player.isCreative() || ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().map(ShapeType::getEntityType).toList().contains(EntityType.WOLF);
 

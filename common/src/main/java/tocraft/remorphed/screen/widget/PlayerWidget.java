@@ -1,5 +1,7 @@
 package tocraft.remorphed.screen.widget;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -11,6 +13,7 @@ import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
 
+@Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
     private final RemorphedScreen parent;
 

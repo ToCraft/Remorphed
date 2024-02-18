@@ -28,7 +28,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     private Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<>();
     @Unique
-    private Set<ShapeType<?>> remorphed$favoriteShapes = new HashSet<>();
+    private final Set<ShapeType<?>> remorphed$favoriteShapes = new HashSet<>();
     @Unique
     private final String UNLOCKED_SHAPES = "UnlockedShapes";
     @Unique
@@ -85,6 +85,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         return tag;
     }
 
+    @SuppressWarnings("unchecked")
     @Unique
     public void remorphed$readData(CompoundTag tag) {
         remorphed$unlockedShapes.clear();
