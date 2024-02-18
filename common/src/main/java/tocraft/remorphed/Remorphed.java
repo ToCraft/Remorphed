@@ -101,7 +101,7 @@ public class Remorphed {
         ListTag list = new ListTag();
 
         unlockedShapes.forEach((shape, killAmount) -> {
-            if (killAmount > 0) {
+            if (killAmount > 0 && shape != null) {
                 CompoundTag compound = new CompoundTag();
                 compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
                 compound.putInt("variant", shape.getVariantData());

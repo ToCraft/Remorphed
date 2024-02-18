@@ -59,7 +59,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         CompoundTag tag = new CompoundTag();
         ListTag unlockedList = new ListTag();
         remorphed$unlockedShapes.forEach((shape, killAmount) -> {
-            if (killAmount > 0) {
+            if (killAmount > 0 && shape != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
@@ -72,10 +72,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
         ListTag favoritesList = new ListTag();
         remorphed$favoriteShapes.forEach(shape -> {
-            CompoundTag entryTag = new CompoundTag();
-            entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
-            entryTag.putInt("variant", shape.getVariantData());
-            favoritesList.add(entryTag);
+            if (shape != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                entryTag.putInt("variant", shape.getVariantData());
+                favoritesList.add(entryTag);
+            }
         });
         if (!remorphed$favoriteShapes.isEmpty())
             tag.put(FAVORITE_SHAPES, favoritesList);
