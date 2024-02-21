@@ -156,6 +156,7 @@ public class RemorphedScreen extends Screen {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private void populateEntityWidgets(List<ShapeType<?>> rendered) {
         // add widget for each entity to be rendered
         int x = 15;
@@ -177,7 +178,7 @@ public class RemorphedScreen extends Screen {
                             getWindow().getGuiScaledHeight() / 5f * yIndex + y,
                             (getWindow().getGuiScaledWidth() - 27) / 7f,
                             getWindow().getGuiScaledHeight() / 5f,
-                            type,
+                            (ShapeType<Mob>) type,
                             renderEntities.get(type),
                             this,
                             ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(type),
