@@ -1,6 +1,8 @@
 package tocraft.remorphed.network;
 
 import dev.architectury.networking.NetworkManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -19,17 +21,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Environment(EnvType.CLIENT)
 public class ClientNetworking {
     public static void registerPacketHandlers() {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, NetworkHandler.UNLOCKED_SYNC,
                 ClientNetworking::handleUnlockedSyncPacket);
     }
 
+    @SuppressWarnings("unchecked")
     public static void handleUnlockedSyncPacket(FriendlyByteBuf packet, NetworkManager.PacketContext context) {
         final UUID uuid = packet.readUUID();
         final CompoundTag compound = packet.readNbt();
-        final Map<ShapeType<?>, Integer> unlockedShapes = new HashMap<ShapeType<?>, Integer>();
-        if (compound.get("UnlockedShapes") instanceof ListTag list) {
+        final Map<ShapeType<?>, Integer> unlockedShapes = new HashMap<>();
+        if (compound != null && compound.contains("UnlockedShapes") && compound.get("UnlockedShapes") instanceof ListTag list) {
             list.forEach(entryTag -> {
                 EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(new ResourceLocation(((CompoundTag) entryTag).getString("id")));
                 int variant = ((CompoundTag) entryTag).getInt("variant");

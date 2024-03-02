@@ -23,13 +23,27 @@ side = "BOTH"
 [[dependencies.remorphed]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,)"
+versionRange = "[${minecraft_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remorphed]]
 modId = "craftedcore"
 mandatory = true
-versionRange = "[1.1,)"
+versionRange = "[${craftedcore_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.remorphed]]
+modId = "walkers"
+mandatory = true
+versionRange = "[${woodwalkers_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.remorphed]]
+modId = "architectury"
+mandatory = true
+versionRange = "[${architectury_version},)"
 ordering = "AFTER"
 side = "BOTH"

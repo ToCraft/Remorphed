@@ -3,21 +3,27 @@ package tocraft.remorphed.screen;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import tocraft.remorphed.Remorphed;
+import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
 import tocraft.remorphed.screen.widget.PlayerWidget;
 import tocraft.remorphed.screen.widget.SearchWidget;
+import tocraft.remorphed.screen.widget.SpecialShapeWidget;
+import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -27,22 +33,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
-
     private final List<ShapeType<?>> unlocked = new ArrayList<>();
-    private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
+    private static final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
     private final PlayerWidget playerButton = createPlayerButton();
+    private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
 
     public RemorphedScreen() {
-        super(new TextComponent(""));
+        super(Component.nullToEmpty(""));
         super.init(Minecraft.getInstance(), Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
 
         // don't initialize if the player is null
+        if (minecraft == null) return;
         if (minecraft.player == null) {
             minecraft.setScreen(null);
             return;
@@ -53,9 +61,21 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
         addRenderableWidget(playerButton);
+        //if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
+        addRenderableWidget(specialShapeButton);
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
+        // handle favorites
+        unlocked.sort((first, second) -> {
+            boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+            boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+            if (firstIsFav == secondIsFav)
+                return 0;
+            if (firstIsFav)
+                return -1;
+            else return 1;
+        });
         // add entity widgets
         populateEntityWidgets(unlocked);
 
@@ -71,7 +91,7 @@ public class RemorphedScreen extends Screen {
 
                 List<ShapeType<?>> filtered = unlocked
                         .stream()
-                        .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text))
+                        .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text) || EntityType.getKey(type.getEntityType()).toString().contains(text))
                         .collect(Collectors.toList());
 
                 populateEntityWidgets(filtered);
@@ -94,7 +114,19 @@ public class RemorphedScreen extends Screen {
         helpButton.render(context, mouseX, mouseY, delta);
         variantsButton.render(context, mouseX, mouseY, delta);
         playerButton.render(context, mouseX, mouseY, delta);
+        if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
+            specialShapeButton.render(context, mouseX, mouseY, delta);
         renderEntityWidgets(context, mouseX, mouseY, delta);
+
+        // tooltips
+        for (NarratableEntry selectable : ((ScreenAccessor) this).getSelectables()) {
+            if(selectable instanceof Button button) {
+                if(button.isHoveredOrFocused()) {
+                    button.renderToolTip(context, mouseX, mouseY);
+                    break;
+                }
+            }
+        }
     }
 
     public void renderEntityWidgets(PoseStack context, int mouseX, int mouseY, float delta) {
@@ -135,6 +167,7 @@ public class RemorphedScreen extends Screen {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private void populateEntityWidgets(List<ShapeType<?>> rendered) {
         // add widget for each entity to be rendered
         int x = 15;
@@ -151,14 +184,15 @@ public class RemorphedScreen extends Screen {
                     ShapeType<?> type = rendered.get(listIndex);
 
                     // TODO: only render selected type, this will show all eg. sheep
-                    EntityWidget<?> entityWidget = new EntityWidget(
+                    EntityWidget<?> entityWidget = new EntityWidget<>(
                             (getWindow().getGuiScaledWidth() - 27) / 7f * xIndex + x,
                             getWindow().getGuiScaledHeight() / 5f * yIndex + y,
                             (getWindow().getGuiScaledWidth() - 27) / 7f,
                             getWindow().getGuiScaledHeight() / 5f,
-                            type,
+                            (ShapeType<Mob>) type,
                             renderEntities.get(type),
                             this,
+                            ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(type),
                             type.equals(currentType)
                     );
 
@@ -169,7 +203,7 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    private void populateRenderEntities() {
+    public static void populateRenderEntities() {
         if (renderEntities.isEmpty()) {
             List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level, Remorphed.displayVariantsInMenu);
             for (ShapeType<?> type : types) {
@@ -205,9 +239,8 @@ public class RemorphedScreen extends Screen {
     }
 
     private Button createHelpButton() {
-        return new Button((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35), 5, 20, 20, Component.nullToEmpty("?"), (widget) -> {
-            Minecraft.getInstance().setScreen(new RemorphedHelpScreen());
-        });
+        int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
+        return new Button((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35 + xOffset), 5, 20, 20, Component.nullToEmpty("?"), (widget) -> Minecraft.getInstance().setScreen(new RemorphedHelpScreen()));
     }
 
     private Button createVariantsButton() {
@@ -219,19 +252,24 @@ public class RemorphedScreen extends Screen {
 
     private PlayerWidget createPlayerButton() {
         return new PlayerWidget(
-            (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
-            5,
-            20,
-            20,
-            this);
+                (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
+                5,
+                20,
+                20,
+                this);
+    }
+
+    private SpecialShapeWidget createSpecialShapeButton() {
+        return new SpecialShapeWidget(
+                (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35),
+                5,
+                20,
+                20,
+                this);
     }
 
     public Window getWindow() {
         return Minecraft.getInstance().getWindow();
-    }
-
-    public void disableAll() {
-        entityWidgets.forEach(button -> button.setActive(false));
     }
 
     @Override
@@ -242,7 +280,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseY < 35) {
-            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button);
+            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }

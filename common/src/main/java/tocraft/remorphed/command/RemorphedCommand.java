@@ -61,7 +61,7 @@ public class RemorphedCommand implements CommandRegistrationEvent {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = new TranslatableComponent(type.getEntityType().getDescriptionId());
 
-        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.CONFIG.killToUnlock);
+        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.getKillToUnlock(type.getEntityType()));
 
         if (Walkers.CONFIG.logCommands) {
             source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".addShape", player.getDisplayName(), name), true);
@@ -78,7 +78,7 @@ public class RemorphedCommand implements CommandRegistrationEvent {
     }
 
     private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {
-        ShapeType<LivingEntity> type = new ShapeType(Registry.ENTITY_TYPE.get(id));
+        ShapeType<LivingEntity> type = new ShapeType<>((EntityType<LivingEntity>) Registry.ENTITY_TYPE.get(id));
 
         if (nbt != null) {
             CompoundTag copy = nbt.copy();
@@ -161,21 +161,16 @@ public class RemorphedCommand implements CommandRegistrationEvent {
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", EntitySummonArgument.id())
-                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
-                                    hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                            EntitySummonArgument.getSummonableEntity(context, "shape"),
-                                            null);
-                                    return 1;
-                                }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                        EntitySummonArgument.getSummonableEntity(context, "shape"),
+                                        null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
 
-                                            hasShape(context.getSource(),
+                                            return hasShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
                                                     EntitySummonArgument.getSummonableEntity(context, "shape"),
                                                     nbt);
-
-                                            return 1;
                                         }))))
                 .build();
 

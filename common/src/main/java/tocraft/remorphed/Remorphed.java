@@ -10,9 +10,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.UUID;
 
 public class Remorphed {
 
@@ -41,12 +44,33 @@ public class Remorphed {
     private static final String MAVEN_URL = "https://maven.tocraft.dev/public/dev/tocraft/remorphed/maven-metadata.xml";
     public static boolean displayVariantsInMenu = true;
 
-    public static ResourceLocation id(String name) {
-        return new ResourceLocation(MODID, name);
+    public void initialize() {
+        // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
+        Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
+
+        try {
+            VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), new TextComponent("Remorphed"));
+        } catch (MalformedURLException ignored) {
+        }
+
+        if (Platform.getEnvironment() == Env.CLIENT) new RemorphedClient().initialize();
+
+        NetworkHandler.registerPacketReceiver();
+
+        ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
+        ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
+        CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
+
+        // allow unlocking friendly mobs via the "normal" method
+        Walkers.CONFIG.unlockOverridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+        Walkers.CONFIG.save();
+
+        // Sync favorites
+        PlayerEvent.PLAYER_JOIN.register(NetworkHandler::sendFavoriteSync);
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.CONFIG.killToUnlock <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.CONFIG.killToUnlock);
+        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.getKillToUnlock(type.getEntityType()));
     }
 
     public static boolean canUseAnyShape(Player player) {
@@ -57,6 +81,12 @@ public class Remorphed {
         }
 
         return canUseShapes;
+    }
+
+    public static int getKillToUnlock(EntityType<?> entityType) {
+        String id = Registry.ENTITY_TYPE.getKey(entityType).toString();
+        if (Remorphed.CONFIG.killToUnlockByType.containsKey(id)) return Remorphed.CONFIG.killToUnlockByType.get(id);
+        else return Remorphed.CONFIG.killToUnlock;
     }
 
     public static void sync(ServerPlayer player) {
@@ -73,7 +103,7 @@ public class Remorphed {
         ListTag list = new ListTag();
 
         unlockedShapes.forEach((shape, killAmount) -> {
-            if (killAmount > 0) {
+            if (killAmount > 0 && shape != null) {
                 CompoundTag compound = new CompoundTag();
                 compound.putString("id", Registry.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
                 compound.putInt("variant", shape.getVariantData());
@@ -82,31 +112,14 @@ public class Remorphed {
             }
         });
 
-        if (!unlockedShapes.isEmpty())
-            compoundTag.put("UnlockedShapes", list);
+        if (!unlockedShapes.isEmpty()) compoundTag.put("UnlockedShapes", list);
 
         packet.writeUUID(changed.getUUID());
         packet.writeNbt(compoundTag);
         NetworkManager.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, packet);
     }
 
-    public void initialize() {
-        try {
-            VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), new TextComponent("Remorphed"));
-        } catch (MalformedURLException ignored) {
-        }
-
-        if (Platform.getEnvironment() == Env.CLIENT)
-            new RemorphedClient().initialize();
-
-        NetworkHandler.registerPacketReceiver();
-
-        ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
-        ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
-        CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
-
-        PlayerEvent.PLAYER_JOIN.register(player -> {
-            Walkers.CONFIG.unlockOveridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
-        });
+    public static ResourceLocation id(String name) {
+        return new ResourceLocation(MODID, name);
     }
 }

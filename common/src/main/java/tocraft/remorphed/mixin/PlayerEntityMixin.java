@@ -19,14 +19,20 @@ import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
     @Unique
-    private Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<ShapeType<? extends LivingEntity>, Integer>();
+    private Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<>();
+    @Unique
+    private final Set<ShapeType<?>> remorphed$favoriteShapes = new HashSet<>();
     @Unique
     private final String UNLOCKED_SHAPES = "UnlockedShapes";
+    @Unique
+    private final String FAVORITE_SHAPES = "FavoriteShapes";
 
     private PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level world) {
         super(type, world);
@@ -51,38 +57,59 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     private CompoundTag remorphed$writeData() {
         CompoundTag tag = new CompoundTag();
-        ListTag list = new ListTag();
+        ListTag unlockedList = new ListTag();
         remorphed$unlockedShapes.forEach((shape, killAmount) -> {
-            if (killAmount > 0) {
+            if (killAmount > 0 && shape != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putString("id", Registry.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
                 entryTag.putInt("killAmount", killAmount);
-                list.add(entryTag);
+                unlockedList.add(entryTag);
             }
         });
         if (!remorphed$unlockedShapes.isEmpty())
-            tag.put(UNLOCKED_SHAPES, list);
+            tag.put(UNLOCKED_SHAPES, unlockedList);
+
+        ListTag favoritesList = new ListTag();
+        remorphed$favoriteShapes.forEach(shape -> {
+            if (shape != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putString("id", Registry.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                entryTag.putInt("variant", shape.getVariantData());
+                favoritesList.add(entryTag);
+            }
+        });
+        if (!remorphed$favoriteShapes.isEmpty())
+            tag.put(FAVORITE_SHAPES, favoritesList);
+
         return tag;
     }
 
+    @SuppressWarnings("unchecked")
     @Unique
     public void remorphed$readData(CompoundTag tag) {
         remorphed$unlockedShapes.clear();
+        remorphed$favoriteShapes.clear();
 
-        if (tag.get(UNLOCKED_SHAPES) != null) {
-            ListTag list = (ListTag) tag.get(UNLOCKED_SHAPES);
-            assert list != null;
-            list.forEach(entry -> {
-                if (entry instanceof CompoundTag) {
-                    ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
-                    int typeVariantId = ((CompoundTag) entry).getInt("variant");
-                    int killAmount = ((CompoundTag) entry).getInt("killAmount");
+        ListTag unlockedList = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
+        unlockedList.forEach(entry -> {
+            if (entry instanceof CompoundTag) {
+                ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
+                int typeVariantId = ((CompoundTag) entry).getInt("variant");
+                int killAmount = ((CompoundTag) entry).getInt("killAmount");
 
-                    remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
-                }
-            });
-        }
+                remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
+            }
+        });
+        ListTag favoritesList = tag.getList(FAVORITE_SHAPES, ListTag.TAG_COMPOUND);
+        favoritesList.forEach(entry -> {
+            if (entry instanceof CompoundTag) {
+                ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
+                int typeVariantId = ((CompoundTag) entry).getInt("variant");
+
+                remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(typeId), typeVariantId));
+            }
+        });
     }
 
     @Unique
@@ -109,4 +136,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         return remorphed$unlockedShapes.getOrDefault(type, 0);
     }
 
+    @Unique
+    @Override
+    public Set<ShapeType<?>> remorphed$getFavorites() {
+        return remorphed$favoriteShapes;
+    }
 }
