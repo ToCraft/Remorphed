@@ -88,6 +88,11 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 RenderSystem.setShaderTexture(0, Remorphed.id("textures/gui/selected.png"));
                 GuiComponent.blit(context, getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
+            // Render favorite
+            if (isFavorite) {
+                RenderSystem.setShaderTexture(0, Remorphed.id("textures/gui/favorite.png"));
+                GuiComponent.blit(context, x, y, getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
+            }
         }
     }
 
