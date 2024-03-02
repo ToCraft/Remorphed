@@ -23,7 +23,5 @@ public class RemorphedClient {
         // Register event handlers
         ClientTickEvent.CLIENT_PRE.register(new KeyPressHandler());
         ClientNetworking.registerPacketHandlers();
-
-        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> new Thread(RemorphedScreen::populateRenderEntities).start());
     }
 }
