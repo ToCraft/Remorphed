@@ -21,5 +21,9 @@
   "remorphed.hasShape_fail": "%s didn't unlocked %s.",
   "remorphed.removeShape": "Removed the %s-shape from %s.",
   "remorphed.addShape": "%s unlocked %s.",
-  "remorphed.clearShapes": "Cleared all unlocked Shapes from %s."
+  "remorphed.clearShapes": "Cleared all unlocked Shapes from %s.",
+  "remorphed.variants": "Show mob variants.",
+  "remorphed.player_icon": "Transform back into a player.",
+  "remorphed.special_shape_available": "Congratulations on your special shape!",
+  "remorphed.special_shape_unavailable": "Please unlock a wolf first."
 }

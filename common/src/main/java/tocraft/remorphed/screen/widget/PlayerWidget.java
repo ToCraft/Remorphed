@@ -2,24 +2,27 @@ package tocraft.remorphed.screen.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
 
+@Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
     private final RemorphedScreen parent;
 
     public PlayerWidget(int x, int y, int width, int height, RemorphedScreen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
         this.parent = parent;
+        setTooltip(Tooltip.create(Component.translatable("remorphed.player_icon")));
     }
 
     @Override

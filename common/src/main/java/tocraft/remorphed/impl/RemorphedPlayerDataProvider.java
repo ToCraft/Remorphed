@@ -4,6 +4,7 @@ import net.minecraft.world.entity.LivingEntity;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.Map;
+import java.util.Set;
 
 public interface RemorphedPlayerDataProvider {
 
@@ -14,4 +15,6 @@ public interface RemorphedPlayerDataProvider {
     void remorphed$addKill(ShapeType<? extends LivingEntity> type);
 
     int remorphed$getKills(ShapeType<? extends LivingEntity> type);
+
+    Set<ShapeType<?>> remorphed$getFavorites();
 }
