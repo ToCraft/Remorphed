@@ -2,6 +2,7 @@ package tocraft.remorphed.config;
 
 import tocraft.craftedcore.config.Config;
 import tocraft.craftedcore.config.annotions.Synchronize;
+import tocraft.remorphed.Remorphed;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,4 +19,9 @@ public class RemorphedConfig implements Config {
             put("minecraft:wither", 2);
         }
     };
+
+    @Override
+    public String getName() {
+        return Remorphed.MODID;
+    }
 }

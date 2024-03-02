@@ -61,7 +61,8 @@ public class Remorphed {
         CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
 
         // allow unlocking friendly mobs via the "normal" method
-        //Walkers.CONFIG.unlockOverridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+        Walkers.CONFIG.unlockOverridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
+        Walkers.CONFIG.save();
 
         // Sync favorites
         PlayerEvent.PLAYER_JOIN.register(NetworkHandler::sendFavoriteSync);

@@ -78,8 +78,9 @@ public class RemorphedCommand implements CommandRegistrationEvent {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {
-        ShapeType<LivingEntity> type = new ShapeType<>((EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(id));
+        ShapeType<LivingEntity> type = ShapeType.from((EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(id));
 
         if (nbt != null) {
             CompoundTag copy = nbt.copy();
