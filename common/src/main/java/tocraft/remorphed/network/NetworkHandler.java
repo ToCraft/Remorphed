@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +31,6 @@ public class NetworkHandler {
     public static void registerPacketReceiver() {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, NetworkHandler.SHAPE_REQUEST, NetworkHandler::handleShapeRequestPacket);
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, FAVORITE_UPDATE, NetworkHandler::handleFavoriteRequestPacket);
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, NetworkHandler.FAVORITE_SYNC, NetworkHandler::handleFavoriteSyncPacket);
     }
 
     public static <T extends LivingEntity> void sendSwap2ndShapeRequest(@NotNull ShapeType<T> type) {
@@ -87,17 +85,6 @@ public class NetworkHandler {
         FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeNbt(tag);
         NetworkManager.sendToPlayer(player, NetworkHandler.FAVORITE_SYNC, packet);
-    }
-
-    private static void handleFavoriteSyncPacket(FriendlyByteBuf packet, NetworkManager.PacketContext context) {
-        CompoundTag tag = packet.readNbt();
-
-        ClientNetworking.runOrQueue(context, player -> {
-            RemorphedPlayerDataProvider data = (RemorphedPlayerDataProvider) player;
-            data.remorphed$getFavorites().clear();
-            ListTag idList = tag.getList("FavoriteShapes", Tag.TAG_COMPOUND);
-            idList.forEach(compound -> data.remorphed$getFavorites().add(ShapeType.from((CompoundTag) compound)));
-        });
     }
 
     public static void sendFavoriteRequest(ShapeType<? extends LivingEntity> type, boolean favorite) {
