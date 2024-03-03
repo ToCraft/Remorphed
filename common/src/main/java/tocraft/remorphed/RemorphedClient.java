@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 import tocraft.remorphed.network.ClientNetworking;
+import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.remorphed.tick.KeyPressHandler;
 
 @Environment(EnvType.CLIENT)
@@ -21,5 +22,7 @@ public class RemorphedClient {
         // Register event handlers
         ClientTickEvent.CLIENT_PRE.register(new KeyPressHandler());
         ClientNetworking.registerPacketHandlers();
+
+        new Thread(RemorphedScreen::populateRenderEntities).start();
     }
 }

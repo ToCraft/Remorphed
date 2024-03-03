@@ -68,18 +68,12 @@ public class Remorphed {
         PlayerEvent.PLAYER_JOIN.register(NetworkHandler::sendFavoriteSync);
     }
 
-    public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return player.isCreative() || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.getKillToUnlock(type.getEntityType()));
+    public static boolean canUseEveryShape(Player player) {
+        return player.isCreative() || CONFIG.creativeUnlockAll;
     }
 
-    public static boolean canUseAnyShape(Player player) {
-        boolean canUseShapes = player.isCreative() || Remorphed.CONFIG.killToUnlock <= 0;
-
-        for (ShapeType<? extends LivingEntity> shape : ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().keySet()) {
-            canUseShapes = canUseShapes ? canUseShapes : canUseShape(player, shape);
-        }
-
-        return canUseShapes;
+    public static boolean canUseShape(Player player, ShapeType<?> type) {
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.getKillToUnlock(type.getEntityType()));
     }
 
     public static int getKillToUnlock(EntityType<?> entityType) {

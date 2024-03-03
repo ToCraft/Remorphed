@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
     private final List<ShapeType<?>> unlocked = new ArrayList<>();
-    private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
+    private static final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -75,6 +75,10 @@ public class RemorphedScreen extends Screen {
                 return -1;
             else return 1;
         });
+
+        // filter unlocked
+        filterUnlocked();
+
         // add entity widgets
         populateEntityWidgets(unlocked);
 
@@ -90,7 +94,7 @@ public class RemorphedScreen extends Screen {
 
                 List<ShapeType<?>> filtered = unlocked
                         .stream()
-                        .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text) || EntityType.getKey(type.getEntityType()).toString().contains(text))
+                        .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
                         .collect(Collectors.toList());
 
                 populateEntityWidgets(filtered);
@@ -156,6 +160,20 @@ public class RemorphedScreen extends Screen {
         return false;
     }
 
+    public void filterUnlocked() {
+        if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlocked) {
+                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
+                }
+            }
+
+            unlocked.clear();
+            unlocked.addAll(newUnlocked);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void populateEntityWidgets(List<ShapeType<?>> rendered) {
         // add widget for each entity to be rendered
@@ -192,9 +210,9 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    private void populateRenderEntities() {
+    public static void populateRenderEntities() {
         if (renderEntities.isEmpty()) {
-            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level, Remorphed.displayVariantsInMenu);
+            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
                 if (entity instanceof Mob living) {
