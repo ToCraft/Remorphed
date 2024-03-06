@@ -78,7 +78,17 @@ public class RemorphedScreen extends Screen {
         });
 
         // filter unlocked
-        filterUnlocked();
+        if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlocked) {
+                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
+                }
+            }
+
+            unlocked.clear();
+            unlocked.addAll(newUnlocked);
+        }
 
         // add entity widgets
         populateEntityWidgets(unlocked);
@@ -144,9 +154,10 @@ public class RemorphedScreen extends Screen {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (!entityWidgets.isEmpty()) {
             float firstPos = entityWidgets.get(0).getY();
+            EntityWidget<?> lastWidget = entityWidgets.get(entityWidgets.size() - 1);
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
-            if (scrollY == 1 && firstPos >= 35) {
+            if ((scrollY == 1 && firstPos >= 35) || (scrollY == -1 && lastWidget.getY() <= getWindow().getGuiScaledHeight() - lastWidget.getHeight())) {
                 return false;
             }
 
@@ -158,20 +169,6 @@ public class RemorphedScreen extends Screen {
         }
 
         return false;
-    }
-
-    public void filterUnlocked() {
-        if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
-            List<ShapeType<?>> newUnlocked = new ArrayList<>();
-            for (ShapeType<?> shapeType : unlocked) {
-                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                    newUnlocked.add(shapeType);
-                }
-            }
-
-            unlocked.clear();
-            unlocked.addAll(newUnlocked);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -211,7 +208,7 @@ public class RemorphedScreen extends Screen {
     }
 
     public static void populateRenderEntities() {
-        if (renderEntities.isEmpty()) {
+        if (renderEntities.isEmpty() && Minecraft.getInstance().level != null) {
             List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
@@ -287,7 +284,7 @@ public class RemorphedScreen extends Screen {
                 this);
     }
 
-    public Window getWindow() {
+    private Window getWindow() {
         return Minecraft.getInstance().getWindow();
     }
 
