@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -60,8 +61,8 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
         addRenderableWidget(playerButton);
-        //if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
-        addRenderableWidget(specialShapeButton);
+        if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
+            addRenderableWidget(specialShapeButton);
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
@@ -119,10 +120,7 @@ public class RemorphedScreen extends Screen {
         playerButton.render(context, mouseX, mouseY, delta);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             specialShapeButton.render(context, mouseX, mouseY, delta);
-        renderEntityWidgets(context, mouseX, mouseY, delta);
-    }
 
-    public void renderEntityWidgets(GuiGraphics context, int mouseX, int mouseY, float delta) {
         double scaledFactor = this.minecraft.getWindow().getGuiScale();
         int top = 35;
 
@@ -133,7 +131,9 @@ public class RemorphedScreen extends Screen {
                 (int) ((double) width * scaledFactor),
                 (int) ((double) (this.height - top) * scaledFactor));
 
-        entityWidgets.forEach(widget -> widget.render(context, mouseX, mouseY, delta));
+        for (EntityWidget<?> widget : entityWidgets) {
+            widget.render(context, mouseX, mouseY, delta);
+        }
 
         RenderSystem.disableScissor();
 
@@ -150,11 +150,11 @@ public class RemorphedScreen extends Screen {
                 return false;
             }
 
-            ((ScreenAccessor) this).getSelectables().forEach(button -> {
+            for (NarratableEntry button : ((ScreenAccessor) this).getSelectables()) {
                 if (button instanceof EntityWidget<?> widget) {
                     widget.setPosition(widget.getX(), (int) (widget.getY() + scrollY * 10));
                 }
-            });
+            }
         }
 
         return false;
@@ -289,11 +289,6 @@ public class RemorphedScreen extends Screen {
 
     public Window getWindow() {
         return Minecraft.getInstance().getWindow();
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 
     @Override
