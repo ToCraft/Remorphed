@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
     private final List<ShapeType<?>> unlocked = new ArrayList<>();
-    private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
+    private static final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -61,8 +61,8 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
         addRenderableWidget(playerButton);
-        //if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
-        addRenderableWidget(specialShapeButton);
+        if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
+            addRenderableWidget(specialShapeButton);
 
         unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
@@ -76,6 +76,20 @@ public class RemorphedScreen extends Screen {
                 return -1;
             else return 1;
         });
+
+        // filter unlocked
+        if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlocked) {
+                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
+                }
+            }
+
+            unlocked.clear();
+            unlocked.addAll(newUnlocked);
+        }
+
         // add entity widgets
         populateEntityWidgets(unlocked);
 
@@ -91,7 +105,7 @@ public class RemorphedScreen extends Screen {
 
                 List<ShapeType<?>> filtered = unlocked
                         .stream()
-                        .filter(type -> text.isEmpty() || type.getEntityType().getDescriptionId().contains(text) || EntityType.getKey(type.getEntityType()).toString().contains(text))
+                        .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
                         .collect(Collectors.toList());
 
                 populateEntityWidgets(filtered);
@@ -116,7 +130,24 @@ public class RemorphedScreen extends Screen {
         playerButton.render(context, mouseX, mouseY, delta);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             specialShapeButton.render(context, mouseX, mouseY, delta);
-        renderEntityWidgets(context, mouseX, mouseY, delta);
+
+        double scaledFactor = this.minecraft.getWindow().getGuiScale();
+        int top = 35;
+
+        context.pushPose();
+        RenderSystem.enableScissor(
+                (int) ((double) 0 * scaledFactor),
+                (int) ((double) 0 * scaledFactor),
+                (int) ((double) width * scaledFactor),
+                (int) ((double) (this.height - top) * scaledFactor));
+
+        for (EntityWidget<?> widget : entityWidgets) {
+            widget.render(context, mouseX, mouseY, delta);
+        }
+
+        RenderSystem.disableScissor();
+
+        context.popPose();
 
         // tooltips
         for (NarratableEntry selectable : ((ScreenAccessor) this).getSelectables()) {
@@ -129,39 +160,22 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    public void renderEntityWidgets(PoseStack context, int mouseX, int mouseY, float delta) {
-        double scaledFactor = this.minecraft.getWindow().getGuiScale();
-        int top = 35;
-
-        context.pushPose();
-        RenderSystem.enableScissor(
-                (int) ((double) 0 * scaledFactor),
-                (int) ((double) 0 * scaledFactor),
-                (int) ((double) width * scaledFactor),
-                (int) ((double) (this.height - top) * scaledFactor));
-
-        entityWidgets.forEach(widget -> widget.render(context, mouseX, mouseY, delta));
-
-        RenderSystem.disableScissor();
-
-        context.popPose();
-    }
-
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         if (!entityWidgets.isEmpty()) {
             float firstPos = entityWidgets.get(0).y;
+            EntityWidget<?> lastWidget = entityWidgets.get(entityWidgets.size() - 1);
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
-            if (scrollY == 1 && firstPos >= 35) {
+            if ((scrollY == 1 && firstPos >= 35) || (scrollY == -1 && lastWidget.y <= getWindow().getGuiScaledHeight() - lastWidget.getHeight())) {
                 return false;
             }
 
-            ((ScreenAccessor) this).getSelectables().forEach(button -> {
+            for (NarratableEntry button : ((ScreenAccessor) this).getSelectables()) {
                 if (button instanceof EntityWidget<?> widget) {
                     widget.y += (int) (scrollY * 10);
                 }
-            });
+            }
         }
 
         return false;
@@ -203,9 +217,9 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    private void populateRenderEntities() {
-        if (renderEntities.isEmpty()) {
-            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level, Remorphed.displayVariantsInMenu);
+    public static void populateRenderEntities() {
+        if (renderEntities.isEmpty() && Minecraft.getInstance().level != null) {
+            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
             for (ShapeType<?> type : types) {
                 Entity entity = type.create(Minecraft.getInstance().level);
                 if (entity instanceof Mob living) {
@@ -268,13 +282,8 @@ public class RemorphedScreen extends Screen {
                 this);
     }
 
-    public Window getWindow() {
+    private Window getWindow() {
         return Minecraft.getInstance().getWindow();
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 
     @Override
