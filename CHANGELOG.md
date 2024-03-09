@@ -1,4 +1,5 @@
-# 3.0
+remorphed 3.0
+================
 
 First of all, this update is required to make the mod work with Woodwalkers v3+.
 Furthermore, this implements a feature which was originally introduced by identity- entity favourites! I hope you like

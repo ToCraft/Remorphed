@@ -8,9 +8,9 @@ apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/main/main.gr
 
 ext {
     mod_meta = [
-            minecraft_version   : minecraft_version, version: version,
-            architectury_version: architectury_version,
-            craftedcore_version : craftedcore_version,
-            woodwalkers_version : woodwalkers_version
-        ]
-    }
+        minecraft_version   : minecraft_version, version: version,
+        architectury_version: architectury_version,
+        craftedcore_version : craftedcore_version,
+        woodwalkers_version : woodwalkers_version
+    ]
+}
