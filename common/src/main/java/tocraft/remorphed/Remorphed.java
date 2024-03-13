@@ -69,7 +69,7 @@ public class Remorphed {
     }
 
     public static boolean canUseEveryShape(Player player) {
-        return player.isCreative() || CONFIG.creativeUnlockAll;
+        return player.isCreative() && CONFIG.creativeUnlockAll;
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
