@@ -10,12 +10,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
     private final List<ShapeType<?>> unlocked = new ArrayList<>();
-    private static final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
+    private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
     private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -56,15 +56,13 @@ public class RemorphedScreen extends Screen {
             return;
         }
 
-        populateRenderEntities();
+        populateUnlockedRenderEntities(minecraft.player);
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
         addRenderableWidget(playerButton);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             addRenderableWidget(specialShapeButton);
-
-        unlocked.addAll(collectUnlockedEntities(minecraft.player));
 
         // handle favorites
         unlocked.sort((first, second) -> {
@@ -186,52 +184,43 @@ public class RemorphedScreen extends Screen {
 
                 if (listIndex < rendered.size()) {
                     ShapeType<?> type = rendered.get(listIndex);
+                    Mob entity = renderEntities.get(type);
+                    if (entity != null) {
+                        EntityWidget<?> entityWidget = new EntityWidget<>(
+                                (getWindow().getGuiScaledWidth() - 27) / 7f * xIndex + x,
+                                getWindow().getGuiScaledHeight() / 5f * yIndex + y,
+                                (getWindow().getGuiScaledWidth() - 27) / 7f,
+                                getWindow().getGuiScaledHeight() / 5f,
+                                (ShapeType<Mob>) type,
+                                entity,
+                                this,
+                                ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(type),
+                                type.equals(currentType)
+                        );
 
-                    // TODO: only render selected type, this will show all eg. sheep
-                    EntityWidget<?> entityWidget = new EntityWidget<>(
-                            (getWindow().getGuiScaledWidth() - 27) / 7f * xIndex + x,
-                            getWindow().getGuiScaledHeight() / 5f * yIndex + y,
-                            (getWindow().getGuiScaledWidth() - 27) / 7f,
-                            getWindow().getGuiScaledHeight() / 5f,
-                            (ShapeType<Mob>) type,
-                            renderEntities.get(type),
-                            this,
-                            ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(type),
-                            type.equals(currentType)
-                    );
-
-                    addRenderableWidget(entityWidget);
-                    entityWidgets.add(entityWidget);
+                        addRenderableWidget(entityWidget);
+                        entityWidgets.add(entityWidget);
+                    } else {
+                        Remorphed.LOGGER.error("invalid shape type: " + type.getEntityType().getDescriptionId());
+                    }
                 }
             }
         }
     }
 
-    public static void populateRenderEntities() {
+    public void populateUnlockedRenderEntities(Player player) {
         if (renderEntities.isEmpty() && Minecraft.getInstance().level != null) {
-            List<ShapeType<?>> types = ShapeType.getAllTypes(Minecraft.getInstance().level);
-            for (ShapeType<?> type : types) {
+            List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
+            for (ShapeType<?> type : validUnlocked) {
                 Entity entity = type.create(Minecraft.getInstance().level);
                 if (entity instanceof Mob living) {
+                    unlocked.add(type);
                     renderEntities.put(type, living);
                 }
             }
 
-            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", types.size()));
+            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", unlocked.size()));
         }
-    }
-
-    private List<ShapeType<?>> collectUnlockedEntities(LocalPlayer player) {
-        List<ShapeType<?>> unlocked = new ArrayList<>();
-
-        // collect current unlocked identities (or allow all for creative users)
-        renderEntities.forEach((type, instance) -> {
-            if (Remorphed.canUseShape(player, type)) {
-                unlocked.add(type);
-            }
-        });
-
-        return unlocked;
     }
 
     private SearchWidget createSearchBar() {
