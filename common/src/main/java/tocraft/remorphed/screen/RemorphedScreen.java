@@ -44,6 +44,7 @@ public class RemorphedScreen extends Screen {
     private final PlayerWidget playerButton = createPlayerButton();
     private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
+    private Thread populateUnlocked = null;
 
     public RemorphedScreen() {
         super(Component.literal(""));
@@ -56,7 +57,6 @@ public class RemorphedScreen extends Screen {
             return;
         }
 
-        populateUnlockedRenderEntities(minecraft.player);
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
@@ -64,32 +64,34 @@ public class RemorphedScreen extends Screen {
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             addRenderableWidget(specialShapeButton);
 
-        // handle favorites
-        unlocked.sort((first, second) -> {
-            boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-            boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
-            if (firstIsFav == secondIsFav)
-                return 0;
-            if (firstIsFav)
-                return -1;
-            else return 1;
-        });
+        populateUnlocked = new Thread(() -> {
+            populateUnlockedRenderEntities(minecraft.player);
 
-        // filter unlocked
-        if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
-            List<ShapeType<?>> newUnlocked = new ArrayList<>();
-            for (ShapeType<?> shapeType : unlocked) {
-                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                    newUnlocked.add(shapeType);
+            // handle favorites
+            unlocked.sort((first, second) -> {
+                boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+                boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                if (firstIsFav == secondIsFav)
+                    return 0;
+                if (firstIsFav)
+                    return -1;
+                else return 1;
+            });
+
+            // filter unlocked
+            if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
+                List<ShapeType<?>> newUnlocked = new ArrayList<>();
+                for (ShapeType<?> shapeType : unlocked) {
+                    if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                        newUnlocked.add(shapeType);
+                    }
                 }
+
+                unlocked.clear();
+                unlocked.addAll(newUnlocked);
             }
-
-            unlocked.clear();
-            unlocked.addAll(newUnlocked);
-        }
-
-        // add entity widgets
-        populateEntityWidgets(unlocked);
+        }, "cache entities");
+        populateUnlocked.start();
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -114,12 +116,13 @@ public class RemorphedScreen extends Screen {
     }
 
     @Override
-    public void clearWidgets() {
-
-    }
-
-    @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        if (populateUnlocked != null && entityWidgets.isEmpty() && !populateUnlocked.isAlive()) {
+            populateUnlocked = null;
+            // add entity widgets
+            populateEntityWidgets(unlocked);
+        }
+
         renderTransparentBackground(context);
 
         searchBar.render(context, mouseX, mouseY, delta);
@@ -140,7 +143,9 @@ public class RemorphedScreen extends Screen {
                 (int) ((double) (this.height - top) * scaledFactor));
 
         for (EntityWidget<?> widget : entityWidgets) {
-            widget.render(context, mouseX, mouseY, delta);
+            if (widget.getY() + widget.getHeight() > top && widget.getY() < getWindow().getGuiScaledHeight()) {
+                widget.render(context, mouseX, mouseY, delta);
+            }
         }
 
         RenderSystem.disableScissor();
@@ -155,7 +160,7 @@ public class RemorphedScreen extends Screen {
             EntityWidget<?> lastWidget = entityWidgets.get(entityWidgets.size() - 1);
 
             // Top section should always have mobs, prevent scrolling the entire list down the screen
-            if ((scrollY == 1 && firstPos >= 35) || (scrollY == -1 && lastWidget.getY() <= getWindow().getGuiScaledHeight() - lastWidget.getHeight())) {
+            if ((scrollY >= 0 && firstPos >= 35) || (scrollY <= 0 && lastWidget.getY() <= getWindow().getGuiScaledHeight() - lastWidget.getHeight())) {
                 return false;
             }
 
@@ -208,7 +213,7 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    public void populateUnlockedRenderEntities(Player player) {
+    public synchronized void populateUnlockedRenderEntities(Player player) {
         if (renderEntities.isEmpty() && Minecraft.getInstance().level != null) {
             List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
             for (ShapeType<?> type : validUnlocked) {
