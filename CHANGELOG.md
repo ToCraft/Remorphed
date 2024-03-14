@@ -1,3 +1,10 @@
+remorphed 3.3
+================
+
+- menu loads entities in the background
+- menu only renders visible entities (fixes low FPS in the menu)
+- fix every entity available in survival
+
 remorphed 3.0
 ================
 
