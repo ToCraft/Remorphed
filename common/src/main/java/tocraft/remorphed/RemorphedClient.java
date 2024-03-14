@@ -1,7 +1,6 @@
 package tocraft.remorphed;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.fabricmc.api.EnvType;
@@ -9,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 import tocraft.remorphed.network.ClientNetworking;
-import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.remorphed.tick.KeyPressHandler;
 
 @Environment(EnvType.CLIENT)
@@ -23,7 +21,5 @@ public class RemorphedClient {
         // Register event handlers
         ClientTickEvent.CLIENT_PRE.register(new KeyPressHandler());
         ClientNetworking.registerPacketHandlers();
-
-        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> new Thread(RemorphedScreen::populateRenderEntities).start());
     }
 }
