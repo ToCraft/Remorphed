@@ -73,7 +73,8 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             try {
                 // ARGH
                 InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + this.getWidth() / 2, (int) (this.getY() + this.getHeight() * .75f), size, -10, -10, entity);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Remorphed.LOGGER.error("Error while rendering " + type.getEntityType().getDescriptionId(), e);
                 crashed = true;
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
                 immediate.endBatch();
@@ -84,7 +85,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             }
 
             // Render selected outline
-            if (active) {
+            if (isCurrent) {
                 RenderSystem.setShaderTexture(0, Remorphed.id("textures/gui/selected.png"));
                 GuiComponent.blit(context, getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
