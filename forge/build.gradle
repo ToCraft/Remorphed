@@ -4,6 +4,12 @@ plugins {
 
 apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/main/forge.gradle"
 
+loom {
+    forge {
+        mixinConfigs = ["remorphed.mixins.json"]
+    }
+}
+
 dependencies {
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
     modApi "dev.tocraft:craftedcore-forge:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"

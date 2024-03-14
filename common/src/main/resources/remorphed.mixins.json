@@ -10,6 +10,7 @@
     "ServerPlayerEntityMixin"
   ],
   "client": [
+    "ClientPlayerDataCacheMixin",
     "accessor.ScreenAccessor"
   ],
   "injectors": {
