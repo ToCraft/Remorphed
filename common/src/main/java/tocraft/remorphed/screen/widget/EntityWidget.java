@@ -14,6 +14,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
@@ -71,7 +73,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
                 // ARGH
-                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + (this.getWidth() / 4), this.getY(), this.getX() + (this.getWidth() / 4 * 3), this.getY() + this.getHeight(), (int) (size * .75f), 0, -10, -10, entity);
+                InventoryScreen.renderEntityInInventory(context, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
             } catch (Exception e) {
                 Remorphed.LOGGER.error("Error while rendering " + type.getEntityType().getDescriptionId(), e);
                 crashed = true;
