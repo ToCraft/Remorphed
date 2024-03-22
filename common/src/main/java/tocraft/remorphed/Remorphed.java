@@ -29,8 +29,6 @@ import tocraft.walkers.Walkers;
 import tocraft.walkers.api.event.ShapeEvents;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +45,7 @@ public class Remorphed {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
 
-        VersionChecker.registerDefaultGitHubChecker(MODID, "ToCraft","Remorphed", Component.literal("Remorphed"));
+        VersionChecker.registerDefaultGitHubChecker(MODID, "ToCraft", "Remorphed", Component.literal("Remorphed"));
 
         if (Platform.getEnvironment() == Env.CLIENT) new RemorphedClient().initialize();
 
