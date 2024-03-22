@@ -27,7 +27,6 @@ import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,15 +69,21 @@ public class RemorphedScreen extends Screen {
         populateUnlocked = new Thread(() -> {
             populateUnlockedRenderEntities(minecraft.player);
 
+            ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+
             // handle favorites
             unlocked.sort((first, second) -> {
-                boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-                boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
-                if (firstIsFav == secondIsFav)
-                    return 0;
-                if (firstIsFav)
+                if (first.equals(currentShape)) {
                     return -1;
-                else return 1;
+                } else {
+                    boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+                    boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                    if (firstIsFav == secondIsFav)
+                        return 0;
+                    if (firstIsFav)
+                        return -1;
+                    else return 1;
+                }
             });
 
             // filter unlocked
