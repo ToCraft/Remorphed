@@ -7,5 +7,5 @@ apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/main/neoforg
 dependencies {
     modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_version}"
     modApi "dev.tocraft:craftedcore-neoforge:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
-    modApi "dev.tocraft:walkers-neoforge:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
+    modApi "dev.tocraft:walkers-neoforge:${rootProject.minecraft_version}-${rootProject.woodwalkers_version}"
 }

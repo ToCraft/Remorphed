@@ -41,17 +41,13 @@ public class Remorphed {
     public static final Logger LOGGER = LoggerFactory.getLogger(Remorphed.class);
     public static final String MODID = "remorphed";
     public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
-    private static final String MAVEN_URL = "https://maven.tocraft.dev/public/dev/tocraft/remorphed/maven-metadata.xml";
     public static boolean displayVariantsInMenu = true;
 
     public void initialize() {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
 
-        try {
-            VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), Component.literal("Remorphed"));
-        } catch (MalformedURLException ignored) {
-        }
+        VersionChecker.registerDefaultGitHubChecker(MODID, "ToCraft","Remorphed", Component.literal("Remorphed"));
 
         if (Platform.getEnvironment() == Env.CLIENT) new RemorphedClient().initialize();
 
