@@ -75,24 +75,26 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!crashed) {
-            // Render Skill Icons first
-            int blitOffset = 0;
-            int rowIndex = 0;
-            List<ResourceLocation> renderedSkills = new ArrayList<>();
-            for (ShapeSkill<T> skill : SkillRegistry.getAll(entity)) {
-                if (!renderedSkills.contains(skill.getId()) && skill.getIcon() != null) {
-                    context.blit(getX() + rowIndex, getY() + blitOffset, 0, 18, 18, skill.getIcon());
-                    // prevent infinite skills to be rendered
-                    if (blitOffset >= getHeight() - 18) {
-                        rowIndex += 18;
-                        blitOffset = 0;
-                    } else {
-                        blitOffset += 18;
+            if (Remorphed.displaySkillsInMenu) {
+                // Render Skill Icons first
+                int blitOffset = 0;
+                int rowIndex = 0;
+                List<ResourceLocation> renderedSkills = new ArrayList<>();
+                for (ShapeSkill<T> skill : SkillRegistry.getAll(entity)) {
+                    if (!renderedSkills.contains(skill.getId()) && skill.getIcon() != null) {
+                        context.blit(getX() + rowIndex, getY() + blitOffset, 0, 18, 18, skill.getIcon());
+                        // prevent infinite skills to be rendered
+                        if (blitOffset >= getHeight() - 18) {
+                            rowIndex += 18;
+                            blitOffset = 0;
+                        } else {
+                            blitOffset += 18;
+                        }
+                        if (rowIndex >= getWidth() - 18) {
+                            break;
+                        }
+                        renderedSkills.add(skill.getId());
                     }
-                    if (rowIndex >= getWidth() - 18) {
-                        break;
-                    }
-                    renderedSkills.add(skill.getId());
                 }
             }
 

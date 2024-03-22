@@ -40,6 +40,7 @@ public class Remorphed {
     public static final String MODID = "remorphed";
     public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
     public static boolean displayVariantsInMenu = true;
+    public static boolean displaySkillsInMenu = true;
 
     public void initialize() {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
