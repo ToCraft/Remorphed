@@ -143,7 +143,9 @@ public class RemorphedScreen extends Screen {
                 (int) ((double) (this.height - top) * scaledFactor));
 
         for (EntityWidget<?> widget : entityWidgets) {
-            widget.render(context, mouseX, mouseY, delta);
+            if (widget.getY() + widget.getHeight() > top && widget.getY() < getWindow().getGuiScaledHeight()) {
+                widget.render(context, mouseX, mouseY, delta);
+            }
         }
 
         RenderSystem.disableScissor();
