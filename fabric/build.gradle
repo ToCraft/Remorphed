@@ -7,5 +7,5 @@ apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/main/fabric.
 dependencies {
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
     modApi "dev.tocraft:craftedcore-fabric:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
-    modApi "dev.tocraft:walkers-fabric:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
+    modApi "dev.tocraft:walkers-fabric:${rootProject.minecraft_version}-${rootProject.woodwalkers_version}"
 }

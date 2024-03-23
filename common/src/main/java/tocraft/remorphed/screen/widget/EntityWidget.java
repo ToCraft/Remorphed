@@ -14,12 +14,19 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import org.joml.Quaternionf;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
+import tocraft.walkers.skills.ShapeSkill;
+import tocraft.walkers.skills.SkillRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class EntityWidget<T extends LivingEntity> extends AbstractButton {
@@ -41,7 +48,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         this.parent = parent;
         this.isFavorite = isFavorite;
         this.isCurrent = current;
-        setTooltip(Tooltip.create(type.createTooltipText(entity)));
+        setTooltip(Tooltip.create(ShapeType.createTooltipText(entity)));
     }
 
     @Override
@@ -68,13 +75,37 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     @Override
     public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         if (!crashed) {
+            if (Remorphed.displaySkillsInMenu) {
+                // Render Skill Icons first
+                int blitOffset = 0;
+                int rowIndex = 0;
+                List<ResourceLocation> renderedSkills = new ArrayList<>();
+                for (ShapeSkill<T> skill : SkillRegistry.getAll(entity)) {
+                    if (!renderedSkills.contains(skill.getId()) && skill.getIcon() != null) {
+                        RenderSystem.setShaderTexture(0, skill.getIcon().atlasLocation());
+                        GuiComponent.blit(context, getX() + rowIndex, getY() + blitOffset, 0, 18, 18, skill.getIcon());
+                        // prevent infinite skills to be rendered
+                        if (blitOffset >= getHeight() - 18) {
+                            rowIndex += 18;
+                            blitOffset = 0;
+                        } else {
+                            blitOffset += 18;
+                        }
+                        if (rowIndex >= getWidth() - 18) {
+                            break;
+                        }
+                        renderedSkills.add(skill.getId());
+                    }
+                }
+            }
+
             // Some entities (namely Aether mobs) crash when rendered in a GUI.
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
                 // ARGH
-                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.getX() + this.getWidth() / 2, (int) (this.getY() + this.getHeight() * .75f), size, -10, -10, entity);
+                InventoryScreen.renderEntityInInventory(context, getX() + this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Quaternionf().rotationXYZ((float) Math.PI, 0, 0), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), entity);
             } catch (Exception e) {
-                Remorphed.LOGGER.error("Error while rendering " + type.getEntityType().getDescriptionId(), e);
+                Remorphed.LOGGER.error("Error while rendering " + ShapeType.createTooltipText(entity).getString(), e);
                 crashed = true;
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
                 immediate.endBatch();
