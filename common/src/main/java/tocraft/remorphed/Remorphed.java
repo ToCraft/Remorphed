@@ -30,8 +30,6 @@ import tocraft.walkers.Walkers;
 import tocraft.walkers.api.event.ShapeEvents;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,17 +40,14 @@ public class Remorphed {
     public static final Logger LOGGER = LoggerFactory.getLogger(Remorphed.class);
     public static final String MODID = "remorphed";
     public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
-    private static final String MAVEN_URL = "https://maven.tocraft.dev/public/dev/tocraft/remorphed/maven-metadata.xml";
     public static boolean displayVariantsInMenu = true;
+    public static boolean displaySkillsInMenu = true;
 
     public void initialize() {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
 
-        try {
-            VersionChecker.registerMavenChecker(MODID, new URL(MAVEN_URL), new TextComponent("Remorphed"));
-        } catch (MalformedURLException ignored) {
-        }
+        VersionChecker.registerDefaultGitHubChecker(MODID, "ToCraft", "Remorphed", new TextComponent("Remorphed"));
 
         if (Platform.getEnvironment() == Env.CLIENT) new RemorphedClient().initialize();
 

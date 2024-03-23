@@ -13,5 +13,5 @@ loom {
 dependencies {
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
     modApi "dev.tocraft:craftedcore-forge:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
-    modApi "dev.tocraft:walkers-forge:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
+    modApi "dev.tocraft:walkers-forge:${rootProject.minecraft_version}-${rootProject.woodwalkers_version}"
 }

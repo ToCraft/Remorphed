@@ -1,3 +1,10 @@
+remorphed 3.5
+================
+- change entity orientation in menu
+- fix sync error
+- fix render scissor (no more entities in the menu)
+- some skills render the icon (toggleable)
+
 remorphed 3.4
 ================
 - fix crash on startup for 1.20.2+
