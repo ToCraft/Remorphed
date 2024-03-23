@@ -1,13 +1,18 @@
+remorphed 3.5
+================
+- change entity orientation in menu
+- fix sync error
+- fix render scissor (no more entities in the menu)
+- some skills render the icon (toggleable)
+
 remorphed 3.4
 ================
-
 - fix crash on startup for 1.20.2+
 - player data will be properly restored on death now (required re-login before)
 - fix only craftedcore 3.0 possible on Fabric
 
 remorphed 3.3
 ================
-
 - menu loads entities in the background
 - menu only renders visible entities (fixes low FPS in the menu)
 - fix every entity available in survival
