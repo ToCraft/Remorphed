@@ -50,7 +50,10 @@ public class RemorphedScreen extends Screen {
     public RemorphedScreen() {
         super(Component.literal(""));
         super.init(Minecraft.getInstance(), Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+    }
 
+    @Override
+    public void init() {
         // don't initialize if the player is null
         if (minecraft == null) return;
         if (minecraft.player == null) {
@@ -273,8 +276,9 @@ public class RemorphedScreen extends Screen {
         Button.Builder skillButton = Button.builder(Component.translatable("remorphed.show_skills"), (widget) -> Remorphed.displaySkillsInMenu = !Remorphed.displaySkillsInMenu);
         int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
 
-        skillButton.pos((int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 65 + xOffset), 5);
-        skillButton.size(50, 20);
+        int xPos = (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 65 + xOffset);
+        skillButton.pos(xPos, 5);
+        skillButton.size(Math.min(50, getWindow().getGuiScaledWidth() - xPos), 20);
         skillButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".skills")));
 
         return skillButton.build();
