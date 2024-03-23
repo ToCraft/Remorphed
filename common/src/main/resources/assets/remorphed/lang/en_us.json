@@ -2,6 +2,7 @@
   "key.categories.remorphed": "Remorphed",
   "key.remorphed_menu": "Open menu to choose second shape",
   "remorphed.display_variants": "Display Variants",
+  "remorphed.show_skills": "Skills",
   "remorphed.help": "Open Remorphed help menu",
   "remorphed.help.welcome": "Welcome to Remorphed, based on Identity by Draylar, written by To_Craft.",
   "remorphed.help.credits": "Thank you to Supporters of this project!",
@@ -22,8 +23,9 @@
   "remorphed.removeShape": "Removed the %s-shape from %s.",
   "remorphed.addShape": "%s unlocked %s.",
   "remorphed.clearShapes": "Cleared all unlocked Shapes from %s.",
-  "remorphed.variants": "Show mob variants.",
-  "remorphed.player_icon": "Transform back into a player.",
+  "remorphed.variants": "Show mob variants",
+  "remorphed.skills": "Display Skills",
+  "remorphed.player_icon": "Transform back into a player",
   "remorphed.special_shape_available": "Congratulations on your special shape!",
-  "remorphed.special_shape_unavailable": "Please unlock a wolf first."
+  "remorphed.special_shape_unavailable": "Unlock a wolf first"
 }
