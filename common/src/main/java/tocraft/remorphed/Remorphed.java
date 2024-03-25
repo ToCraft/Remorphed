@@ -21,7 +21,6 @@ import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
-import tocraft.remorphed.events.ShapeSwapCallback;
 import tocraft.remorphed.events.UnlockShapeCallback;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
@@ -53,7 +52,6 @@ public class Remorphed {
         NetworkHandler.registerPacketReceiver();
 
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
-        ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
         CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
 
         // allow unlocking friendly mobs via the "normal" method
