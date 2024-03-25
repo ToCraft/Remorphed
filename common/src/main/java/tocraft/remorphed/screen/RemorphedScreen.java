@@ -78,6 +78,8 @@ public class RemorphedScreen extends Screen {
             unlocked.sort((first, second) -> {
                 if (first.equals(currentShape)) {
                     return -1;
+                } else if (second.equals(currentShape)) {
+                    return 1;
                 } else {
                     boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
                     boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
@@ -93,7 +95,7 @@ public class RemorphedScreen extends Screen {
             if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
                 List<ShapeType<?>> newUnlocked = new ArrayList<>();
                 for (ShapeType<?> shapeType : unlocked) {
-                    if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
                         newUnlocked.add(shapeType);
                     }
                 }
