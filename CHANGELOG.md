@@ -1,3 +1,9 @@
+remorphed 3.6
+================
+- selected entity is rendered first
+- add compatibility for walkers 4.2 (and variants menu)
+- skills can renderer multiple times per entity if required (e.g. the MobEffectSkill can render multiple icons now)
+
 remorphed 3.5
 ================
 - change entity orientation in menu
