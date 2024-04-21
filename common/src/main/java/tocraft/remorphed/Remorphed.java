@@ -21,8 +21,7 @@ import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
-import tocraft.remorphed.events.ShapeSwapCallback;
-import tocraft.remorphed.events.UnlockShapeCallback;
+import tocraft.remorphed.events.ShapeEventsCallback;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
@@ -52,8 +51,8 @@ public class Remorphed {
 
         NetworkHandler.registerPacketReceiver();
 
-        ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
-        ShapeEvents.SWAP_SHAPE.register(new ShapeSwapCallback());
+        ShapeEvents.UNLOCK_SHAPE.register(((player, type) -> new ShapeEventsCallback().event(player, type)));
+        ShapeEvents.SWAP_SHAPE.register(((player, shape) -> new ShapeEventsCallback().event(player, ShapeType.from(shape))));
         CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
 
         // allow unlocking friendly mobs via the "normal" method
@@ -75,6 +74,12 @@ public class Remorphed {
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
         if (canUseEveryShape(player)) {
             return ShapeType.getAllTypes(player.level);
+        } else if (Walkers.CONFIG.unlockEveryVariant) {
+            List<ShapeType<?>> unlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level)) {
+                if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) unlocked.add(shapeType);
+            }
+            return unlocked;
         } else {
             return new ArrayList<>(((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().keySet().stream().filter(type -> canUseShape(player, type)).toList());
         }
