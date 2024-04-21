@@ -73,6 +73,12 @@ public class Remorphed {
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
         if (canUseEveryShape(player)) {
             return ShapeType.getAllTypes(player.level());
+        } else if (Walkers.CONFIG.unlockEveryVariant) {
+            List<ShapeType<?>> unlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
+                if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) unlocked.add(shapeType);
+            }
+            return unlocked;
         } else {
             return new ArrayList<>(((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().keySet().stream().filter(type -> canUseShape(player, type)).toList());
         }
