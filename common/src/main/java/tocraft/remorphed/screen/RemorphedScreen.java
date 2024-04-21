@@ -75,25 +75,29 @@ public class RemorphedScreen extends Screen {
             ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
             // handle favorites
-            unlocked.sort((first, second) -> {
-                if (first.equals(currentShape)) {
-                    return -1;
-                } else {
-                    boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-                    boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
-                    if (firstIsFav == secondIsFav)
-                        return 0;
-                    if (firstIsFav)
+            synchronized (unlocked) {
+                unlocked.sort((first, second) -> {
+                    if (first.equals(currentShape)) {
                         return -1;
-                    else return 1;
-                }
-            });
+                    } else if (second.equals(currentShape)) {
+                        return 1;
+                    } else {
+                        boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+                        boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                        if (firstIsFav == secondIsFav)
+                            return 0;
+                        if (firstIsFav)
+                            return -1;
+                        else return 1;
+                    }
+                });
+            }
 
             // filter unlocked
             if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
                 List<ShapeType<?>> newUnlocked = new ArrayList<>();
                 for (ShapeType<?> shapeType : unlocked) {
-                    if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
                         newUnlocked.add(shapeType);
                     }
                 }
