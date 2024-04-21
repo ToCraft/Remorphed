@@ -79,7 +79,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 int rowIndex = 0;
                 List<ResourceLocation> renderedSkills = new ArrayList<>();
                 for (ShapeSkill<T> skill : SkillRegistry.getAll(entity)) {
-                    if (!renderedSkills.contains(skill.getId()) && skill.getIcon() != null) {
+                    if (skill != null && skill.getIcon() != null && (!renderedSkills.contains(skill.getId()) || skill.iconMightDiffer())) {
                         RenderSystem.setShaderTexture(0, skill.getIcon().atlas().location());
                         GuiComponent.blit(context, x + rowIndex, y + blitOffset, 0, 18, 18, skill.getIcon());
                         // prevent infinite skills to be rendered

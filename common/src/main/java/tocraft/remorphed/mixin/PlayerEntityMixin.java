@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.walkers.Walkers;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.HashMap;
@@ -133,7 +134,15 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     @Override
     public int remorphed$getKills(ShapeType<? extends LivingEntity> type) {
-        return remorphed$unlockedShapes.getOrDefault(type, 0);
+        if (Walkers.CONFIG.unlockEveryVariant) {
+            int killAmount = 0;
+            for (Integer i : remorphed$unlockedShapes.entrySet().stream().filter(entry -> entry.getKey().getEntityType().equals(type.getEntityType())).map(Map.Entry::getValue).toList()) {
+                killAmount += i;
+            }
+            return killAmount;
+        } else {
+            return remorphed$unlockedShapes.getOrDefault(type, 0);
+        }
     }
 
     @Unique

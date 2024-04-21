@@ -23,7 +23,6 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
-import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -33,15 +32,12 @@ public class RemorphedCommand implements CommandRegistrationEvent {
         Component name = new TranslatableComponent(type.getEntityType().getDescriptionId());
 
         if (((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().containsKey(type)) {
-            if (Walkers.CONFIG.logCommands) {
-                source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".hasShape_success",
-                        player.getDisplayName(), name), true);
-            }
+            source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".hasShape_success",
+                    player.getDisplayName(), name), true);
 
             return 1;
-        } else if (Walkers.CONFIG.logCommands) {
+        } else
             source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".hasShape_fail", player.getDisplayName(), name), true);
-        }
 
         return 0;
     }
@@ -52,9 +48,7 @@ public class RemorphedCommand implements CommandRegistrationEvent {
 
         ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().remove(type);
 
-        if (Walkers.CONFIG.logCommands) {
-            source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".removeShape", name, player.getDisplayName()), true);
-        }
+        source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".removeShape", name, player.getDisplayName()), true);
     }
 
     private static void addShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
@@ -63,18 +57,14 @@ public class RemorphedCommand implements CommandRegistrationEvent {
 
         ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.getKillToUnlock(type.getEntityType()));
 
-        if (Walkers.CONFIG.logCommands) {
-            source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".addShape", player.getDisplayName(), name), true);
-        }
+        source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".addShape", player.getDisplayName(), name), true);
     }
 
     private static void clearShapes(CommandSourceStack source, ServerPlayer player) {
         ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().clear();
 
-        if (Walkers.CONFIG.logCommands) {
-            source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".clearShapes", player.getDisplayName()), true);
-            PlayerShapeChanger.change2ndShape(player, null);
-        }
+        source.sendSuccess(new TranslatableComponent(Remorphed.MODID + ".clearShapes", player.getDisplayName()), true);
+        PlayerShapeChanger.change2ndShape(player, null);
     }
 
     private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {

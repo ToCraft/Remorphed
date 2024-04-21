@@ -22,7 +22,11 @@ import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
-import tocraft.walkers.network.impl.SpecialSwapPackets;
+import tocraft.walkers.api.variant.TypeProvider;
+import tocraft.walkers.api.variant.TypeProviderRegistry;
+import tocraft.walkers.network.impl.SwapVariantPackets;
+
+import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public class SpecialShapeWidget extends AbstractButton {
@@ -39,7 +43,7 @@ public class SpecialShapeWidget extends AbstractButton {
         if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf)
             wolf.saveWithoutId(nbt);
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
-        this.isAvailable = Walkers.CONFIG.specialShapeIsThirdShape || Remorphed.canUseEveryShape(Minecraft.getInstance().player) || ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().map(ShapeType::getEntityType).toList().contains(EntityType.WOLF);
+        this.isAvailable = Remorphed.canUseEveryShape(Minecraft.getInstance().player) || ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().anyMatch(type -> type.getEntityType().equals(EntityType.WOLF));
     }
 
     @Override
@@ -59,9 +63,12 @@ public class SpecialShapeWidget extends AbstractButton {
     @Override
     public void onPress() {
         if (!isCurrent && isAvailable && Walkers.hasSpecialShape(UUIDTypeAdapter.fromString(Minecraft.getInstance().getUser().getUuid()))) {
-            if (!Walkers.CONFIG.specialShapeIsThirdShape)
-                NetworkHandler.sendSwap2ndShapeRequest(ShapeType.from(EntityType.WOLF, -1));
-            SpecialSwapPackets.sendSpecialSwapRequest();
+            // get variant range
+            TypeProvider<Wolf> typeProvider = TypeProviderRegistry.getProvider(EntityType.WOLF);
+            int range = typeProvider != null ? typeProvider.getRange() : -1;
+            // swap to variant
+            NetworkHandler.sendSwap2ndShapeRequest(Objects.requireNonNull(ShapeType.from(EntityType.WOLF, -1)));
+            SwapVariantPackets.sendSwapRequest(range + 1);
             parent.onClose();
         }
     }
