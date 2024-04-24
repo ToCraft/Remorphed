@@ -27,17 +27,15 @@ import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
-    private final List<ShapeType<?>> unlocked = new ArrayList<>();
+    private final List<ShapeType<?>> unlocked = new CopyOnWriteArrayList<>();
     private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
-    private final List<EntityWidget<?>> entityWidgets = new ArrayList<>();
+    private final List<EntityWidget<?>> entityWidgets = new CopyOnWriteArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
@@ -45,7 +43,6 @@ public class RemorphedScreen extends Screen {
     private final PlayerWidget playerButton = createPlayerButton();
     private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
-    private Thread populateUnlocked = null;
 
     public RemorphedScreen() {
         super(Component.literal(""));
@@ -57,7 +54,7 @@ public class RemorphedScreen extends Screen {
         // don't initialize if the player is null
         if (minecraft == null) return;
         if (minecraft.player == null) {
-            minecraft.setScreen(null);
+            this.onClose();
             return;
         }
 
@@ -69,17 +66,16 @@ public class RemorphedScreen extends Screen {
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             addRenderableWidget(specialShapeButton);
 
-        populateUnlocked = new Thread(() -> {
+        new Thread(() -> {
             populateUnlockedRenderEntities(minecraft.player);
 
             ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
             // handle favorites
-            synchronized (unlocked) {
-                unlocked.sort((first, second) -> {
-                    if (first.equals(currentShape)) {
+            unlocked.sort((first, second) -> {
+                if (Objects.equals(first, currentShape)) {
                         return -1;
-                    } else if (second.equals(currentShape)) {
+                } else if (Objects.equals(second, currentShape)) {
                         return 1;
                     } else {
                         boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
@@ -91,10 +87,9 @@ public class RemorphedScreen extends Screen {
                         else return 1;
                     }
                 });
-            }
 
             // filter unlocked
-            if (!unlocked.isEmpty() && !Remorphed.displayVariantsInMenu) {
+            if (!Remorphed.displayVariantsInMenu) {
                 List<ShapeType<?>> newUnlocked = new ArrayList<>();
                 for (ShapeType<?> shapeType : unlocked) {
                     if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
@@ -105,8 +100,9 @@ public class RemorphedScreen extends Screen {
                 unlocked.clear();
                 unlocked.addAll(newUnlocked);
             }
-        }, "cache entities");
-        populateUnlocked.start();
+
+            populateEntityWidgets(unlocked);
+        }, "cache entities").start();
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -116,7 +112,6 @@ public class RemorphedScreen extends Screen {
             if (!lastSearchContents.equals(text)) {
                 ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
                 children().removeIf(button -> button instanceof EntityWidget);
-                entityWidgets.clear();
 
                 List<ShapeType<?>> filtered = unlocked
                         .stream()
@@ -132,12 +127,6 @@ public class RemorphedScreen extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        if (populateUnlocked != null && entityWidgets.isEmpty() && !populateUnlocked.isAlive()) {
-            populateUnlocked = null;
-            // add entity widgets
-            populateEntityWidgets(unlocked);
-        }
-
         renderBackground(context);
 
         searchBar.render(context, mouseX, mouseY, delta);
@@ -191,7 +180,8 @@ public class RemorphedScreen extends Screen {
     }
 
     @SuppressWarnings("unchecked")
-    private void populateEntityWidgets(List<ShapeType<?>> rendered) {
+    private synchronized void populateEntityWidgets(List<ShapeType<?>> rendered) {
+        entityWidgets.clear();
         // add widget for each entity to be rendered
         int x = 15;
         int y = 35;
@@ -230,18 +220,18 @@ public class RemorphedScreen extends Screen {
     }
 
     public synchronized void populateUnlockedRenderEntities(Player player) {
-        if (renderEntities.isEmpty() && Minecraft.getInstance().level != null) {
-            List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
-            for (ShapeType<?> type : validUnlocked) {
-                Entity entity = type.create(Minecraft.getInstance().level);
-                if (entity instanceof Mob living) {
-                    unlocked.add(type);
-                    renderEntities.put(type, living);
-                }
+        unlocked.clear();
+        renderEntities.clear();
+        List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
+        for (ShapeType<?> type : validUnlocked) {
+            Entity entity = type.create(Minecraft.getInstance().level);
+            if (entity instanceof Mob living) {
+                unlocked.add(type);
+                renderEntities.put(type, living);
             }
-
-            Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", unlocked.size()));
         }
+
+        Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", unlocked.size()));
     }
 
     private SearchWidget createSearchBar() {
