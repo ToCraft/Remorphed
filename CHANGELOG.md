@@ -1,3 +1,7 @@
+remorphed 3.6.1
+================
+- fix issues with entity caching in menu
+
 remorphed 3.6
 ================
 - selected entity is rendered first
