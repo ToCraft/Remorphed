@@ -1,11 +1,7 @@
 package tocraft.remorphed;
 
-import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -18,6 +14,10 @@ import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tocraft.craftedcore.config.ConfigLoader;
+import tocraft.craftedcore.event.common.CommandEvents;
+import tocraft.craftedcore.event.common.PlayerEvents;
+import tocraft.craftedcore.network.ModernNetworking;
+import tocraft.craftedcore.platform.PlatformData;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
@@ -25,7 +25,7 @@ import tocraft.remorphed.events.ShapeEventsCallback;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
-import tocraft.walkers.api.event.ShapeEvents;
+import tocraft.walkers.api.events.ShapeEvents;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.ArrayList;
@@ -39,28 +39,28 @@ public class Remorphed {
     public static final String MODID = "remorphed";
     public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
     public static boolean displayVariantsInMenu = true;
-    public static boolean displaySkillsInMenu = true;
+    public static boolean displayTraitsInMenu = true;
 
     public void initialize() {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
 
-        VersionChecker.registerDefaultGitHubChecker(MODID, "ToCraft", "Remorphed", Component.literal("Remorphed"));
+        VersionChecker.registerModrinthChecker(MODID, "remorphed", Component.literal("Remorphed"));
 
-        if (Platform.getEnvironment() == Env.CLIENT) new RemorphedClient().initialize();
+        if (PlatformData.getEnv() == EnvType.CLIENT) new RemorphedClient().initialize();
 
         NetworkHandler.registerPacketReceiver();
 
         ShapeEvents.UNLOCK_SHAPE.register(((player, type) -> new ShapeEventsCallback().event(player, type)));
         ShapeEvents.SWAP_SHAPE.register(((player, shape) -> new ShapeEventsCallback().event(player, ShapeType.from(shape))));
-        CommandRegistrationEvent.EVENT.register(new RemorphedCommand());
+        CommandEvents.REGISTRATION.register(new RemorphedCommand());
 
         // allow unlocking friendly mobs via the "normal" method
         Walkers.CONFIG.unlockOverridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;
         Walkers.CONFIG.save();
 
         // Sync favorites
-        PlayerEvent.PLAYER_JOIN.register(NetworkHandler::sendFavoriteSync);
+        PlayerEvents.PLAYER_JOIN.register(NetworkHandler::sendFavoriteSync);
     }
 
     public static boolean canUseEveryShape(Player player) {
@@ -116,9 +116,8 @@ public class Remorphed {
 
         if (!unlockedShapes.isEmpty()) compoundTag.put("UnlockedShapes", list);
 
-        packet.writeUUID(changed.getUUID());
-        packet.writeNbt(compoundTag);
-        NetworkManager.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, packet);
+        compoundTag.putUUID("uuid", changed.getUUID());
+        ModernNetworking.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, compoundTag);
     }
 
     public static ResourceLocation id(String name) {

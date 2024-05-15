@@ -39,10 +39,11 @@ public class RemorphedScreen extends Screen {
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
-    private final Button skillsButton = createSkillsButton();
+    private final Button traitsButton = createTraitsButton();
     private final PlayerWidget playerButton = createPlayerButton();
     private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
+    private boolean canRenderEntityWidgets = false;
 
     public RemorphedScreen() {
         super(Component.literal(""));
@@ -61,7 +62,7 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
-        addRenderableWidget(skillsButton);
+        addRenderableWidget(traitsButton);
         addRenderableWidget(playerButton);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             addRenderableWidget(specialShapeButton);
@@ -74,19 +75,19 @@ public class RemorphedScreen extends Screen {
             // handle favorites
             unlocked.sort((first, second) -> {
                 if (Objects.equals(first, currentShape)) {
-                        return -1;
+                    return -1;
                 } else if (Objects.equals(second, currentShape)) {
-                        return 1;
-                    } else {
-                        boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-                        boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
-                        if (firstIsFav == secondIsFav)
-                            return 0;
-                        if (firstIsFav)
-                            return -1;
-                        else return 1;
-                    }
-                });
+                    return 1;
+                } else {
+                    boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+                    boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                    if (firstIsFav == secondIsFav)
+                        return 0;
+                    if (firstIsFav)
+                        return -1;
+                    else return 1;
+                }
+            });
 
             // filter unlocked
             if (!Remorphed.displayVariantsInMenu) {
@@ -102,6 +103,8 @@ public class RemorphedScreen extends Screen {
             }
 
             populateEntityWidgets(unlocked);
+
+            canRenderEntityWidgets = true;
         }, "cache entities").start();
 
         // implement search handler
@@ -132,7 +135,7 @@ public class RemorphedScreen extends Screen {
         searchBar.render(context, mouseX, mouseY, delta);
         helpButton.render(context, mouseX, mouseY, delta);
         variantsButton.render(context, mouseX, mouseY, delta);
-        skillsButton.render(context, mouseX, mouseY, delta);
+        traitsButton.render(context, mouseX, mouseY, delta);
         playerButton.render(context, mouseX, mouseY, delta);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             specialShapeButton.render(context, mouseX, mouseY, delta);
@@ -147,9 +150,11 @@ public class RemorphedScreen extends Screen {
                 (int) ((double) width * scaledFactor),
                 (int) ((double) (this.height - top) * scaledFactor));
 
-        for (EntityWidget<?> widget : entityWidgets) {
-            if (widget.getY() + widget.getHeight() > top && widget.getY() < getWindow().getGuiScaledHeight()) {
-                widget.render(context, mouseX, mouseY, delta);
+        if (canRenderEntityWidgets) {
+            for (EntityWidget<?> widget : entityWidgets) {
+                if (widget.getY() + widget.getHeight() > top && widget.getY() < getWindow().getGuiScaledHeight()) {
+                    widget.render(context, mouseX, mouseY, delta);
+                }
             }
         }
 
@@ -180,7 +185,7 @@ public class RemorphedScreen extends Screen {
     }
 
     @SuppressWarnings("unchecked")
-    private synchronized void populateEntityWidgets(List<ShapeType<?>> rendered) {
+    private void populateEntityWidgets(List<ShapeType<?>> rendered) {
         entityWidgets.clear();
         // add widget for each entity to be rendered
         int x = 15;
@@ -219,7 +224,7 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    public synchronized void populateUnlockedRenderEntities(Player player) {
+    public void populateUnlockedRenderEntities(Player player) {
         unlocked.clear();
         renderEntities.clear();
         List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
@@ -266,16 +271,16 @@ public class RemorphedScreen extends Screen {
         return variantsButton.build();
     }
 
-    private Button createSkillsButton() {
-        Button.Builder skillButton = Button.builder(Component.translatable("remorphed.show_skills"), (widget) -> Remorphed.displaySkillsInMenu = !Remorphed.displaySkillsInMenu);
+    private Button createTraitsButton() {
+        Button.Builder traitButton = Button.builder(Component.translatable("remorphed.show_traits"), (widget) -> Remorphed.displayTraitsInMenu = !Remorphed.displayTraitsInMenu);
         int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
 
         int xPos = (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 65 + xOffset);
-        skillButton.pos(xPos, 5);
-        skillButton.size(Math.min(50, getWindow().getGuiScaledWidth() - xPos), 20);
-        skillButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".skills")));
+        traitButton.pos(xPos, 5);
+        traitButton.size(Math.min(50, getWindow().getGuiScaledWidth() - xPos), 20);
+        traitButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".traits")));
 
-        return skillButton.build();
+        return traitButton.build();
     }
 
     private PlayerWidget createPlayerButton() {
@@ -303,7 +308,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseY < 35) {
-            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || skillsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
+            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || traitsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }

@@ -1,6 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[48,)"
-#issueTrackerURL = ""
+issueTrackerURL = "https://github.com/ToCraft/Remorphed/issues"
+displayURL = "https://github.com/ToCraft/Remorphed"
 license = "MIT"
 
 [[mods]]
@@ -8,10 +9,11 @@ modId = "remorphed"
 version = "${version}"
 displayName = "ReMorphed"
 authors = "To_Craft"
+credits = "Original mod by Draylar"
 description = '''
 Transform like in the old-school morph mod!
 '''
-#logoFile = ""
+logoFile = "icon.png"
 
 [[dependencies.remorphed]]
 modId = "forge"
@@ -38,12 +40,5 @@ side = "BOTH"
 modId = "walkers"
 mandatory = true
 versionRange = "[${woodwalkers_version},)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.remorphed]]
-modId = "architectury"
-mandatory = true
-versionRange = "[${architectury_version},)"
 ordering = "AFTER"
 side = "BOTH"

@@ -1,12 +1,12 @@
 package tocraft.remorphed;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.event.events.client.ClientTickEvent;
-import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
+import tocraft.craftedcore.event.client.ClientTickEvents;
+import tocraft.craftedcore.registration.KeyBindingRegistry;
 import tocraft.remorphed.network.ClientNetworking;
 import tocraft.remorphed.tick.KeyPressHandler;
 
@@ -16,10 +16,10 @@ public class RemorphedClient {
             GLFW.GLFW_KEY_GRAVE_ACCENT, "key.categories.remorphed");
 
     public void initialize() {
-        KeyMappingRegistry.register(MENU_KEY);
+        KeyBindingRegistry.register(MENU_KEY);
 
         // Register event handlers
-        ClientTickEvent.CLIENT_PRE.register(new KeyPressHandler());
+        ClientTickEvents.CLIENT_PRE.register(new KeyPressHandler());
         ClientNetworking.registerPacketHandlers();
     }
 }
