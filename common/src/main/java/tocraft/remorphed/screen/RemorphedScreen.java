@@ -43,7 +43,6 @@ public class RemorphedScreen extends Screen {
     private final PlayerWidget playerButton = createPlayerButton();
     private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
-    private boolean canRenderEntityWidgets = false;
 
     public RemorphedScreen() {
         super(Component.literal(""));
@@ -67,45 +66,41 @@ public class RemorphedScreen extends Screen {
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             addRenderableWidget(specialShapeButton);
 
-        new Thread(() -> {
-            populateUnlockedRenderEntities(minecraft.player);
+        populateUnlockedRenderEntities(minecraft.player);
 
-            ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+        ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
-            // handle favorites
-            unlocked.sort((first, second) -> {
-                if (Objects.equals(first, currentShape)) {
+        // handle favorites
+        unlocked.sort((first, second) -> {
+            if (Objects.equals(first, currentShape)) {
+                return -1;
+            } else if (Objects.equals(second, currentShape)) {
+                return 1;
+            } else {
+                boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+                boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                if (firstIsFav == secondIsFav)
+                    return 0;
+                if (firstIsFav)
                     return -1;
-                } else if (Objects.equals(second, currentShape)) {
-                    return 1;
-                } else {
-                    boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-                    boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
-                    if (firstIsFav == secondIsFav)
-                        return 0;
-                    if (firstIsFav)
-                        return -1;
-                    else return 1;
-                }
-            });
+                else return 1;
+            }
+        });
 
-            // filter unlocked
-            if (!Remorphed.displayVariantsInMenu) {
-                List<ShapeType<?>> newUnlocked = new ArrayList<>();
-                for (ShapeType<?> shapeType : unlocked) {
-                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                        newUnlocked.add(shapeType);
-                    }
+        // filter unlocked
+        if (!Remorphed.displayVariantsInMenu) {
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlocked) {
+                if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
                 }
-
-                unlocked.clear();
-                unlocked.addAll(newUnlocked);
             }
 
-            populateEntityWidgets(unlocked);
+            unlocked.clear();
+            unlocked.addAll(newUnlocked);
+        }
 
-            canRenderEntityWidgets = true;
-        }, "cache entities").start();
+        populateEntityWidgets(unlocked);
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -150,11 +145,9 @@ public class RemorphedScreen extends Screen {
                 (int) ((double) width * scaledFactor),
                 (int) ((double) (this.height - top) * scaledFactor));
 
-        if (canRenderEntityWidgets) {
-            for (EntityWidget<?> widget : entityWidgets) {
-                if (widget.getY() + widget.getHeight() > top && widget.getY() < getWindow().getGuiScaledHeight()) {
-                    widget.render(context, mouseX, mouseY, delta);
-                }
+        for (EntityWidget<?> widget : entityWidgets) {
+            if (widget.getY() + widget.getHeight() > top && widget.getY() < getWindow().getGuiScaledHeight()) {
+                widget.render(context, mouseX, mouseY, delta);
             }
         }
 
