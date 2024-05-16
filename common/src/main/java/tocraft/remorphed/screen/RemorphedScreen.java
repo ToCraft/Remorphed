@@ -105,7 +105,7 @@ public class RemorphedScreen extends Screen {
 
         // implement search handler
         searchBar.setResponder(text -> {
-            setFocused(searchBar);
+            magicalSpecialHackyFocus(searchBar);
 
             // Only re-filter if the text contents changed
             if (!lastSearchContents.equals(text)) {
