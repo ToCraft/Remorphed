@@ -1,3 +1,8 @@
+remorphed 3.6.2
+================
+- update to CraftedCore 4.2 & Walkers 4.4.2
+- temporarily disable caching thread in menu to prevent wrong rendering
+
 remorphed 3.6.1
 ================
 - fix issues with entity caching in menu

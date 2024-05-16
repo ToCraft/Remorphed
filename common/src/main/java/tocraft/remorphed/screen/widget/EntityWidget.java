@@ -22,8 +22,9 @@ import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
-import tocraft.walkers.skills.ShapeSkill;
-import tocraft.walkers.skills.SkillRegistry;
+import tocraft.walkers.traits.ShapeTrait;
+import tocraft.walkers.traits.TraitRegistry;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,15 +76,15 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!crashed) {
-            if (Remorphed.displaySkillsInMenu) {
-                // Render Skill Icons first
+            if (Remorphed.displayTraitsInMenu) {
+                // Render Trait Icons first
                 int blitOffset = 0;
                 int rowIndex = 0;
-                List<ResourceLocation> renderedSkills = new ArrayList<>();
-                for (ShapeSkill<T> skill : SkillRegistry.getAll(entity)) {
-                    if (skill != null && skill.getIcon() != null && (!renderedSkills.contains(skill.getId()) || skill.iconMightDiffer())) {
-                        context.blit(getX() + rowIndex, getY() + blitOffset, 0, 18, 18, skill.getIcon());
-                        // prevent infinite skills to be rendered
+                List<ResourceLocation> renderedTraits = new ArrayList<>();
+                for (ShapeTrait<T> trait : TraitRegistry.getAll(entity)) {
+                    if (trait != null && trait.getIcon() != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
+                        context.blit(getX() + rowIndex, getY() + blitOffset, 0, 18, 18, trait.getIcon());
+                        // prevent infinite traits to be rendered
                         if (blitOffset >= getHeight() - 18) {
                             rowIndex += 18;
                             blitOffset = 0;
@@ -93,7 +94,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                         if (rowIndex >= getWidth() - 18) {
                             break;
                         }
-                        renderedSkills.add(skill.getId());
+                        renderedTraits.add(trait.getId());
                     }
                 }
             }
@@ -104,7 +105,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 // ARGH
                 InventoryScreen.renderEntityInInventory(context, getX() + this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Quaternionf().rotationXYZ((float) Math.PI, 0, 0), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), entity);
             } catch (Exception e) {
-                Remorphed.LOGGER.error("Error while rendering " + ShapeType.createTooltipText(entity).getString(), e);
+                Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
                 crashed = true;
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
                 immediate.endBatch();
