@@ -42,7 +42,7 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(NetworkHandler.SHAPE_REQUEST, compound);
     }
 
-    @SuppressWarnings({"ALL"})
+    @SuppressWarnings({"DataFlowIssue", "unchecked"})
     private static void handleShapeRequestPacket(ModernNetworking.Context context, CompoundTag compound) {
         context.getPlayer().getServer().execute(() -> {
             // check if player is blacklisted
@@ -88,7 +88,7 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
 
-    @SuppressWarnings("ALL")
+    @SuppressWarnings({"unchecked", "DataFlowIssue"})
     private static void handleFavoriteRequestPacket(ModernNetworking.Context context, CompoundTag packet) {
         EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(packet.getString("id")));
         int variant = packet.getInt("variant");

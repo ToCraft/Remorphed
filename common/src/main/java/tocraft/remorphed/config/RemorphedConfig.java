@@ -7,6 +7,7 @@ import tocraft.remorphed.Remorphed;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("CanBeFinal")
 public class RemorphedConfig implements Config {
     @Synchronize
     public boolean creativeUnlockAll = true;

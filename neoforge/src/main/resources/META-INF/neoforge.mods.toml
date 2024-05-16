@@ -1,0 +1,42 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+issueTrackerURL = "https://github.com/ToCraft/Remorphed/issues"
+displayURL = "https://github.com/ToCraft/Remorphed"
+license = "MIT"
+
+[[mixins]]
+config = "remorphed.mixins.json"
+
+[[mods]]
+modId = "remorphed"
+version = "${version}"
+displayName = "ReMorphed"
+authors = "To_Craft"
+credits = "Original mod by Draylar"
+description = '''
+Transform like in the old-school morph mod!
+'''
+logoFile = "icon.png"
+
+[[dependencies.remorphed]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.remorphed]]
+modId = "craftedcore"
+mandatory = true
+type = "required"
+versionRange = "[${craftedcore_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.remorphed]]
+modId = "walkers"
+mandatory = true
+type = "required"
+versionRange = "[${woodwalkers_version},)"
+ordering = "AFTER"
+side = "BOTH"

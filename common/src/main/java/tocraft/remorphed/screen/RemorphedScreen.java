@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"DataFlowIssue", "SequencedCollectionMethodCanBeUsed"})
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
     private final List<ShapeType<?>> unlocked = new CopyOnWriteArrayList<>();
@@ -210,7 +211,7 @@ public class RemorphedScreen extends Screen {
                         addRenderableWidget(entityWidget);
                         entityWidgets.add(entityWidget);
                     } else {
-                        Remorphed.LOGGER.error("invalid shape type: " + type.getEntityType().getDescriptionId());
+                        Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());
                     }
                 }
             }

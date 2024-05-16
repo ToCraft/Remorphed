@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.event.common.CommandEvents;
+import tocraft.craftedcore.event.common.EntityEvents;
 import tocraft.craftedcore.event.common.PlayerEvents;
 import tocraft.craftedcore.network.ModernNetworking;
 import tocraft.craftedcore.platform.PlatformData;
@@ -22,6 +23,8 @@ import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
 import tocraft.remorphed.events.ShapeEventsCallback;
+import tocraft.remorphed.handler.LivingDeathHandler;
+import tocraft.remorphed.handler.PlayerRespawnHandler;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
@@ -54,6 +57,8 @@ public class Remorphed {
         ShapeEvents.UNLOCK_SHAPE.register(((player, type) -> new ShapeEventsCallback().event(player, type)));
         ShapeEvents.SWAP_SHAPE.register(((player, shape) -> new ShapeEventsCallback().event(player, ShapeType.from(shape))));
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
+        EntityEvents.LIVING_DEATH.register(new LivingDeathHandler());
+        PlayerEvents.PLAYER_RESPAWN.register(new PlayerRespawnHandler());
 
         // allow unlocking friendly mobs via the "normal" method
         Walkers.CONFIG.unlockOverridesCurrentShape = Remorphed.CONFIG.unlockFriendlyNormal;

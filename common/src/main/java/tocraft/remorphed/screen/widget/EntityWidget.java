@@ -104,7 +104,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 // ARGH
                 InventoryScreen.renderEntityInInventory(context, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
             } catch (Exception e) {
-                Remorphed.LOGGER.error("Error while rendering " + ShapeType.createTooltipText(entity).getString(), e);
+                Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
                 crashed = true;
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
                 immediate.endBatch();

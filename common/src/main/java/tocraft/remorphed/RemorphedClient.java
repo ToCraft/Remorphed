@@ -5,8 +5,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
+import tocraft.craftedcore.event.client.ClientPlayerEvents;
 import tocraft.craftedcore.event.client.ClientTickEvents;
 import tocraft.craftedcore.registration.KeyBindingRegistry;
+import tocraft.remorphed.handler.client.ClientPlayerRespawnHandler;
 import tocraft.remorphed.network.ClientNetworking;
 import tocraft.remorphed.tick.KeyPressHandler;
 
@@ -21,5 +23,7 @@ public class RemorphedClient {
         // Register event handlers
         ClientTickEvents.CLIENT_PRE.register(new KeyPressHandler());
         ClientNetworking.registerPacketHandlers();
+
+        ClientPlayerEvents.CLIENT_PLAYER_RESPAWN.register(new ClientPlayerRespawnHandler());
     }
 }
