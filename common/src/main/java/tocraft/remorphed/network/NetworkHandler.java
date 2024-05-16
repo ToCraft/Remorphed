@@ -29,6 +29,9 @@ public class NetworkHandler {
     public static void registerPacketReceiver() {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.SHAPE_REQUEST, NetworkHandler::handleShapeRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, FAVORITE_UPDATE, NetworkHandler::handleFavoriteRequestPacket);
+
+        ModernNetworking.registerType(UNLOCKED_SYNC);
+        ModernNetworking.registerType(FAVORITE_SYNC);
     }
 
     public static <T extends LivingEntity> void sendSwap2ndShapeRequest(@NotNull ShapeType<T> type) {

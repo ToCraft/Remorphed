@@ -25,7 +25,6 @@ import tocraft.walkers.api.variant.ShapeType;
 import tocraft.walkers.traits.ShapeTrait;
 import tocraft.walkers.traits.TraitRegistry;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,7 +110,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 immediate.endBatch();
                 EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
                 entityRenderDispatcher.setRenderShadow(true);
-                RenderSystem.getModelViewStack().popPose();
+                RenderSystem.getModelViewStack().popMatrix();
                 Lighting.setupFor3DItems();
             }
 
