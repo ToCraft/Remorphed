@@ -1,14 +1,14 @@
 package tocraft.remorphed.tick;
 
-import dev.architectury.event.events.client.ClientTickEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import tocraft.craftedcore.event.client.ClientTickEvents;
 import tocraft.remorphed.RemorphedClient;
 import tocraft.remorphed.screen.RemorphedScreen;
 
 @Environment(EnvType.CLIENT)
-public class KeyPressHandler implements ClientTickEvent.Client {
+public class KeyPressHandler implements ClientTickEvents.Client {
     @Override
     public void tick(Minecraft client) {
         assert client.player != null;

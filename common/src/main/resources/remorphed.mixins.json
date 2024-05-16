@@ -4,14 +4,11 @@
   "package": "tocraft.remorphed.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "LivingEntityMixin",
     "PlayerEntityMixin",
     "PlayerListMixin",
-    "ServerEntityMixin",
-    "ServerPlayerEntityMixin"
+    "ServerEntityMixin"
   ],
   "client": [
-    "ClientPlayerDataCacheMixin",
     "accessor.ScreenAccessor"
   ],
   "injectors": {

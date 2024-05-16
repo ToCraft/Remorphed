@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"DataFlowIssue", "SequencedCollectionMethodCanBeUsed"})
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
     private final List<ShapeType<?>> unlocked = new CopyOnWriteArrayList<>();
@@ -39,7 +40,7 @@ public class RemorphedScreen extends Screen {
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
     private final Button variantsButton = createVariantsButton();
-    private final Button skillsButton = createSkillsButton();
+    private final Button traitsButton = createTraitsButton();
     private final PlayerWidget playerButton = createPlayerButton();
     private final SpecialShapeWidget specialShapeButton = createSpecialShapeButton();
     private String lastSearchContents = "";
@@ -61,48 +62,46 @@ public class RemorphedScreen extends Screen {
         addRenderableWidget(searchBar);
         addRenderableWidget(helpButton);
         addRenderableWidget(variantsButton);
-        addRenderableWidget(skillsButton);
+        addRenderableWidget(traitsButton);
         addRenderableWidget(playerButton);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             addRenderableWidget(specialShapeButton);
 
-        new Thread(() -> {
-            populateUnlockedRenderEntities(minecraft.player);
+        populateUnlockedRenderEntities(minecraft.player);
 
-            ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+        ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
-            // handle favorites
-            unlocked.sort((first, second) -> {
-                if (Objects.equals(first, currentShape)) {
-                        return -1;
-                } else if (Objects.equals(second, currentShape)) {
-                        return 1;
-                    } else {
-                        boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-                        boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
-                        if (firstIsFav == secondIsFav)
-                            return 0;
-                        if (firstIsFav)
-                            return -1;
-                        else return 1;
-                    }
-                });
+        // handle favorites
+        unlocked.sort((first, second) -> {
+            if (Objects.equals(first, currentShape)) {
+                return -1;
+            } else if (Objects.equals(second, currentShape)) {
+                return 1;
+            } else {
+                boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
+                boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                if (firstIsFav == secondIsFav)
+                    return 0;
+                if (firstIsFav)
+                    return -1;
+                else return 1;
+            }
+        });
 
-            // filter unlocked
-            if (!Remorphed.displayVariantsInMenu) {
-                List<ShapeType<?>> newUnlocked = new ArrayList<>();
-                for (ShapeType<?> shapeType : unlocked) {
-                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                        newUnlocked.add(shapeType);
-                    }
+        // filter unlocked
+        if (!Remorphed.displayVariantsInMenu) {
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlocked) {
+                if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
                 }
-
-                unlocked.clear();
-                unlocked.addAll(newUnlocked);
             }
 
-            populateEntityWidgets(unlocked);
-        }, "cache entities").start();
+            unlocked.clear();
+            unlocked.addAll(newUnlocked);
+        }
+
+        populateEntityWidgets(unlocked);
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -132,7 +131,7 @@ public class RemorphedScreen extends Screen {
         searchBar.render(context, mouseX, mouseY, delta);
         helpButton.render(context, mouseX, mouseY, delta);
         variantsButton.render(context, mouseX, mouseY, delta);
-        skillsButton.render(context, mouseX, mouseY, delta);
+        traitsButton.render(context, mouseX, mouseY, delta);
         playerButton.render(context, mouseX, mouseY, delta);
         if (Walkers.hasSpecialShape(minecraft.player.getUUID()))
             specialShapeButton.render(context, mouseX, mouseY, delta);
@@ -190,7 +189,7 @@ public class RemorphedScreen extends Screen {
     }
 
     @SuppressWarnings("unchecked")
-    private synchronized void populateEntityWidgets(List<ShapeType<?>> rendered) {
+    private void populateEntityWidgets(List<ShapeType<?>> rendered) {
         entityWidgets.clear();
         // add widget for each entity to be rendered
         int x = 15;
@@ -222,14 +221,14 @@ public class RemorphedScreen extends Screen {
                         addRenderableWidget(entityWidget);
                         entityWidgets.add(entityWidget);
                     } else {
-                        Remorphed.LOGGER.error("invalid shape type: " + type.getEntityType().getDescriptionId());
+                        Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());
                     }
                 }
             }
         }
     }
 
-    public synchronized void populateUnlockedRenderEntities(Player player) {
+    public void populateUnlockedRenderEntities(Player player) {
         unlocked.clear();
         renderEntities.clear();
         List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
@@ -264,11 +263,11 @@ public class RemorphedScreen extends Screen {
         });
     }
 
-    private Button createSkillsButton() {
+    private Button createTraitsButton() {
         int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
         int xPos = (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 65 + xOffset);
-        return new Button(xPos, 5, Math.min(50, getWindow().getGuiScaledWidth() - xPos), 20, new TranslatableComponent("remorphed.show_skills"), (widget) -> {
-            Remorphed.displaySkillsInMenu = !Remorphed.displaySkillsInMenu;
+        return new Button(xPos, 5, Math.min(50, getWindow().getGuiScaledWidth() - xPos), 20, new TranslatableComponent("remorphed.show_traits"), (widget) -> {
+            Remorphed.displayTraitsInMenu = !Remorphed.displayTraitsInMenu;
         });
     }
 
@@ -297,7 +296,7 @@ public class RemorphedScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseY < 35) {
-            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || skillsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
+            return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || traitsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }

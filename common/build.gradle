@@ -1,7 +1,6 @@
 apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/main/common.gradle"
 
 dependencies {
-    modApi "dev.architectury:architectury:${rootProject.architectury_version}"
     modApi "dev.tocraft:craftedcore:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
     modApi "dev.tocraft:walkers:${rootProject.minecraft_version}-${rootProject.woodwalkers_version}"
 }
