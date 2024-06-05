@@ -1,20 +1,30 @@
+remorphed 3.6.3
+================
+
+- fix crash when morphing back and unlockFriendlyNormal is true
+- use new walkers API Levels & use PlayerMorph.class
+
 remorphed 3.6.2
 ================
+
 - update to CraftedCore 4.2 & Walkers 4.4.2
 - temporarily disable caching thread in menu to prevent wrong rendering
 
 remorphed 3.6.1
 ================
+
 - fix issues with entity caching in menu
 
 remorphed 3.6
 ================
+
 - selected entity is rendered first
 - add compatibility for walkers 4.2 (and variants menu)
 - skills can renderer multiple times per entity if required (e.g. the MobEffectSkill can render multiple icons now)
 
 remorphed 3.5
 ================
+
 - change entity orientation in menu
 - fix sync error
 - fix render scissor (no more entities in the menu)
@@ -22,12 +32,14 @@ remorphed 3.5
 
 remorphed 3.4
 ================
+
 - fix crash on startup for 1.20.2+
 - player data will be properly restored on death now (required re-login before)
 - fix only craftedcore 3.0 possible on Fabric
 
 remorphed 3.3
 ================
+
 - menu loads entities in the background
 - menu only renders visible entities (fixes low FPS in the menu)
 - fix every entity available in survival

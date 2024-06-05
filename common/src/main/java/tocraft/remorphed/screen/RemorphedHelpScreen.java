@@ -19,7 +19,7 @@ public class RemorphedHelpScreen extends Screen {
     }
 
     @SuppressWarnings("resource")
-	@Override
+    @Override
     public void render(PoseStack context, int mouseX, int mouseY, float delta) {
         renderBackground(context);
 

@@ -16,7 +16,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Wolf;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.Walkers;
@@ -43,7 +43,7 @@ public class SpecialShapeWidget extends AbstractButton {
         if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf)
             wolf.saveWithoutId(nbt);
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
-        this.isAvailable = Remorphed.canUseEveryShape(Minecraft.getInstance().player) || ((RemorphedPlayerDataProvider) Minecraft.getInstance().player).remorphed$getUnlockedShapes().keySet().stream().anyMatch(type -> type.getEntityType().equals(EntityType.WOLF));
+        this.isAvailable = Remorphed.canUseEveryShape(Minecraft.getInstance().player) || (PlayerMorph.getUnlockedShapes(Minecraft.getInstance().player)).keySet().stream().anyMatch(type -> type.getEntityType().equals(EntityType.WOLF));
     }
 
     @Override

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.network.ModernNetworking;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.PlayerShapeChanger;
@@ -67,7 +67,7 @@ public class NetworkHandler {
     }
 
     public static void sendFavoriteSync(ServerPlayer player) {
-        Set<ShapeType<?>> favorites = ((RemorphedPlayerDataProvider) player).remorphed$getFavorites();
+        Set<ShapeType<?>> favorites = PlayerMorph.getFavorites(player);
         CompoundTag tag = new CompoundTag();
         ListTag idList = new ListTag();
         favorites.forEach(type -> idList.add(type.writeCompound()));
@@ -90,16 +90,16 @@ public class NetworkHandler {
         EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.get(new ResourceLocation(packet.getString("id")));
         int variant = packet.getInt("variant");
         boolean favorite = packet.getBoolean("favorite");
-        RemorphedPlayerDataProvider playerData = (RemorphedPlayerDataProvider) context.getPlayer();
 
         context.getPlayer().getServer().execute(() -> {
             @Nullable ShapeType<?> type = ShapeType.from(entityType, variant);
 
             if (type != null) {
-                if (favorite)
-                    playerData.remorphed$getFavorites().add(type);
-                else
-                    playerData.remorphed$getFavorites().remove(type);
+                if (favorite) {
+                    PlayerMorph.getFavorites(context.getPlayer()).add(type);
+                } else {
+                    PlayerMorph.getFavorites(context.getPlayer()).remove(type);
+                }
                 // resync favorites
                 sendFavoriteSync((ServerPlayer) context.getPlayer());
             }

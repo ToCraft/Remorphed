@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.client.CraftedCoreClient;
 import tocraft.craftedcore.network.ModernNetworking;
 import tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.HashMap;
@@ -46,18 +46,19 @@ public class ClientNetworking {
             @Nullable
             Player syncTarget = player.getCommandSenderWorld().getPlayerByUUID(uuid);
 
-            if (syncTarget != null)
-                ((RemorphedPlayerDataProvider) syncTarget).remorphed$setUnlockedShapes(unlockedShapes);
+            if (syncTarget != null) {
+                PlayerMorph.getUnlockedShapes(player).clear();
+                PlayerMorph.getUnlockedShapes(player).putAll(unlockedShapes);
+            }
         });
     }
 
 
     private static void handleFavoriteSyncPacket(ModernNetworking.Context context, CompoundTag tag) {
         ClientNetworking.runOrQueue(context, player -> {
-            RemorphedPlayerDataProvider data = (RemorphedPlayerDataProvider) player;
-            data.remorphed$getFavorites().clear();
+            PlayerMorph.getFavorites(player).clear();
             ListTag idList = tag.getList("FavoriteShapes", Tag.TAG_COMPOUND);
-            idList.forEach(compound -> data.remorphed$getFavorites().add(ShapeType.from((CompoundTag) compound)));
+            idList.forEach(compound -> PlayerMorph.getFavorites(player).add(ShapeType.from((CompoundTag) compound)));
         });
     }
 

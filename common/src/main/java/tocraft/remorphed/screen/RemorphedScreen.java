@@ -17,7 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.mixin.accessor.ScreenAccessor;
 import tocraft.remorphed.screen.widget.EntityWidget;
 import tocraft.remorphed.screen.widget.PlayerWidget;
@@ -78,8 +78,8 @@ public class RemorphedScreen extends Screen {
             } else if (Objects.equals(second, currentShape)) {
                 return 1;
             } else {
-                boolean firstIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(first);
-                boolean secondIsFav = ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(second);
+                boolean firstIsFav = PlayerMorph.getFavorites(minecraft.player).contains(first);
+                boolean secondIsFav = PlayerMorph.getFavorites(minecraft.player).contains(second);
                 if (firstIsFav == secondIsFav)
                     return 0;
                 if (firstIsFav)
@@ -158,8 +158,8 @@ public class RemorphedScreen extends Screen {
 
         // tooltips
         for (NarratableEntry selectable : ((ScreenAccessor) this).getSelectables()) {
-            if(selectable instanceof Button button) {
-                if(button.isHoveredOrFocused()) {
+            if (selectable instanceof Button button) {
+                if (button.isHoveredOrFocused()) {
                     button.renderToolTip(context, mouseX, mouseY);
                     break;
                 }
@@ -214,7 +214,7 @@ public class RemorphedScreen extends Screen {
                                 (ShapeType<Mob>) type,
                                 entity,
                                 this,
-                                ((RemorphedPlayerDataProvider) minecraft.player).remorphed$getFavorites().contains(type),
+                                PlayerMorph.getFavorites(minecraft.player).contains(type),
                                 type.equals(currentType)
                         );
 

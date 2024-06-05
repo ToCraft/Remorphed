@@ -24,7 +24,6 @@ import tocraft.walkers.api.variant.ShapeType;
 import tocraft.walkers.traits.ShapeTrait;
 import tocraft.walkers.traits.TraitRegistry;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
