@@ -1,11 +1,9 @@
 package tocraft.remorphed;
 
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,13 +20,14 @@ import tocraft.craftedcore.platform.PlatformData;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
-import tocraft.remorphed.events.ShapeEventsCallback;
 import tocraft.remorphed.handler.LivingDeathHandler;
 import tocraft.remorphed.handler.PlayerRespawnHandler;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.handler.ShapeEventsCallback;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.events.ShapeEvents;
+import tocraft.walkers.api.platform.ApiLevel;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.ArrayList;
@@ -45,6 +44,11 @@ public class Remorphed {
     public static boolean displayTraitsInMenu = true;
 
     public void initialize() {
+        ShapeEvents.UNLOCK_SHAPE.register(new ShapeEventsCallback());
+        if (!CONFIG.unlockFriendlyNormal) {
+            ApiLevel.setApiLevel(ApiLevel.MORPHING_AND_VARIANTS_MENU_ONLY);
+        }
+
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
 
@@ -54,8 +58,6 @@ public class Remorphed {
 
         NetworkHandler.registerPacketReceiver();
 
-        ShapeEvents.UNLOCK_SHAPE.register(((player, type) -> new ShapeEventsCallback().event(player, type)));
-        ShapeEvents.SWAP_SHAPE.register(((player, shape) -> new ShapeEventsCallback().event(player, ShapeType.from(shape))));
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
         EntityEvents.LIVING_DEATH.register(new LivingDeathHandler());
         PlayerEvents.PLAYER_RESPAWN.register(new PlayerRespawnHandler());
@@ -73,7 +75,7 @@ public class Remorphed {
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || ((RemorphedPlayerDataProvider) player).remorphed$getKills(type) >= Remorphed.getKillToUnlock(type.getEntityType()));
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type.getEntityType()));
     }
 
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
@@ -86,7 +88,7 @@ public class Remorphed {
             }
             return unlocked;
         } else {
-            return new ArrayList<>(((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().keySet().stream().filter(type -> canUseShape(player, type)).toList());
+            return new ArrayList<>(PlayerMorph.getUnlockedShapes(player).keySet().stream().filter(type -> canUseShape(player, type)).toList());
         }
     }
 
@@ -101,11 +103,10 @@ public class Remorphed {
     }
 
     public static void sync(ServerPlayer changed, ServerPlayer packetTarget) {
-        FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
         CompoundTag compoundTag = new CompoundTag();
 
         // serialize current shape data to tag if it exists
-        Map<ShapeType<?>, Integer> unlockedShapes = ((RemorphedPlayerDataProvider) changed).remorphed$getUnlockedShapes();
+        Map<ShapeType<?>, Integer> unlockedShapes = PlayerMorph.getUnlockedShapes(changed);
 
         ListTag list = new ListTag();
 

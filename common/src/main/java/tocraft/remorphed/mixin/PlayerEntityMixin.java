@@ -24,11 +24,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces"})
+@SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused"})
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
     @Unique
-    private Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<>();
+    private final Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<>();
     @Unique
     private final Set<ShapeType<?>> remorphed$favoriteShapes = new HashSet<>();
     @Unique
@@ -118,12 +118,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Override
     public Map<ShapeType<? extends LivingEntity>, Integer> remorphed$getUnlockedShapes() {
         return remorphed$unlockedShapes;
-    }
-
-    @Unique
-    @Override
-    public void remorphed$setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types) {
-        remorphed$unlockedShapes = types;
     }
 
     @Unique
