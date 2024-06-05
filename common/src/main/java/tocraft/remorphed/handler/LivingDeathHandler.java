@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.event.common.EntityEvents;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
@@ -18,9 +18,9 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
         if (!(entity instanceof Player) && source.getEntity() instanceof ServerPlayer killer) {
             ShapeType<?> type = ShapeType.from(entity);
             if (type != null) {
-                ((RemorphedPlayerDataProvider) killer).remorphed$addKill(type);
+                PlayerMorph.addKill(killer, type);
 
-                if (Remorphed.CONFIG.autoTransform && ((RemorphedPlayerDataProvider) killer).remorphed$getKills(type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
+                if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
                     PlayerShapeChanger.change2ndShape(killer, type);
                     PlayerShape.updateShapes(killer, type.create(killer.level));
                 }
