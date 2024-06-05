@@ -23,7 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.event.common.CommandEvents;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -32,7 +32,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        if (((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().containsKey(type)) {
+        if (PlayerMorph.getUnlockedShapes(player).containsKey(type)) {
             source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".hasShape_success",
                     player.getDisplayName(), name));
 
@@ -47,7 +47,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().remove(type);
+        PlayerMorph.getUnlockedShapes(player).remove(type);
 
         source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".removeShape", name, player.getDisplayName()));
     }
@@ -56,13 +56,13 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().put(type, Remorphed.getKillToUnlock(type.getEntityType()));
+        PlayerMorph.getUnlockedShapes(player).put(type, Remorphed.getKillToUnlock(type.getEntityType()));
 
         source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name));
     }
 
     private static void clearShapes(CommandSourceStack source, ServerPlayer player) {
-        ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes().clear();
+        PlayerMorph.getUnlockedShapes(player).clear();
 
         source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()));
         PlayerShapeChanger.change2ndShape(player, null);
