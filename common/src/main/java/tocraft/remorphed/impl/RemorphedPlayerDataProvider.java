@@ -6,11 +6,12 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @see PlayerMorph
+ */
 public interface RemorphedPlayerDataProvider {
 
     Map<ShapeType<? extends LivingEntity>, Integer> remorphed$getUnlockedShapes();
-
-    void remorphed$setUnlockedShapes(Map<ShapeType<? extends LivingEntity>, Integer> types);
 
     void remorphed$addKill(ShapeType<? extends LivingEntity> type);
 
