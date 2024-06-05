@@ -1,3 +1,9 @@
+remorphed 3.6.3
+================
+
+- fix crash when morphing back and unlockFriendlyNormal is true
+- use new walkers API Levels & use PlayerMorph.class
+
 remorphed 3.6.2
 ================
 
