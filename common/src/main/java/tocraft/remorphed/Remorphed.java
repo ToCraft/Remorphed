@@ -1,10 +1,8 @@
 package tocraft.remorphed;
 
 import net.fabricmc.api.EnvType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -16,6 +14,9 @@ import tocraft.craftedcore.event.common.CommandEvents;
 import tocraft.craftedcore.event.common.EntityEvents;
 import tocraft.craftedcore.event.common.PlayerEvents;
 import tocraft.craftedcore.network.ModernNetworking;
+import tocraft.craftedcore.patched.CEntity;
+import tocraft.craftedcore.patched.Identifier;
+import tocraft.craftedcore.patched.TComponent;
 import tocraft.craftedcore.platform.PlatformData;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
@@ -52,7 +53,7 @@ public class Remorphed {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
 
-        VersionChecker.registerModrinthChecker(MODID, "remorphed", Component.literal("Remorphed"));
+        VersionChecker.registerModrinthChecker(MODID, "remorphed", TComponent.literal("Remorphed"));
 
         if (PlatformData.getEnv() == EnvType.CLIENT) new RemorphedClient().initialize();
 
@@ -80,10 +81,10 @@ public class Remorphed {
 
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
         if (canUseEveryShape(player)) {
-            return ShapeType.getAllTypes(player.level());
+            return ShapeType.getAllTypes(CEntity.level(player));
         } else if (Walkers.CONFIG.unlockEveryVariant) {
             List<ShapeType<?>> unlocked = new ArrayList<>();
-            for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
+            for (ShapeType<?> shapeType : ShapeType.getAllTypes(CEntity.level(player))) {
                 if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) unlocked.add(shapeType);
             }
             return unlocked;
@@ -93,7 +94,7 @@ public class Remorphed {
     }
 
     public static int getKillToUnlock(EntityType<?> entityType) {
-        String id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString();
+        String id = Walkers.getEntityTypeRegistry().getKey(entityType).toString();
         if (Remorphed.CONFIG.killToUnlockByType.containsKey(id)) return Remorphed.CONFIG.killToUnlockByType.get(id);
         else return Remorphed.CONFIG.killToUnlock;
     }
@@ -113,7 +114,7 @@ public class Remorphed {
         unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {
                 CompoundTag compound = new CompoundTag();
-                compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                compound.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
                 compound.putInt("variant", shape.getVariantData());
                 compound.putInt("killAmount", killAmount);
                 list.add(compound);
@@ -127,6 +128,6 @@ public class Remorphed {
     }
 
     public static ResourceLocation id(String name) {
-        return new ResourceLocation(MODID, name);
+        return Identifier.parse(MODID, name);
     }
 }

@@ -1,6 +1,5 @@
 package tocraft.remorphed.mixin;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +13,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import tocraft.craftedcore.patched.CEntity;
+import tocraft.craftedcore.patched.Identifier;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.Walkers;
@@ -42,8 +43,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void serverTick(CallbackInfo info) {
-        if (!level().isClientSide)
+        if (!CEntity.level(this).isClientSide) {
             Remorphed.sync((ServerPlayer) (Object) this);
+        }
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
@@ -63,7 +65,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {
                 CompoundTag entryTag = new CompoundTag();
-                entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                entryTag.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
                 entryTag.putInt("killAmount", killAmount);
                 unlockedList.add(entryTag);
@@ -76,7 +78,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$favoriteShapes.forEach(shape -> {
             if (shape != null) {
                 CompoundTag entryTag = new CompoundTag();
-                entryTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(shape.getEntityType()).toString());
+                entryTag.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
                 favoritesList.add(entryTag);
             }
@@ -96,20 +98,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         ListTag unlockedList = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
         unlockedList.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
+                ResourceLocation typeId = Identifier.parse(((CompoundTag) entry).getString("id"));
                 int typeVariantId = ((CompoundTag) entry).getInt("variant");
                 int killAmount = ((CompoundTag) entry).getInt("killAmount");
 
-                remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId), killAmount);
+                remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId), typeVariantId), killAmount);
             }
         });
         ListTag favoritesList = tag.getList(FAVORITE_SHAPES, ListTag.TAG_COMPOUND);
         favoritesList.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                ResourceLocation typeId = new ResourceLocation(((CompoundTag) entry).getString("id"));
+                ResourceLocation typeId = Identifier.parse(((CompoundTag) entry).getString("id"));
                 int typeVariantId = ((CompoundTag) entry).getInt("variant");
 
-                remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId), typeVariantId));
+                remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId), typeVariantId));
             }
         });
     }

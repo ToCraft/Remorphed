@@ -2,16 +2,15 @@ package tocraft.remorphed.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceArgument;
+//#if MC>1182
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.Commands.CommandSelection;
+//#endif
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,55 +21,59 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.event.common.CommandEvents;
+import tocraft.craftedcore.patched.CCommandSourceStack;
+import tocraft.craftedcore.patched.CEntitySummonArgument;
+import tocraft.craftedcore.patched.TComponent;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
+import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
 public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static int hasShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
-        Component name = Component.translatable(type.getEntityType().getDescriptionId());
+        Component name = TComponent.translatable(type.getEntityType().getDescriptionId());
 
         if (PlayerMorph.getUnlockedShapes(player).containsKey(type)) {
-            source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".hasShape_success",
-                    player.getDisplayName(), name));
+            CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".hasShape_success",
+                    player.getDisplayName(), name), true);
 
             return 1;
         } else
-            source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".hasShape_fail", player.getDisplayName(), name));
+            CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".hasShape_fail", player.getDisplayName(), name), true);
 
         return 0;
     }
 
     private static void removeShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
-        Component name = Component.translatable(type.getEntityType().getDescriptionId());
+        Component name = TComponent.translatable(type.getEntityType().getDescriptionId());
 
         PlayerMorph.getUnlockedShapes(player).remove(type);
 
-        source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".removeShape", name, player.getDisplayName()));
+        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".removeShape", name, player.getDisplayName()), true);
     }
 
     private static void addShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
-        Component name = Component.translatable(type.getEntityType().getDescriptionId());
+        Component name = TComponent.translatable(type.getEntityType().getDescriptionId());
 
         PlayerMorph.getUnlockedShapes(player).put(type, Remorphed.getKillToUnlock(type.getEntityType()));
 
-        source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name));
+        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name), true);
     }
 
     private static void clearShapes(CommandSourceStack source, ServerPlayer player) {
         PlayerMorph.getUnlockedShapes(player).clear();
 
-        source.sendSystemMessage(Component.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()));
+        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()), true);
         PlayerShapeChanger.change2ndShape(player, null);
     }
 
     @SuppressWarnings("unchecked")
     private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {
-        ShapeType<LivingEntity> type = ShapeType.from((EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(id));
+        ShapeType<LivingEntity> type = ShapeType.from((EntityType<LivingEntity>) Walkers.getEntityTypeRegistry().get(id));
 
         if (nbt != null) {
             CompoundTag copy = nbt.copy();
@@ -85,7 +88,12 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     @Override
+    //#if MC>1182
     public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registry, CommandSelection selection) {
+    //#else
+    //$$ public void register(CommandDispatcher<CommandSourceStack> dispatcher, Commands.CommandSelection selection) {
+        //$$ Object registry = null;
+    //#endif
 
         LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(Remorphed.MODID)
                 .requires(source -> source.hasPermission(2)).build();
@@ -95,11 +103,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          */
         LiteralCommandNode<CommandSourceStack> removeShape = Commands.literal("removeShape")
                 .then(Commands.argument("player", EntityArgument.players())
-                        .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
+                        .then(Commands.argument("shape", CEntitySummonArgument.id(registry))
                                 .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
                                     removeShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                            EntityType.getKey(ResourceArgument
-                                                    .getSummonableEntityType(context, "shape").value()),
+                                            CEntitySummonArgument.getEntityTypeId(context, "shape"),
                                             null);
                                     return 1;
                                 }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
@@ -108,8 +115,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
                                             removeShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
-                                                    EntityType.getKey(ResourceArgument
-                                                            .getSummonableEntityType(context, "shape").value()),
+                                                    CEntitySummonArgument.getEntityTypeId(context, "shape"),
                                                     nbt);
 
                                             return 1;
@@ -121,11 +127,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          */
         LiteralCommandNode<CommandSourceStack> addShape = Commands.literal("addShape")
                 .then(Commands.argument("player", EntityArgument.players())
-                        .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
+                        .then(Commands.argument("shape",  CEntitySummonArgument.id(registry))
                                 .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
                                     addShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                            EntityType.getKey(ResourceArgument
-                                                    .getSummonableEntityType(context, "shape").value()),
+                                            CEntitySummonArgument.getEntityTypeId(context, "shape"),
                                             null);
                                     return 1;
                                 }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
@@ -134,8 +139,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
                                             addShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
-                                                    EntityType.getKey(ResourceArgument
-                                                            .getSummonableEntityType(context, "shape").value()),
+                                                    CEntitySummonArgument.getEntityTypeId(context, "shape"),
                                                     nbt);
 
                                             return 1;
@@ -156,18 +160,16 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          */
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
                 .then(Commands.argument("player", EntityArgument.players())
-                        .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
+                        .then(Commands.argument("shape",  CEntitySummonArgument.id(registry))
                                 .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                        EntityType.getKey(ResourceArgument
-                                                .getSummonableEntityType(context, "shape").value()),
+                                        CEntitySummonArgument.getEntityTypeId(context, "shape"),
                                         null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
 
                                             return hasShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
-                                                    EntityType.getKey(ResourceArgument
-                                                            .getSummonableEntityType(context, "shape").value()),
+                                                    CEntitySummonArgument.getEntityTypeId(context, "shape"),
                                                     nbt);
                                         }))))
                 .build();

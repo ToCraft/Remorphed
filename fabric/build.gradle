@@ -1,6 +1,6 @@
-apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/main/fabric.gradle"
+apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/v2/fabric.gradle"
 
 dependencies {
-    modApi "dev.tocraft:craftedcore-fabric:${rootProject.minecraft_version}-${rootProject.craftedcore_version}"
-    modApi "dev.tocraft:walkers-fabric:${rootProject.minecraft_version}-${rootProject.woodwalkers_version}"
+    modApi "dev.tocraft:craftedcore-fabric:${parent.name}-${rootProject.craftedcore_version}"
+    modApi "dev.tocraft:walkers-fabric:${parent.name}-${rootProject.woodwalkers_version}"
 }

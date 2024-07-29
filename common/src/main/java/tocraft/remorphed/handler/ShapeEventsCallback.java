@@ -5,6 +5,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
+import tocraft.craftedcore.patched.CEntity;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.Walkers;
@@ -17,7 +18,7 @@ public class ShapeEventsCallback implements ShapeEvents.UnlockShapeCallback {
         if (type != null) {
             // check if the walkers unlock mechanic should be used
             if (!Remorphed.CONFIG.lockTransform && Remorphed.CONFIG.unlockFriendlyNormal) {
-                LivingEntity entityToBeUnlocked = type.create(player.level());
+                LivingEntity entityToBeUnlocked = type.create(CEntity.level(player));
                 if (!(entityToBeUnlocked instanceof Enemy)) {
                     PlayerMorph.getUnlockedShapes(player).put(type, Remorphed.getKillToUnlock(type.getEntityType()));
                 }

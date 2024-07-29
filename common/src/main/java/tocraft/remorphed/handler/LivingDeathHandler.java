@@ -6,6 +6,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.event.common.EntityEvents;
+import tocraft.craftedcore.patched.CEntity;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.PlayerShape;
@@ -22,7 +23,7 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
 
                 if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
                     PlayerShapeChanger.change2ndShape(killer, type);
-                    PlayerShape.updateShapes(killer, type.create(killer.level()));
+                    PlayerShape.updateShapes(killer, type.create(CEntity.level(killer)));
                 }
             }
         }

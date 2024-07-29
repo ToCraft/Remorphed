@@ -5,9 +5,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+//#if MC>=1201
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#else
+import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,8 +18,14 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+//#if MC>1182
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import net.minecraft.client.gui.components.Tooltip;
+//#else
+//$$ import net.minecraft.client.gui.screens.Screen;
+//#endif
+import tocraft.craftedcore.patched.client.CGraphics;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
@@ -48,8 +57,19 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
         this.parent = parent;
         this.isFavorite = isFavorite;
         this.isCurrent = current;
+        //#if MC>1182
         setTooltip(Tooltip.create(ShapeType.createTooltipText(entity)));
+        //#endif
     }
+
+    //#if MC<=1182
+    //$$ private int getX() {
+    //$$     return x;
+    //$$ }
+    //$$ public int getY() {
+    //$$     return y;
+    //$$ }
+    //#endif
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -73,7 +93,13 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    //#if MC>1194
+    //$$ public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    //#elseif MC>1182
+    public void renderWidget(PoseStack guiGraphics, int mouseX, int mouseY, float delta) {
+    //#else
+    //$$ public void renderButton(PoseStack guiGraphics, int mouseX, int mouseY, float delta) {
+    //#endif
         if (!crashed) {
             if (Remorphed.displayTraitsInMenu) {
                 // Render Trait Icons first
@@ -82,7 +108,7 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 List<ResourceLocation> renderedTraits = new ArrayList<>();
                 for (ShapeTrait<T> trait : TraitRegistry.getAll(entity)) {
                     if (trait != null && trait.getIcon() != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
-                        context.blit(getX() + rowIndex, getY() + blitOffset, 0, 18, 18, trait.getIcon());
+                        CGraphics.blit(guiGraphics, getX() + rowIndex, getY() + blitOffset, 0, 18, 18, trait.getIcon());
                         // prevent infinite traits to be rendered
                         if (blitOffset >= getHeight() - 18) {
                             rowIndex += 18;
@@ -102,7 +128,13 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
             // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
             try {
                 // ARGH
-                InventoryScreen.renderEntityInInventory(context, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+                //#if MC>1201
+                //$$ InventoryScreen.renderEntityInInventory(guiGraphics, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+                //#elseif MC>1182
+                InventoryScreen.renderEntityInInventory(guiGraphics, getX() + this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Quaternionf().rotationXYZ((float) Math.PI, 0, 0), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), entity);
+                //#else
+                //$$ InventoryScreen.renderEntityInInventory(x + this.getWidth() / 2, (int) (y + this.getHeight() * .75f), size, -10, -10, entity);
+                //#endif
             } catch (Exception e) {
                 Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
                 crashed = true;
@@ -110,17 +142,21 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
                 immediate.endBatch();
                 EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
                 entityRenderDispatcher.setRenderShadow(true);
-                RenderSystem.getModelViewStack().popMatrix();
+                //#if MC>=1205
+                //$$ RenderSystem.getModelViewStack().popMatrix();
+                //#else
+                RenderSystem.getModelViewStack().popPose();
+                //#endif
                 Lighting.setupFor3DItems();
             }
 
             // Render selected outline
             if (isCurrent) {
-                context.blit(Remorphed.id("textures/gui/selected.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
+                CGraphics.blit(guiGraphics, Remorphed.id("textures/gui/selected.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
             // Render favorite
             if (isFavorite) {
-                context.blit(Remorphed.id("textures/gui/favorite.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
+                CGraphics.blit(guiGraphics, Remorphed.id("textures/gui/favorite.png"), getX(), getY(), getWidth(), getHeight(), 0, 0, 48, 32, 48, 32);
             }
         }
     }
@@ -130,8 +166,24 @@ public class EntityWidget<T extends LivingEntity> extends AbstractButton {
 
     }
 
+    //#if MC>1182
     @Override
     public void updateWidgetNarration(NarrationElementOutput builder) {
-
+    
     }
+    //#else
+    //$$ @Override
+    //$$ public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    //$$
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+    //$$     Screen currentScreen = Minecraft.getInstance().screen;
+    //$$
+    //$$     if (currentScreen != null) {
+    //$$         currentScreen.renderTooltip(poseStack, ShapeType.createTooltipText(entity), mouseX, mouseY);
+    //$$     }
+    //$$ }
+    //#endif
 }

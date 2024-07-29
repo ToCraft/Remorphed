@@ -1,6 +1,5 @@
 package tocraft.remorphed.network;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -11,6 +10,9 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.network.ModernNetworking;
+import tocraft.craftedcore.patched.CEntity;
+import tocraft.craftedcore.patched.Identifier;
+import tocraft.craftedcore.patched.TComponent;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.Walkers;
@@ -30,13 +32,15 @@ public class NetworkHandler {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.SHAPE_REQUEST, NetworkHandler::handleShapeRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, FAVORITE_UPDATE, NetworkHandler::handleFavoriteRequestPacket);
 
-        ModernNetworking.registerType(UNLOCKED_SYNC);
-        ModernNetworking.registerType(FAVORITE_SYNC);
+        //#if MC>=1205
+        ModernNetworking.registerType(SHAPE_REQUEST);
+        ModernNetworking.registerType(FAVORITE_UPDATE);
+        //#endif
     }
 
     public static <T extends LivingEntity> void sendSwap2ndShapeRequest(@NotNull ShapeType<T> type) {
         CompoundTag compound = new CompoundTag();
-        compound.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(type.getEntityType()).toString());
+        compound.putString("id", Walkers.getEntityTypeRegistry().getKey(type.getEntityType()).toString());
         compound.putInt("variant", type.getVariantData());
 
         ModernNetworking.sendToServer(NetworkHandler.SHAPE_REQUEST, compound);
@@ -47,14 +51,14 @@ public class NetworkHandler {
         context.getPlayer().getServer().execute(() -> {
             // check if player is blacklisted
             if (Walkers.CONFIG.playerUUIDBlacklist.contains(context.getPlayer().getUUID())) {
-                context.getPlayer().displayClientMessage(Component.translatable("walkers.player_blacklisted"), true);
+                context.getPlayer().displayClientMessage(TComponent.translatable("walkers.player_blacklisted"), true);
                 return;
             }
 
-            ResourceLocation typeId = new ResourceLocation(compound.getString("id"));
+            ResourceLocation typeId = Identifier.parse(compound.getString("id"));
             int typeVariant = compound.getInt("variant");
 
-            EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId);
+            EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId);
 
             // make the default ShapeType null, doing it this way, it's ensured that invalid 2ndShapes won't cause crashes.
             @Nullable
@@ -62,7 +66,7 @@ public class NetworkHandler {
             // update Player
             boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
             if (result && type != null)
-                PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
+                PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(CEntity.level(context.getPlayer())));
 
             // Refresh player dimensions
             context.getPlayer().refreshDimensions();
@@ -82,7 +86,7 @@ public class NetworkHandler {
 
     public static void sendFavoriteRequest(ShapeType<? extends LivingEntity> type, boolean favorite) {
         CompoundTag packet = new CompoundTag();
-        packet.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(type.getEntityType()).toString());
+        packet.putString("id", Walkers.getEntityTypeRegistry().getKey(type.getEntityType()).toString());
         packet.putInt("variant", type.getVariantData());
         packet.putBoolean("favorite", favorite);
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
@@ -90,7 +94,7 @@ public class NetworkHandler {
 
     @SuppressWarnings({"unchecked", "DataFlowIssue"})
     private static void handleFavoriteRequestPacket(ModernNetworking.Context context, CompoundTag packet) {
-        EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(packet.getString("id")));
+        EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(Identifier.parse(packet.getString("id")));
         int variant = packet.getInt("variant");
         boolean favorite = packet.getBoolean("favorite");
 
