@@ -1,5 +1,7 @@
 package tocraft.remorphed.screen.widget;
 
+import dev.tocraft.skinshifter.SkinShifter;
+import dev.tocraft.skinshifter.data.SkinCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -13,13 +15,14 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 //#endif
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import tocraft.craftedcore.patched.TComponent;
 import tocraft.craftedcore.patched.client.CGraphics;
+import tocraft.craftedcore.platform.PlayerProfile;
+import tocraft.remorphed.Remorphed;
+import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
-import tocraft.walkers.api.variant.ShapeType;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
 
@@ -43,12 +46,21 @@ public class PlayerWidget extends AbstractButton {
     //#else
     //$$ public void renderButton(PoseStack guiGraphics, int mouseX, int mouseY, float delta) {
     //#endif
-            if (Minecraft.getInstance().player != null) {
+        AbstractClientPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
             //#if MC>1201
-            ResourceLocation skinLocation = Minecraft.getInstance().player.getSkin().texture();
+            ResourceLocation skinLocation = player.getSkin().texture();
             //#else
-            //$$ ResourceLocation skinLocation = Minecraft.getInstance().player.getSkinTextureLocation();
+            //$$ ResourceLocation skinLocation = player.getSkinTextureLocation();
             //#endif
+            if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(player) != null) {
+                // still render own skin as icon when in another skin
+                PlayerProfile playerProfile = PlayerProfile.ofId(player.getUUID());
+                if (playerProfile != null && playerProfile.skin() != null) {
+                    skinLocation = SkinCache.getCustomSkinId(playerProfile.skin());
+                }
+            }
+
             CGraphics.blit(guiGraphics, skinLocation, getX(), getY(), getWidth(), getHeight(), 8.0f, 8, 8, 8, 64, 64);
                 CGraphics.blit(guiGraphics, skinLocation, getX(), getY(), getWidth(), getHeight(), 40.0f, 8, 8, 8, 64, 64);
         } else {
@@ -67,9 +79,14 @@ public class PlayerWidget extends AbstractButton {
 
     @Override
     public void onPress() {
-        if (Minecraft.getInstance().player != null && ((PlayerDataProvider) Minecraft.getInstance().player).walkers$getCurrentShape() != null) {
-            SwapPackets.sendSwapRequest();
-            parent.onClose();
+        if (Minecraft.getInstance().player != null) {
+            if (((PlayerDataProvider) Minecraft.getInstance().player).walkers$getCurrentShape() != null) {
+                SwapPackets.sendSwapRequest();
+                parent.onClose();
+            } else if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(Minecraft.getInstance().player) != Minecraft.getInstance().player.getUUID()) {
+                NetworkHandler.sendResetSkinPacket();
+                parent.onClose();
+            }
         }
     }
 

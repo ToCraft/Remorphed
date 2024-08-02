@@ -5,6 +5,7 @@ import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @see PlayerMorph
@@ -17,5 +18,13 @@ public interface RemorphedPlayerDataProvider {
 
     int remorphed$getKills(ShapeType<? extends LivingEntity> type);
 
-    Set<ShapeType<?>> remorphed$getFavorites();
+    Set<ShapeType<?>> remorphed$getFavoriteShapes();
+
+    Map<UUID, Integer> remorphed$getUnlockedSkins();
+
+    void remorphed$addKill(UUID skinId);
+
+    int remorphed$getKills(UUID skinId);
+
+    Set<UUID> remorphed$getFavoriteSkins();
 }

@@ -3,4 +3,5 @@ apply from: "https://raw.githubusercontent.com/ToCraft/GradleMaster/v2/neoforge.
 dependencies {
     modApi "dev.tocraft:craftedcore-neoforge:${parent.name}-${rootProject.craftedcore_version}"
     modApi "dev.tocraft:walkers-neoforge:${parent.name}-${rootProject.woodwalkers_version}"
+    modApi "dev.tocraft:skinshifter-neoforge:${parent.name}-${rootProject.skinshifter_version}"
 }

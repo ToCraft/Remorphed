@@ -26,6 +26,8 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
                     PlayerShape.updateShapes(killer, type.create(CEntity.level(killer)));
                 }
             }
+        } else if (entity instanceof Player && source.getEntity() instanceof ServerPlayer killer) {
+            PlayerMorph.addPlayerKill(killer, entity.getUUID());
         }
 
         return InteractionResult.PASS;

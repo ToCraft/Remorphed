@@ -8,7 +8,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,22 +23,30 @@ import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused"})
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
+    @Shadow @Final private static Logger LOGGER;
     @Unique
     private final Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<>();
     @Unique
     private final Set<ShapeType<?>> remorphed$favoriteShapes = new HashSet<>();
     @Unique
+    private final Map<UUID, Integer> remorphed$unlockedSkins = new ConcurrentHashMap<>();
+    @Unique
+    private final Set<UUID> remorphed$favoriteSkins = new CopyOnWriteArraySet<>();
+    @Unique
     private final String UNLOCKED_SHAPES = "UnlockedShapes";
     @Unique
     private final String FAVORITE_SHAPES = "FavoriteShapes";
+    @Unique
+    private final String UNLOCKED_SKINS = "UnlockedSkins";
+    @Unique
+    private final String FAVORITE_SKINS = "FavoriteSkins";
 
     private PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level world) {
         super(type, world);
@@ -61,30 +72,57 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     private CompoundTag remorphed$writeData() {
         CompoundTag tag = new CompoundTag();
-        ListTag unlockedList = new ListTag();
+        ListTag unlockedShapes = new ListTag();
         remorphed$unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
                 entryTag.putInt("killAmount", killAmount);
-                unlockedList.add(entryTag);
+                unlockedShapes.add(entryTag);
             }
         });
-        if (!remorphed$unlockedShapes.isEmpty())
-            tag.put(UNLOCKED_SHAPES, unlockedList);
+        if (!unlockedShapes.isEmpty()) {
+            tag.put(UNLOCKED_SHAPES, unlockedShapes);
+        }
 
-        ListTag favoritesList = new ListTag();
+        ListTag favoriteShapes = new ListTag();
         remorphed$favoriteShapes.forEach(shape -> {
             if (shape != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
-                favoritesList.add(entryTag);
+                favoriteShapes.add(entryTag);
             }
         });
-        if (!remorphed$favoriteShapes.isEmpty())
-            tag.put(FAVORITE_SHAPES, favoritesList);
+        if (!favoriteShapes.isEmpty()) {
+            tag.put(FAVORITE_SHAPES, favoriteShapes);
+        }
+
+        ListTag unlockedSkins = new ListTag();
+        remorphed$unlockedSkins.forEach((skinId, killAmount) -> {
+            if (killAmount > 0 && skinId != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putUUID("uuid", skinId);
+                entryTag.putInt("killAmount", killAmount);
+                unlockedSkins.add(entryTag);
+            }
+        });
+        if (!unlockedSkins.isEmpty()) {
+            tag.put(UNLOCKED_SKINS, unlockedSkins);
+        }
+
+        ListTag favoriteSkins = new ListTag();
+        remorphed$favoriteSkins.forEach(skinId -> {
+            if (skinId != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putUUID("uuid", skinId);
+                favoriteSkins.add(entryTag);
+            }
+        });
+        if (!favoriteSkins.isEmpty()) {
+            tag.put(FAVORITE_SKINS, favoriteSkins);
+        }
 
         return tag;
     }
@@ -94,9 +132,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     public void remorphed$readData(CompoundTag tag) {
         remorphed$unlockedShapes.clear();
         remorphed$favoriteShapes.clear();
+        remorphed$unlockedSkins.clear();
+        remorphed$favoriteSkins.clear();
 
-        ListTag unlockedList = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
-        unlockedList.forEach(entry -> {
+        ListTag unlockedShapes = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
+        unlockedShapes.forEach(entry -> {
             if (entry instanceof CompoundTag) {
                 ResourceLocation typeId = Identifier.parse(((CompoundTag) entry).getString("id"));
                 int typeVariantId = ((CompoundTag) entry).getInt("variant");
@@ -105,13 +145,30 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                 remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId), typeVariantId), killAmount);
             }
         });
-        ListTag favoritesList = tag.getList(FAVORITE_SHAPES, ListTag.TAG_COMPOUND);
-        favoritesList.forEach(entry -> {
+        ListTag favoriteShapes = tag.getList(FAVORITE_SHAPES, ListTag.TAG_COMPOUND);
+        favoriteShapes.forEach(entry -> {
             if (entry instanceof CompoundTag) {
                 ResourceLocation typeId = Identifier.parse(((CompoundTag) entry).getString("id"));
                 int typeVariantId = ((CompoundTag) entry).getInt("variant");
 
                 remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId), typeVariantId));
+            }
+        });
+
+        ListTag unlockedSkins = tag.getList(UNLOCKED_SKINS, ListTag.TAG_COMPOUND);
+        unlockedSkins.forEach(entry -> {
+            if (entry instanceof CompoundTag) {
+                UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+                int killAmount = ((CompoundTag) entry).getInt("killAmount");
+                remorphed$unlockedSkins.put(skinId, killAmount);
+            }
+        });
+        ListTag favoriteSkins = tag.getList(FAVORITE_SKINS, ListTag.TAG_COMPOUND);
+        favoriteSkins.forEach(entry -> {
+            if (entry instanceof CompoundTag) {
+                UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+
+                remorphed$favoriteSkins.add(skinId);
             }
         });
     }
@@ -144,7 +201,31 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Unique
     @Override
-    public Set<ShapeType<?>> remorphed$getFavorites() {
+    public Set<ShapeType<?>> remorphed$getFavoriteShapes() {
         return remorphed$favoriteShapes;
+    }
+
+    @Unique
+    @Override
+    public Map<UUID, Integer> remorphed$getUnlockedSkins() {
+        return remorphed$unlockedSkins;
+    }
+
+    @Unique
+    @Override
+    public void remorphed$addKill(UUID skinId) {
+        remorphed$unlockedSkins.put(skinId, remorphed$getKills(skinId) + 1);
+    }
+
+    @Unique
+    @Override
+    public int remorphed$getKills(UUID skinId) {
+        return remorphed$unlockedSkins.getOrDefault(skinId, 0);
+    }
+
+    @Unique
+    @Override
+    public Set<UUID> remorphed$getFavoriteSkins() {
+        return remorphed$favoriteSkins;
     }
 }

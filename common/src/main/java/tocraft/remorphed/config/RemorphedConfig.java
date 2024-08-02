@@ -12,6 +12,7 @@ public class RemorphedConfig implements Config {
     @Synchronize
     public boolean creativeUnlockAll = true;
     public int killToUnlock = 1;
+    public int killToUnlockPlayers = 2;
     public boolean autoTransform = false;
     @Synchronize
     public boolean lockTransform = false;

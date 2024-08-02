@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tocraft.craftedcore.config.Config;
 import tocraft.craftedcore.config.ConfigLoader;
 import tocraft.craftedcore.event.common.CommandEvents;
 import tocraft.craftedcore.event.common.EntityEvents;
@@ -18,6 +19,7 @@ import tocraft.craftedcore.patched.CEntity;
 import tocraft.craftedcore.patched.Identifier;
 import tocraft.craftedcore.patched.TComponent;
 import tocraft.craftedcore.platform.PlatformData;
+import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
@@ -31,10 +33,7 @@ import tocraft.walkers.api.events.ShapeEvents;
 import tocraft.walkers.api.platform.ApiLevel;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class Remorphed {
 
@@ -43,6 +42,7 @@ public class Remorphed {
     public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
     public static boolean displayVariantsInMenu = true;
     public static boolean displayTraitsInMenu = true;
+    public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {
         ShapeEvents.UNLOCK_SHAPE.register(new ShapeEventsCallback());
@@ -93,6 +93,10 @@ public class Remorphed {
         }
     }
 
+    public static List<PlayerProfile> getUnlockedSkins(Player player) {
+        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= CONFIG.killToUnlockPlayers || CONFIG.killToUnlockPlayers == 0) && CONFIG.killToUnlockPlayers != -1).map(PlayerProfile::ofId).filter(Objects::nonNull).toList());
+    }
+
     public static int getKillToUnlock(EntityType<?> entityType) {
         String id = Walkers.getEntityTypeRegistry().getKey(entityType).toString();
         if (Remorphed.CONFIG.killToUnlockByType.containsKey(id)) return Remorphed.CONFIG.killToUnlockByType.get(id);
@@ -108,20 +112,29 @@ public class Remorphed {
 
         // serialize current shape data to tag if it exists
         Map<ShapeType<?>, Integer> unlockedShapes = PlayerMorph.getUnlockedShapes(changed);
-
-        ListTag list = new ListTag();
-
+        ListTag shapesList = new ListTag();
         unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {
                 CompoundTag compound = new CompoundTag();
                 compound.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
                 compound.putInt("variant", shape.getVariantData());
                 compound.putInt("killAmount", killAmount);
-                list.add(compound);
+                shapesList.add(compound);
             }
         });
+        if (!shapesList.isEmpty()) compoundTag.put("UnlockedShapes", shapesList);
 
-        if (!unlockedShapes.isEmpty()) compoundTag.put("UnlockedShapes", list);
+        Map<UUID, Integer> unlockedSkins = PlayerMorph.getUnlockedSkinIds(changed);
+        ListTag skinsList = new ListTag();
+        unlockedSkins.forEach((skinId, killAmount) -> {
+            if (killAmount > 0 && skinId != null) {
+                CompoundTag compound = new CompoundTag();
+                compound.putUUID("uuid", skinId);
+                compound.putInt("killAmount", killAmount);
+                skinsList.add(compound);
+            }
+        });
+        if (!skinsList.isEmpty()) compoundTag.put("UnlockedSkins", skinsList);
 
         compoundTag.putUUID("uuid", changed.getUUID());
         ModernNetworking.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, compoundTag);

@@ -3,10 +3,11 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
         maven { url "https://maven.tocraft.dev/public" }
+        mavenLocal()
     }
     dependencies {
         classpath group: 'com.diluv.schoomp', name: 'Schoomp', version: '1.2.6'
-        classpath "dev.tocraft:preprocessor:0.96-SNAPSHOT"
+        classpath "dev.tocraft:preprocessor:0.111-SNAPSHOT"
     }
 }
 
@@ -22,7 +23,6 @@ println()
 println "Minecraft: ${project.name} (Java ${project.props.java})"
 if (project.props.mappings != null) {
     println "├── Parchment: ${project.props.mappings}"
-
 }
 if (project.props.fabric != null) {
     println "├── Fabric: ${project.props.fabric}"
@@ -52,12 +52,14 @@ apply plugin: "dev.tocraft.preprocessor"
 
 layout.buildDirectory.set(rootDir.toPath().resolve("build/$project.name").toFile())
 
+apply plugin: "dev.tocraft.preprocessor"
+
 subprojects {
+    layout.buildDirectory.set(parent.layout.buildDirectory.file(project.name).get().asFile)
+
     apply plugin: "dev.architectury.loom"
     apply plugin: "maven-publish"
     apply plugin: "dev.tocraft.preprocessor"
-
-    layout.buildDirectory.set(parent.layout.buildDirectory.file(project.name).get().asFile)
 
     preprocess {
         vars.put("MC", project.props.mc_id != null ? project.props.mc_id : project.name.replaceAll(".", ""))
@@ -107,7 +109,7 @@ allprojects {
 
 ext {
     mod_meta = [
-            minecraft_version  : project.name,
+            minecraft_version: project.name,
             version: version,
             craftedcore_version: craftedcore_version,
             woodwalkers_version: woodwalkers_version

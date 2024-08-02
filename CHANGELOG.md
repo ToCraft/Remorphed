@@ -1,3 +1,10 @@
+remorphed 4.0
+================
+
+- merge to new PreProcessor, CraftedCore 5 & Walkers 5
+- add support for SkinShifter
+- re-implement async menu loading
+
 remorphed 3.6.3
 ================
 

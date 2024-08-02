@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[48,)"
+loaderVersion = "[1,)"
 issueTrackerURL = "https://github.com/ToCraft/Remorphed/issues"
 displayURL = "https://github.com/ToCraft/Remorphed"
 license = "MIT"
@@ -18,7 +18,7 @@ logoFile = "icon.png"
 [[dependencies.remorphed]]
 modId = "forge"
 mandatory = true
-versionRange = "[48,)"
+versionRange = "[1,)"
 ordering = "NONE"
 side = "BOTH"
 
