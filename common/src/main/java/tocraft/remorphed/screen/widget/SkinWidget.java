@@ -3,19 +3,30 @@ package tocraft.remorphed.screen.widget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.impl.FakeClientPlayer;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
+
+//#if MC>=1201
+import net.minecraft.client.gui.GuiGraphics;
+//#else
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
+//#if MC>1182
+import org.joml.Quaternionf;
+import net.minecraft.client.gui.components.Tooltip;
+//#if MC>=1202
+import org.joml.Vector3f;
+//#endif
+//#else
+//$$ import net.minecraft.client.gui.screens.Screen;
+//#endif
 
 @Environment(EnvType.CLIENT)
 public class SkinWidget extends ShapeWidget {
@@ -48,7 +59,11 @@ public class SkinWidget extends ShapeWidget {
     }
 
     @Override
+    //#if MC>1194
     protected void renderShape(GuiGraphics guiGraphics) {
+    //#else
+    //$$ protected void renderShape(PoseStack guiGraphics) {
+    //#endif
         if (skin.skin() != null) {
             //#if MC>1201
             InventoryScreen.renderEntityInInventory(guiGraphics, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer);

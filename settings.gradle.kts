@@ -10,7 +10,7 @@ pluginManagement {
 }
 
 // set to only use one minecraft version
-val minecraft = "1.21"
+val minecraft = ""
 
 file("props").listFiles()?.forEach {
     var forcedVersion : String? = startParameter.projectProperties["minecraft"]
@@ -50,33 +50,33 @@ file("props").listFiles()?.forEach {
     include(":$version")
     project(":$version").apply {
         projectDir = file("versions/$version")
-        buildFileName = "../../build.gradle"
+        buildFileName = "../../build.gradle.kts"
     }
 
     include(":$version:common")
     project(":$version:common").apply {
-        projectDir = file("common")
+        buildFileName = "../../../common/build.gradle.kts"
     }
 
     if (foundFabric) {
         include(":$version:fabric")
         project(":$version:fabric").apply {
-            projectDir = file("fabric")
+            buildFileName = "../../../fabric/build.gradle.kts"
         }
     }
     if (foundForge) {
         include(":$version:forge")
         project(":$version:forge").apply {
-            projectDir = file("forge")
+            buildFileName = "../../../forge/build.gradle.kts"
         }
     }
     if (foundNeoForge) {
         include(":$version:neoforge")
         project(":$version:neoforge").apply {
-            projectDir = file("neoforge")
+            buildFileName = "../../../neoforge/build.gradle.kts"
         }
     }
 }
 
-rootProject.name = "Remorphed"
+rootProject.name = "ReMorphed"
 rootProject.buildFileName = "root.gradle.kts"

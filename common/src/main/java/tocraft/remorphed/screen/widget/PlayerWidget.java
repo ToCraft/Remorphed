@@ -5,15 +5,6 @@ import dev.tocraft.skinshifter.data.SkinCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-//#if MC>=1201
-import net.minecraft.client.gui.GuiGraphics;
-//#else
-//$$ import com.mojang.blaze3d.vertex.PoseStack;
-//#endif
-import net.minecraft.client.gui.components.AbstractButton;
-//#if MC>1182
-import net.minecraft.client.gui.components.Tooltip;
-//#endif
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
@@ -25,6 +16,19 @@ import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
+import net.minecraft.client.gui.components.AbstractButton;
+
+//#if MC>=1201
+import net.minecraft.client.gui.GuiGraphics;
+//#else
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
+//#if MC>1182
+import net.minecraft.client.gui.components.Tooltip;
+//#else
+//$$ import net.minecraft.client.gui.screens.Screen;
+//$$ import tocraft.craftedcore.patched.TComponent;
+//#endif
 
 @Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
@@ -83,7 +87,8 @@ public class PlayerWidget extends AbstractButton {
             if (((PlayerDataProvider) Minecraft.getInstance().player).walkers$getCurrentShape() != null) {
                 SwapPackets.sendSwapRequest();
                 parent.onClose();
-            } else if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(Minecraft.getInstance().player) != Minecraft.getInstance().player.getUUID()) {
+            }
+            if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(Minecraft.getInstance().player) != Minecraft.getInstance().player.getUUID()) {
                 NetworkHandler.sendResetSkinPacket();
                 parent.onClose();
             }

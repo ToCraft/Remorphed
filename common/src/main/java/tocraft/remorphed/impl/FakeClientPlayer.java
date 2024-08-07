@@ -7,55 +7,71 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.platform.PlayerProfile;
+
+import java.util.UUID;
+
+//#if MC>1201
+import net.minecraft.client.resources.PlayerSkin;
+//#endif
 
 @Environment(EnvType.CLIENT)
 public class FakeClientPlayer extends AbstractClientPlayer {
+    //#if MC>1201
     private final PlayerSkin skin;
-
-    public FakeClientPlayer(ClientLevel level, @NotNull PlayerProfile skin) {
-        super(level, new GameProfile(skin.id(), skin.name()));
-        if (skin.skin() != null) {
-            ResourceLocation skinId = SkinCache.getCustomSkinId(skin.skin());
-            ResourceLocation capeId = SkinShifter.CONFIG.changeCape ? SkinCache.getCustomCapeId(skin.cape()) : null;
-            PlayerSkin.Model model = skin.isSlim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
-            this.skin = new PlayerSkin(skinId, skin.skin().toString(), capeId, null, model, true);
+    
+    public FakeClientPlayer(ClientLevel level, @NotNull PlayerProfile skinProfile) {
+        super(level, new GameProfile(skinProfile.id(), skinProfile.name()));
+        if (skinProfile.skin() != null) {
+            ResourceLocation skinId = SkinCache.getCustomSkinId(skinProfile.skin());
+            ResourceLocation capeId = SkinShifter.CONFIG.changeCape ? SkinCache.getCustomCapeId(skinProfile.cape()) : null;
+            PlayerSkin.Model model = skinProfile.isSlim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
+            this.skin = new PlayerSkin(skinId, skinProfile.skin().toString(), capeId, null, model, true);
         } else {
             this.skin = super.getSkin();
         }
     }
-
-    //#if MC>1201
+    
     @Override
     public @NotNull PlayerSkin getSkin() {
         return this.skin;
     }
     //#else
-    //$$ @Overwrite
-    //$$ public ResourceLocation setToNewSkin() {
-    //$$     ShiftPlayerSkin skin = SkinPlayerData.getSkin((Player) (Object) this);
-    //$$     if (skin != null && skin.skin() != null) {
-    //$$         cir.setReturnValue(SkinCache.getCustomSkinId(skin.skin()));
+    //$$ @Nullable
+    //$$ private final ResourceLocation skinId;
+    //$$ @Nullable
+    //$$ private final String modelType;
+    //$$ @Nullable
+    //$$ private final ResourceLocation cloakId;
+    //$$
+    //$$ public FakeClientPlayer(ClientLevel clientLevel, @NotNull PlayerProfile skinProfile) {
+    //$$     super(clientLevel, new GameProfile(skinProfile.id(), skinProfile.name()));
+    //$$
+    //$$     if (skinProfile.skin() != null) {
+    //$$         skinId = SkinCache.getCustomSkinId(skinProfile.skin());
+    //$$         modelType = skinProfile.isSlim() ? "slim" : "default";
+    //$$         cloakId = SkinCache.getCustomCapeId(skinProfile.cape());
+    //$$     } else {
+    //$$         skinId = null;
+    //$$         modelType = null;
+    //$$         cloakId = null;
     //$$     }
     //$$ }
-    //$$ @Overwrite
-    //$$ public String setModelType() {
-    //$$     ShiftPlayerSkin skin = SkinPlayerData.getSkin((Player) (Object) this);
-    //$$     if (null != skin && skin.skin() != null) {
-    //$$         cir.setReturnValue(skin.isSlim() ? "slim" : "default");
-    //$$     }
+    //$$
+    //$$ @Override
+    //$$ public @NotNull ResourceLocation getSkinTextureLocation() {
+    //$$     return skinId != null ? skinId : super.getSkinTextureLocation();
     //$$ }
-    //$$ @Overwrite
-    //$$ public ResourceLocation setToNewCloak() {
-    //$$     if (SkinShifter.CONFIG.changeCape) {
-    //$$         ShiftPlayerSkin skin = SkinPlayerData.getSkin((Player) (Object) this);
-    //$$         if (skin != null && skin.cape() != null) {
-    //$$             cir.setReturnValue(SkinCache.getCustomCapeId(skin.cape()));
-    //$$         }
-    //$$     }
+    //$$ @Override
+    //$$ public @NotNull String getModelName() {
+    //$$     return modelType != null ? modelType : super.getModelName();
+    //$$ }
+    //$$ @Override
+    //$$ public @Nullable ResourceLocation getCloakTextureLocation() {
+    //$$     return skinId != null || cloakId != null ? cloakId : super.getCloakTextureLocation();
     //$$ }
     //#endif
 }

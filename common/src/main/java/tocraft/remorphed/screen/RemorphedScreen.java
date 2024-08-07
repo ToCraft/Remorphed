@@ -36,14 +36,16 @@ import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@SuppressWarnings({"DataFlowIssue"})
+@SuppressWarnings({"DataFlowIssue", "SequencedCollectionMethodCanBeUsed"})
 @Environment(EnvType.CLIENT)
 public class RemorphedScreen extends Screen {
     private final List<ShapeType<?>> unlockedShapes = new CopyOnWriteArrayList<>();
     private final List<PlayerProfile> unlockedSkins = new CopyOnWriteArrayList<>();
-    private final Map<ShapeType<?>, Mob> renderEntities = new LinkedHashMap<>();
+    private final Map<ShapeType<?>, Mob> renderEntities = new ConcurrentHashMap<>();
+    private final Map<PlayerProfile, FakeClientPlayer> renderPlayers = new ConcurrentHashMap<>();
     private final List<ShapeWidget> shapeWidgets = new CopyOnWriteArrayList<>();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -76,66 +78,72 @@ public class RemorphedScreen extends Screen {
             addRenderableWidget(specialShapeButton);
         }
 
-        populateUnlockedRenderEntities(minecraft.player);
+        CompletableFuture.runAsync(() ->  {
+            populateUnlockedRenderEntities(minecraft.player);
+            populateUnlockedRenderPlayers(minecraft.player);
 
-        ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+            ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
-        // handle favorites
-        unlockedShapes.sort((first, second) -> {
-            if (Objects.equals(first, currentShape)) {
-                return -1;
-            } else if (Objects.equals(second, currentShape)) {
-                return 1;
-            } else {
-                boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
-                boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
-                if (firstIsFav == secondIsFav) {
-                    return 0;
-                }
-                if (firstIsFav) {
+            // handle favorites
+            unlockedShapes.sort((first, second) -> {
+                if (Objects.equals(first, currentShape)) {
                     return -1;
-                }
-                else return 1;
-            }
-        });
-
-        // filter unlocked
-        if (!Remorphed.displayVariantsInMenu) {
-            List<ShapeType<?>> newUnlocked = new ArrayList<>();
-            for (ShapeType<?> shapeType : unlockedShapes) {
-                if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                    newUnlocked.add(shapeType);
-                }
-            }
-
-            unlockedShapes.clear();
-            unlockedShapes.addAll(newUnlocked);
-        }
-
-        unlockedSkins.clear();
-
-        if (Remorphed.foundSkinShifter) {
-            unlockedSkins.addAll(Remorphed.getUnlockedSkins(minecraft.player));
-            unlockedSkins.sort((first, second) -> {
-                if (Objects.equals(first.id(), SkinShifter.getCurrentSkin(minecraft.player))) {
-                    return -1;
-                } else if (Objects.equals(second.id(), SkinShifter.getCurrentSkin(minecraft.player))) {
+                } else if (Objects.equals(second, currentShape)) {
                     return 1;
                 } else {
-                    boolean firstIsFav = PlayerMorph.getFavoriteSkins(minecraft.player).contains(first);
-                    boolean secondIsFav = PlayerMorph.getFavoriteSkins(minecraft.player).contains(second);
+                    boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
+                    boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
                     if (firstIsFav == secondIsFav) {
-                        return first.name().compareTo(second.name());
+                        return 0;
                     }
-                    if (firstIsFav) {
+                    else if (firstIsFav) {
                         return -1;
                     }
-                    else return 1;
+                    else {
+                        return 1;
+                    }
                 }
             });
-        }
 
-        CompletableFuture.runAsync(() ->  populateShapeWidgets(unlockedShapes, unlockedSkins));
+            // filter unlocked
+            if (!Remorphed.displayVariantsInMenu) {
+                List<ShapeType<?>> newUnlocked = new ArrayList<>();
+                for (ShapeType<?> shapeType : unlockedShapes) {
+                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                        newUnlocked.add(shapeType);
+                    }
+                }
+
+                unlockedShapes.clear();
+                unlockedShapes.addAll(newUnlocked);
+            }
+            
+            if (Remorphed.foundSkinShifter) {
+                UUID currentSkin = SkinShifter.getCurrentSkin(minecraft.player);
+
+                unlockedSkins.sort((first, second) -> {
+                    if (Objects.equals(first.id(), currentSkin) && currentShape != null) {
+                        return -1;
+                    } else if (Objects.equals(second.id(), currentSkin) && currentShape != null) {
+                        return 1;
+                    } else {
+                        boolean firstIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(first.id());
+                        boolean secondIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(second.id());
+                        if (firstIsFav == secondIsFav) {
+                            return first.name().compareTo(second.name());
+                        }
+                        else if (firstIsFav) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
+                    }
+                });
+            }
+
+            populateShapeWidgets(unlockedShapes, unlockedSkins);
+        });
 
         // implement search handler
         searchBar.setResponder(text -> {
@@ -228,7 +236,7 @@ public class RemorphedScreen extends Screen {
             }
 
             for (NarratableEntry button : ((ScreenAccessor) this).getSelectables()) {
-                if (button instanceof EntityWidget<?> widget) {
+                if (button instanceof ShapeWidget widget) {
                     //#if MC>1182
                     widget.setPosition(widget.getX(), (int) (widget.getY() + scrollY * 10));
                     //#else
@@ -242,12 +250,12 @@ public class RemorphedScreen extends Screen {
     }
 
     @SuppressWarnings("unchecked")
-    private void populateShapeWidgets(List<ShapeType<?>> rendered, List<PlayerProfile> skins) {
+    private void populateShapeWidgets(List<ShapeType<?>> rendered, List<PlayerProfile> skinProfiles) {
         shapeWidgets.clear();
         // add widget for each entity to be rendered
         int x = 15;
         int y = 35;
-        int rows = (int) Math.ceil((rendered.size() + skins.size()) / 7f);
+        int rows = (int) Math.ceil((rendered.size() + skinProfiles.size()) / 7f);
 
         ShapeType<LivingEntity> currentType = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
@@ -255,8 +263,10 @@ public class RemorphedScreen extends Screen {
             for (int xIndex = 0; xIndex < 7; xIndex++) {
                 int listIndex = yIndex * 7 + xIndex;
 
-                if (Remorphed.foundSkinShifter && listIndex < skins.size()) {
-                    PlayerProfile skinProfile = skins.get(listIndex);
+                if (Remorphed.foundSkinShifter && listIndex < skinProfiles.size()) {
+                    PlayerProfile skinProfile = skinProfiles.get(listIndex);
+                    FakeClientPlayer fakePlayer = renderPlayers.get(skinProfile);
+                    if (fakePlayer != null) {
                         SkinWidget skinWidget = new SkinWidget(
                                 (getWindow().getGuiScaledWidth() - 27) / 7f * xIndex + x,
                                 getWindow().getGuiScaledHeight() / 5f * yIndex + y,
@@ -266,14 +276,17 @@ public class RemorphedScreen extends Screen {
                                 new FakeClientPlayer(minecraft.level, skinProfile),
                                 this,
                                 PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
-                                Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.id())
+                                Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.id()) && currentType == null
                         );
 
                         addRenderableWidget(skinWidget);
                         shapeWidgets.add(skinWidget);
+                    } else {
+                        Remorphed.LOGGER.error("invalid skin profile: {}", skinProfile);
+                    }
                 }
-                else if (listIndex < skins.size() + rendered.size()) {
-                    ShapeType<?> type = rendered.get(listIndex - skins.size());
+                else if (listIndex < skinProfiles.size() + rendered.size()) {
+                    ShapeType<?> type = rendered.get(listIndex - skinProfiles.size());
                     Mob entity = renderEntities.get(type);
                     if (entity != null) {
                         EntityWidget<?> entityWidget = new EntityWidget<>(
@@ -298,7 +311,7 @@ public class RemorphedScreen extends Screen {
         }
     }
 
-    public void populateUnlockedRenderEntities(Player player) {
+    public synchronized void populateUnlockedRenderEntities(Player player) {
         unlockedShapes.clear();
         renderEntities.clear();
         List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
@@ -310,7 +323,22 @@ public class RemorphedScreen extends Screen {
             }
         }
 
-        Remorphed.LOGGER.info(String.format("Loaded %d entities for rendering", unlockedShapes.size()));
+        Remorphed.LOGGER.info("Loaded {} entities for rendering", unlockedShapes.size());
+    }
+
+    public synchronized void populateUnlockedRenderPlayers(Player player) {
+        unlockedSkins.clear();
+        renderPlayers.clear();
+        List<PlayerProfile> validUnlocked = Remorphed.getUnlockedSkins(player);
+        for (PlayerProfile profile : validUnlocked) {
+            if (profile.id() != player.getUUID()) {
+                FakeClientPlayer entity = new FakeClientPlayer(minecraft.level, profile);
+                unlockedSkins.add(profile);
+                renderPlayers.put(profile, entity);
+            }
+        }
+
+        Remorphed.LOGGER.info("Loaded {} players for rendering", unlockedSkins.size());
     }
 
     private SearchWidget createSearchBar() {

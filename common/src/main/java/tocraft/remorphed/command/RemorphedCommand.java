@@ -136,7 +136,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                     PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
                                     if (playerProfile == null) {
-                                        CCommandSourceStack.sendSuccess(context.getSource(), Component.translatable("skinshifter.invalid_player", playerName), true);
+                                        CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
                                         return 0;
                                     }
                                     removeSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
@@ -156,7 +156,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                     PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
                                     if (playerProfile == null) {
-                                        CCommandSourceStack.sendSuccess(context.getSource(), Component.translatable("skinshifter.invalid_player", playerName), true);
+                                        CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
                                         return 0;
                                     }
                                     addSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
@@ -185,7 +185,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                     PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
                                     if (playerProfile == null) {
-                                        CCommandSourceStack.sendSuccess(context.getSource(), Component.translatable("skinshifter.invalid_player", playerName), true);
+                                        CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
                                         return 0;
                                     }
                                     hasSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
