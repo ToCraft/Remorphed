@@ -80,8 +80,6 @@ public class RemorphedScreen extends Screen {
 
         CompletableFuture.runAsync(() ->  {
             populateUnlockedRenderEntities(minecraft.player);
-            populateUnlockedRenderPlayers(minecraft.player);
-
             ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
             // handle favorites
@@ -119,6 +117,7 @@ public class RemorphedScreen extends Screen {
             }
             
             if (Remorphed.foundSkinShifter) {
+                populateUnlockedRenderPlayers(minecraft.player);
                 UUID currentSkin = SkinShifter.getCurrentSkin(minecraft.player);
 
                 unlockedSkins.sort((first, second) -> {
@@ -143,30 +142,30 @@ public class RemorphedScreen extends Screen {
             }
 
             populateShapeWidgets(unlockedShapes, unlockedSkins);
-        });
 
-        // implement search handler
-        searchBar.setResponder(text -> {
-            setFocused(searchBar);
+            // implement search handler
+            searchBar.setResponder(text -> {
+                setFocused(searchBar);
 
-            // Only re-filter if the text contents changed
-            if (!lastSearchContents.equals(text)) {
-                ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
-                children().removeIf(button -> button instanceof EntityWidget);
+                // Only re-filter if the text contents changed
+                if (!lastSearchContents.equals(text)) {
+                    ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
+                    children().removeIf(button -> button instanceof EntityWidget);
 
-                List<ShapeType<?>> filteredShapes = unlockedShapes
-                        .stream()
-                        .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
-                        .toList();
-                List<PlayerProfile> filteredSkins = unlockedSkins
-                        .stream()
-                        .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
-                        .toList();
+                    List<ShapeType<?>> filteredShapes = unlockedShapes
+                            .stream()
+                            .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
+                            .toList();
+                    List<PlayerProfile> filteredSkins = unlockedSkins
+                            .stream()
+                            .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
+                            .toList();
 
-                populateShapeWidgets(filteredShapes, filteredSkins);
-            }
+                    populateShapeWidgets(filteredShapes, filteredSkins);
+                }
 
-            lastSearchContents = text;
+                lastSearchContents = text;
+            });
         });
     }
 
@@ -434,7 +433,13 @@ public class RemorphedScreen extends Screen {
         if (mouseY < 35) {
             return searchBar.mouseClicked(mouseX, mouseY, button) || helpButton.mouseClicked(mouseX, mouseY, button) || variantsButton.mouseClicked(mouseX, mouseY, button) || traitsButton.mouseClicked(mouseX, mouseY, button) || playerButton.mouseClicked(mouseX, mouseY, button) || specialShapeButton.mouseClicked(mouseX, mouseY, button);
         } else {
-            return super.mouseClicked(mouseX, mouseY, button);
+            for (ShapeWidget shapeWidget : shapeWidgets) {
+                if (shapeWidget.mouseClicked(mouseX, mouseY, button)) {
+                    this.setFocused(shapeWidget);
+                    return true;
+                }
+            }
         }
+        return false;
     }
 }

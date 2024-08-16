@@ -2,20 +2,18 @@ package tocraft.remorphed.impl;
 
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.skinshifter.SkinShifter;
-import dev.tocraft.skinshifter.data.SkinCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.platform.PlayerProfile;
-
-import java.util.UUID;
 
 //#if MC>1201
 import net.minecraft.client.resources.PlayerSkin;
+//#else
+//$$ import org.jetbrains.annotations.Nullable;
 //#endif
 
 @Environment(EnvType.CLIENT)
@@ -26,8 +24,8 @@ public class FakeClientPlayer extends AbstractClientPlayer {
     public FakeClientPlayer(ClientLevel level, @NotNull PlayerProfile skinProfile) {
         super(level, new GameProfile(skinProfile.id(), skinProfile.name()));
         if (skinProfile.skin() != null) {
-            ResourceLocation skinId = SkinCache.getCustomSkinId(skinProfile.skin());
-            ResourceLocation capeId = SkinShifter.CONFIG.changeCape ? SkinCache.getCustomCapeId(skinProfile.cape()) : null;
+            ResourceLocation skinId = skinProfile.getSkinId();
+            ResourceLocation capeId = SkinShifter.CONFIG.changeCape ? skinProfile.getCapeId() : null;
             PlayerSkin.Model model = skinProfile.isSlim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
             this.skin = new PlayerSkin(skinId, skinProfile.skin().toString(), capeId, null, model, true);
         } else {
@@ -51,9 +49,9 @@ public class FakeClientPlayer extends AbstractClientPlayer {
     //$$     super(clientLevel, new GameProfile(skinProfile.id(), skinProfile.name()));
     //$$
     //$$     if (skinProfile.skin() != null) {
-    //$$         skinId = SkinCache.getCustomSkinId(skinProfile.skin());
+    //$$         skinId = skinProfile.getSkinId();
     //$$         modelType = skinProfile.isSlim() ? "slim" : "default";
-    //$$         cloakId = SkinCache.getCustomCapeId(skinProfile.cape());
+    //$$         cloakId = skinProfile.getCapeId();
     //$$     } else {
     //$$         skinId = null;
     //$$         modelType = null;

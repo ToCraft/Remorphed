@@ -1,7 +1,6 @@
 package tocraft.remorphed.screen.widget;
 
 import dev.tocraft.skinshifter.SkinShifter;
-import dev.tocraft.skinshifter.data.SkinCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -17,6 +16,7 @@ import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
 import net.minecraft.client.gui.components.AbstractButton;
+import java.util.concurrent.CompletableFuture;
 
 //#if MC>=1201
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,9 +59,12 @@ public class PlayerWidget extends AbstractButton {
             //#endif
             if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(player) != null) {
                 // still render own skin as icon when in another skin
-                PlayerProfile playerProfile = PlayerProfile.ofId(player.getUUID());
+                PlayerProfile playerProfile = PlayerProfile.getCachedProfile(player.getUUID());
                 if (playerProfile != null && playerProfile.skin() != null) {
-                    skinLocation = SkinCache.getCustomSkinId(playerProfile.skin());
+                    skinLocation = playerProfile.getSkinId();
+                } else {
+                    // cache profile asynchronous
+                    CompletableFuture.runAsync(() -> PlayerProfile.ofId(player.getUUID()));
                 }
             }
 

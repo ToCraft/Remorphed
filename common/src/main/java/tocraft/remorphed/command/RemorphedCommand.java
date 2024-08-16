@@ -34,6 +34,9 @@ import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 // TODO: Throw when no Player can be found
 public class RemorphedCommand implements CommandEvents.CommandRegistration {
     @Override
@@ -127,19 +130,30 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                 .executes(context -> {
-                                    PlayerProfile playerProfile = PlayerProfile.ofId(UuidArgument.getUuid(context, "playerUUID"));
-                                    removeSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
+                                    UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
+                                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                                    CompletableFuture.runAsync(() -> {
+                                        PlayerProfile playerProfile = PlayerProfile.ofId(playerUUID);
+                                        if (playerProfile == null) {
+                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerUUID), true);
+                                        } else {
+                                            removeSkin(context.getSource(), player, playerProfile);
+                                        }
+                                    });
                                     return 1;
                                 }))
                         .then(Commands.argument("playerName", MessageArgument.message())
                                 .executes(context -> {
                                     String playerName = MessageArgument.getMessage(context, "playerName").getString();
-                                    PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
-                                    if (playerProfile == null) {
-                                        CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
-                                        return 0;
-                                    }
-                                    removeSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
+                                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                                    CompletableFuture.runAsync(() -> {
+                                        PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
+                                        if (playerProfile == null) {
+                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
+                                        } else {
+                                            removeSkin(context.getSource(), player, playerProfile);
+                                        }
+                                    });
                                     return 1;
                                 }))).build();
 
@@ -147,25 +161,37 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                 .executes(context -> {
-                                    PlayerProfile playerProfile = PlayerProfile.ofId(UuidArgument.getUuid(context, "playerUUID"));
-                                    addSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
+                                    UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
+                                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                                    CompletableFuture.runAsync(() -> {
+                                        PlayerProfile playerProfile = PlayerProfile.ofId(playerUUID);
+                                        if (playerProfile == null) {
+                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerUUID), true);
+                                        } else {
+                                            addSkin(context.getSource(), player, playerProfile);
+                                        }
+                                    });
                                     return 1;
                                 }))
                         .then(Commands.argument("playerName", MessageArgument.message())
                                 .executes(context -> {
                                     String playerName = MessageArgument.getMessage(context, "playerName").getString();
-                                    PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
-                                    if (playerProfile == null) {
-                                        CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
-                                        return 0;
-                                    }
-                                    addSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
+                                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                                    CompletableFuture.runAsync(() -> {
+                                        PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
+                                        if (playerProfile == null) {
+                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
+                                        } else {
+                                            addSkin(context.getSource(), player, playerProfile);
+                                        }
+                                    });
                                     return 1;
                                 }))).build();
 
         LiteralCommandNode<CommandSourceStack> clearSkins = Commands.literal("clearSkins")
                 .then(Commands.argument("player", EntityArgument.players()).executes(context -> {
-                    clearSkins(context.getSource(), EntityArgument.getPlayer(context, "player"));
+                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                    clearSkins(context.getSource(), player);
                     return 1;
                 })).build();
 
@@ -176,19 +202,30 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                 .executes(context -> {
-                                    PlayerProfile playerProfile = PlayerProfile.ofId(UuidArgument.getUuid(context, "playerUUID"));
-                                    hasSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
+                                    UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
+                                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                                    CompletableFuture.runAsync(() -> {
+                                        PlayerProfile playerProfile = PlayerProfile.ofId(playerUUID);
+                                        if (playerProfile == null) {
+                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerUUID), true);
+                                        } else {
+                                            hasSkin(context.getSource(), player, playerProfile);
+                                        }
+                                    });
                                     return 1;
                                 }))
                         .then(Commands.argument("playerName", MessageArgument.message())
                                 .executes(context -> {
                                     String playerName = MessageArgument.getMessage(context, "playerName").getString();
-                                    PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
-                                    if (playerProfile == null) {
-                                        CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
-                                        return 0;
-                                    }
-                                    hasSkin(context.getSource(), EntityArgument.getPlayer(context, "player"), playerProfile);
+                                    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+                                    CompletableFuture.runAsync(() -> {
+                                        PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
+                                        if (playerProfile == null) {
+                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
+                                        } else {
+                                            hasSkin(context.getSource(), player, playerProfile);
+                                        }
+                                    });
                                     return 1;
                                 }))).build();
 
