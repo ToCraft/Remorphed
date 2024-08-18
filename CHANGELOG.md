@@ -1,3 +1,8 @@
+remorphed 4.1
+================
+
+- fix crash on 1.20.5+ server
+
 remorphed 4.0
 ================
 

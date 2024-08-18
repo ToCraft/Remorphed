@@ -39,8 +39,8 @@ public class NetworkHandler {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.RESET_SKIN, NetworkHandler::handleResetSkinPacket);
 
         //#if MC>=1205
-        ModernNetworking.registerType(MORPH_REQUEST);
-        ModernNetworking.registerType(FAVORITE_UPDATE);
+        ModernNetworking.registerType(UNLOCKED_SYNC);
+        ModernNetworking.registerType(FAVORITE_SYNC);
         //#endif
     }
 
