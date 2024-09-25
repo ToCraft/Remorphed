@@ -1,3 +1,8 @@
+remorphed 4.2
+================
+
+- add config option for loading menu asynchronously
+
 remorphed 4.1
 ================
 

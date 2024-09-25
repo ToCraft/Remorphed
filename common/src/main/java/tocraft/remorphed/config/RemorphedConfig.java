@@ -1,6 +1,7 @@
 package tocraft.remorphed.config;
 
 import tocraft.craftedcore.config.Config;
+import tocraft.craftedcore.config.annotions.Comment;
 import tocraft.craftedcore.config.annotions.Synchronize;
 import tocraft.remorphed.Remorphed;
 
@@ -23,6 +24,8 @@ public class RemorphedConfig implements Config {
             put("minecraft:wither", 2);
         }
     };
+    @Comment("Whether the entities that should be rendered can be loaded asynchronously")
+    public boolean loadMenuAsynchronous = true;
 
     @Override
     public String getName() {

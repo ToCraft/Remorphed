@@ -78,21 +78,65 @@ public class RemorphedScreen extends Screen {
             addRenderableWidget(specialShapeButton);
         }
 
-        CompletableFuture.runAsync(() ->  {
-            populateUnlockedRenderEntities(minecraft.player);
-            ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+        if (Remorphed.CONFIG.loadMenuAsynchronous) {
+            CompletableFuture.runAsync(this::instantiate);
+        } else {
+            instantiate();
+        }
+    }
 
-            // handle favorites
-            unlockedShapes.sort((first, second) -> {
-                if (Objects.equals(first, currentShape)) {
+    private void instantiate() {
+        populateUnlockedRenderEntities(minecraft.player);
+        ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+
+        // handle favorites
+        unlockedShapes.sort((first, second) -> {
+            if (Objects.equals(first, currentShape)) {
+                return -1;
+            } else if (Objects.equals(second, currentShape)) {
+                return 1;
+            } else {
+                boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
+                boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
+                if (firstIsFav == secondIsFav) {
+                    return 0;
+                }
+                else if (firstIsFav) {
                     return -1;
-                } else if (Objects.equals(second, currentShape)) {
+                }
+                else {
+                    return 1;
+                }
+            }
+        });
+
+        // filter unlocked
+        if (!Remorphed.displayVariantsInMenu) {
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlockedShapes) {
+                if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
+                }
+            }
+
+            unlockedShapes.clear();
+            unlockedShapes.addAll(newUnlocked);
+        }
+
+        if (Remorphed.foundSkinShifter) {
+            populateUnlockedRenderPlayers(minecraft.player);
+            UUID currentSkin = SkinShifter.getCurrentSkin(minecraft.player);
+
+            unlockedSkins.sort((first, second) -> {
+                if (Objects.equals(first.id(), currentSkin) && currentShape != null) {
+                    return -1;
+                } else if (Objects.equals(second.id(), currentSkin) && currentShape != null) {
                     return 1;
                 } else {
-                    boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
-                    boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
+                    boolean firstIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(first.id());
+                    boolean secondIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(second.id());
                     if (firstIsFav == secondIsFav) {
-                        return 0;
+                        return first.name().compareTo(second.name());
                     }
                     else if (firstIsFav) {
                         return -1;
@@ -102,70 +146,32 @@ public class RemorphedScreen extends Screen {
                     }
                 }
             });
+        }
 
-            // filter unlocked
-            if (!Remorphed.displayVariantsInMenu) {
-                List<ShapeType<?>> newUnlocked = new ArrayList<>();
-                for (ShapeType<?> shapeType : unlockedShapes) {
-                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                        newUnlocked.add(shapeType);
-                    }
-                }
+        populateShapeWidgets(unlockedShapes, unlockedSkins);
 
-                unlockedShapes.clear();
-                unlockedShapes.addAll(newUnlocked);
-            }
-            
-            if (Remorphed.foundSkinShifter) {
-                populateUnlockedRenderPlayers(minecraft.player);
-                UUID currentSkin = SkinShifter.getCurrentSkin(minecraft.player);
+        // implement search handler
+        searchBar.setResponder(text -> {
+            setFocused(searchBar);
 
-                unlockedSkins.sort((first, second) -> {
-                    if (Objects.equals(first.id(), currentSkin) && currentShape != null) {
-                        return -1;
-                    } else if (Objects.equals(second.id(), currentSkin) && currentShape != null) {
-                        return 1;
-                    } else {
-                        boolean firstIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(first.id());
-                        boolean secondIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(second.id());
-                        if (firstIsFav == secondIsFav) {
-                            return first.name().compareTo(second.name());
-                        }
-                        else if (firstIsFav) {
-                            return -1;
-                        }
-                        else {
-                            return 1;
-                        }
-                    }
-                });
+            // Only re-filter if the text contents changed
+            if (!lastSearchContents.equals(text)) {
+                ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
+                children().removeIf(button -> button instanceof EntityWidget);
+
+                List<ShapeType<?>> filteredShapes = unlockedShapes
+                        .stream()
+                        .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
+                        .toList();
+                List<PlayerProfile> filteredSkins = unlockedSkins
+                        .stream()
+                        .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
+                        .toList();
+
+                populateShapeWidgets(filteredShapes, filteredSkins);
             }
 
-            populateShapeWidgets(unlockedShapes, unlockedSkins);
-
-            // implement search handler
-            searchBar.setResponder(text -> {
-                setFocused(searchBar);
-
-                // Only re-filter if the text contents changed
-                if (!lastSearchContents.equals(text)) {
-                    ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
-                    children().removeIf(button -> button instanceof EntityWidget);
-
-                    List<ShapeType<?>> filteredShapes = unlockedShapes
-                            .stream()
-                            .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
-                            .toList();
-                    List<PlayerProfile> filteredSkins = unlockedSkins
-                            .stream()
-                            .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
-                            .toList();
-
-                    populateShapeWidgets(filteredShapes, filteredSkins);
-                }
-
-                lastSearchContents = text;
-            });
+            lastSearchContents = text;
         });
     }
 
