@@ -3,34 +3,30 @@ package tocraft.remorphed.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.tocraft.skinshifter.SkinShifter;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.EntityArgument;
-//#if MC>1182
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands.CommandSelection;
-//#endif
-import net.minecraft.commands.arguments.MessageArgument;
-import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.*;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.event.common.CommandEvents;
-import tocraft.craftedcore.patched.CCommandSourceStack;
-import tocraft.craftedcore.patched.CEntitySummonArgument;
-import tocraft.craftedcore.patched.TComponent;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
-import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -40,12 +36,7 @@ import java.util.concurrent.CompletableFuture;
 // TODO: Throw when no Player can be found
 public class RemorphedCommand implements CommandEvents.CommandRegistration {
     @Override
-    //#if MC>1182
     public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registry, CommandSelection selection) {
-        //#else
-        //$$ public void register(CommandDispatcher<CommandSourceStack> dispatcher, Commands.CommandSelection selection) {
-        //$$ Object registry = null;
-        //#endif
 
         LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(Remorphed.MODID)
                 .requires(source -> source.hasPermission(2)).build();
@@ -55,10 +46,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          */
         LiteralCommandNode<CommandSourceStack> removeShape = Commands.literal("removeShape")
                 .then(Commands.argument("player", EntityArgument.players())
-                        .then(Commands.argument("shape", CEntitySummonArgument.id(registry))
+                        .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
                                     removeShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                            CEntitySummonArgument.getEntityTypeId(context, "shape"),
+                                            EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                             null);
                                     return 1;
                                 }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
@@ -67,7 +58,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
                                             removeShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
-                                                    CEntitySummonArgument.getEntityTypeId(context, "shape"),
+                                                    EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                                     nbt);
 
                                             return 1;
@@ -79,10 +70,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          */
         LiteralCommandNode<CommandSourceStack> addShape = Commands.literal("addShape")
                 .then(Commands.argument("player", EntityArgument.players())
-                        .then(Commands.argument("shape",  CEntitySummonArgument.id(registry))
+                        .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
                                     addShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                            CEntitySummonArgument.getEntityTypeId(context, "shape"),
+                                            EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                             null);
                                     return 1;
                                 }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
@@ -91,7 +82,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
                                             addShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
-                                                    CEntitySummonArgument.getEntityTypeId(context, "shape"),
+                                                    EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                                     nbt);
 
                                             return 1;
@@ -112,16 +103,16 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          */
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
                 .then(Commands.argument("player", EntityArgument.players())
-                        .then(Commands.argument("shape",  CEntitySummonArgument.id(registry))
+                        .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                        CEntitySummonArgument.getEntityTypeId(context, "shape"),
+                                        EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                         null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
 
                                             return hasShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
-                                                    CEntitySummonArgument.getEntityTypeId(context, "shape"),
+                                                    EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                                     nbt);
                                         }))))
                 .build();
@@ -135,7 +126,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     CompletableFuture.runAsync(() -> {
                                         PlayerProfile playerProfile = PlayerProfile.ofId(playerUUID);
                                         if (playerProfile == null) {
-                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerUUID), true);
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
                                         } else {
                                             removeSkin(context.getSource(), player, playerProfile);
                                         }
@@ -149,7 +140,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     CompletableFuture.runAsync(() -> {
                                         PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
                                         if (playerProfile == null) {
-                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
                                         } else {
                                             removeSkin(context.getSource(), player, playerProfile);
                                         }
@@ -166,7 +157,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     CompletableFuture.runAsync(() -> {
                                         PlayerProfile playerProfile = PlayerProfile.ofId(playerUUID);
                                         if (playerProfile == null) {
-                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerUUID), true);
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
                                         } else {
                                             addSkin(context.getSource(), player, playerProfile);
                                         }
@@ -180,7 +171,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     CompletableFuture.runAsync(() -> {
                                         PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
                                         if (playerProfile == null) {
-                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
                                         } else {
                                             addSkin(context.getSource(), player, playerProfile);
                                         }
@@ -207,7 +198,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     CompletableFuture.runAsync(() -> {
                                         PlayerProfile playerProfile = PlayerProfile.ofId(playerUUID);
                                         if (playerProfile == null) {
-                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerUUID), true);
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
                                         } else {
                                             hasSkin(context.getSource(), player, playerProfile);
                                         }
@@ -221,7 +212,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     CompletableFuture.runAsync(() -> {
                                         PlayerProfile playerProfile = PlayerProfile.ofName(playerName);
                                         if (playerProfile == null) {
-                                            CCommandSourceStack.sendSuccess(context.getSource(), TComponent.translatable("skinshifter.invalid_player", playerName), true);
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
                                         } else {
                                             hasSkin(context.getSource(), player, playerProfile);
                                         }
@@ -245,54 +236,54 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
     }
 
-    private static int hasShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static int hasShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
-        Component name = TComponent.translatable(type.getEntityType().getDescriptionId());
+        Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
         if (PlayerMorph.getUnlockedShapes(player).containsKey(type)) {
-            CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".hasShape_success",
+            source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasShape_success",
                     player.getDisplayName(), name), true);
 
             return 1;
         } else
-            CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".hasShape_fail", player.getDisplayName(), name), true);
+            source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasShape_fail", player.getDisplayName(), name), true);
 
         return 0;
     }
 
-    private static void removeShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static void removeShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
-        Component name = TComponent.translatable(type.getEntityType().getDescriptionId());
+        Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
         PlayerMorph.getUnlockedShapes(player).remove(type);
 
-        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".removeShape", name, player.getDisplayName()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".removeShape", name, player.getDisplayName()), true);
     }
 
-    private static void addShape(CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static void addShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
-        Component name = TComponent.translatable(type.getEntityType().getDescriptionId());
+        Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
         PlayerMorph.getUnlockedShapes(player).put(type, Remorphed.getKillToUnlock(type.getEntityType()));
 
-        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".addShape", player.getDisplayName(), name), true);
     }
 
-    private static void clearShapes(CommandSourceStack source, ServerPlayer player) {
+    private static void clearShapes(@NotNull CommandSourceStack source, ServerPlayer player) {
         PlayerMorph.getUnlockedShapes(player).clear();
 
-        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()), true);
         PlayerShapeChanger.change2ndShape(player, null);
     }
 
     @SuppressWarnings("unchecked")
     private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {
-        ShapeType<LivingEntity> type = ShapeType.from((EntityType<LivingEntity>) Walkers.getEntityTypeRegistry().get(id));
+        ShapeType<LivingEntity> type = ShapeType.from((EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(id).map(Holder::value).orElse(null));
 
         if (nbt != null) {
             CompoundTag copy = nbt.copy();
             copy.putString("id", id.toString());
-            Entity loaded = EntityType.loadEntityRecursive(copy, serverLevel, it -> it);
+            Entity loaded = EntityType.loadEntityRecursive(copy, serverLevel, EntitySpawnReason.LOAD, it -> it);
             if (loaded instanceof LivingEntity living) {
                 type = new ShapeType<>(living);
             }
@@ -301,32 +292,32 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         return type;
     }
 
-    private static void hasSkin(CommandSourceStack source, ServerPlayer player, PlayerProfile playerProfile) {
+    private static void hasSkin(CommandSourceStack source, ServerPlayer player, @NotNull PlayerProfile playerProfile) {
         if (PlayerMorph.getUnlockedSkinIds(player).containsKey(playerProfile.id())) {
-            CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".hasSkin_success",
+            source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_success",
                     player.getDisplayName(), playerProfile.name()), true);
 
         } else
-            CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".hasSkin_fail", player.getDisplayName(), playerProfile.name()), true);
+            source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_fail", player.getDisplayName(), playerProfile.name()), true);
 
     }
 
-    private static void removeSkin(CommandSourceStack source, ServerPlayer player, PlayerProfile playerProfile) {
+    private static void removeSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull PlayerProfile playerProfile) {
         PlayerMorph.getUnlockedSkinIds(player).remove(playerProfile.id());
 
-        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".removeSkin", playerProfile.name(), player.getDisplayName()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".removeSkin", playerProfile.name(), player.getDisplayName()), true);
     }
 
-    private static void addSkin(CommandSourceStack source, ServerPlayer player, PlayerProfile playerProfile) {
+    private static void addSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull PlayerProfile playerProfile) {
         PlayerMorph.getUnlockedSkinIds(player).put(playerProfile.id(), Remorphed.CONFIG.killToUnlockPlayers);
 
-        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".addSkin", player.getDisplayName(), playerProfile.name()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".addSkin", player.getDisplayName(), playerProfile.name()), true);
     }
 
-    private static void clearSkins(CommandSourceStack source, ServerPlayer player) {
+    private static void clearSkins(@NotNull CommandSourceStack source, ServerPlayer player) {
         PlayerMorph.getUnlockedSkinIds(player).clear();
 
-        CCommandSourceStack.sendSuccess(source, TComponent.translatable(Remorphed.MODID + ".clearSkins", player.getDisplayName()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".clearSkins", player.getDisplayName()), true);
         if (Remorphed.foundSkinShifter) {
             SkinShifter.setSkin(player, null);
         }

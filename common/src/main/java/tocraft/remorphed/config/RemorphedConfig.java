@@ -17,6 +17,7 @@ public class RemorphedConfig implements Config {
     public boolean autoTransform = false;
     @Synchronize
     public boolean lockTransform = false;
+    @Comment("Whether friendly mobs should be unlocked by the woodwalkers mechanism instead")
     public boolean unlockFriendlyNormal = false;
     public Map<String, Integer> killToUnlockByType = new HashMap<>() {
         {

@@ -1,10 +1,12 @@
 package tocraft.remorphed.network;
 
 import dev.tocraft.skinshifter.SkinShifter;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -12,9 +14,6 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.network.ModernNetworking;
-import tocraft.craftedcore.patched.CEntity;
-import tocraft.craftedcore.patched.Identifier;
-import tocraft.craftedcore.patched.TComponent;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
@@ -38,10 +37,8 @@ public class NetworkHandler {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, FAVORITE_UPDATE, NetworkHandler::handleFavoriteRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.RESET_SKIN, NetworkHandler::handleResetSkinPacket);
 
-        //#if MC>=1205
         ModernNetworking.registerType(UNLOCKED_SYNC);
         ModernNetworking.registerType(FAVORITE_SYNC);
-        //#endif
     }
 
     private static void handleResetSkinPacket(ModernNetworking.Context context, CompoundTag data) {
@@ -56,7 +53,7 @@ public class NetworkHandler {
 
     public static <T extends LivingEntity> void sendSwap2ndShapeRequest(@NotNull ShapeType<T> type) {
         CompoundTag compound = new CompoundTag();
-        compound.putString("id", Walkers.getEntityTypeRegistry().getKey(type.getEntityType()).toString());
+        compound.putString("id", EntityType.getKey(type.getEntityType()).toString());
         compound.putInt("variant", type.getVariantData());
 
         ModernNetworking.sendToServer(NetworkHandler.MORPH_REQUEST, compound);
@@ -74,7 +71,7 @@ public class NetworkHandler {
         context.getPlayer().getServer().execute(() -> {
             // check if player is blacklisted
             if (Walkers.CONFIG.playerUUIDBlacklist.contains(context.getPlayer().getUUID())) {
-                context.getPlayer().displayClientMessage(TComponent.translatable("walkers.player_blacklisted"), true);
+                context.getPlayer().displayClientMessage(Component.translatable("walkers.player_blacklisted"), true);
                 return;
             }
 
@@ -82,10 +79,10 @@ public class NetworkHandler {
                 UUID targetSkinUUID = compound.getUUID("playerUUID");
                 SkinShifter.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
             } else {
-                ResourceLocation typeId = Identifier.parse(compound.getString("id"));
+                ResourceLocation typeId = ResourceLocation.parse(compound.getString("id"));
                 int typeVariant = compound.getInt("variant");
 
-                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId);
+                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null);
 
                 // make the default ShapeType null, doing it this way, it's ensured that invalid 2ndShapes won't cause crashes.
                 @Nullable
@@ -93,7 +90,7 @@ public class NetworkHandler {
                 // update Player
                 boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
                 if (result && type != null)
-                    PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(CEntity.level(context.getPlayer())));
+                    PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
 
                 // Refresh player dimensions
                 context.getPlayer().refreshDimensions();
@@ -118,7 +115,7 @@ public class NetworkHandler {
 
     public static void sendFavoriteRequest(ShapeType<? extends LivingEntity> type, boolean favorite) {
         CompoundTag packet = new CompoundTag();
-        packet.putString("id", Walkers.getEntityTypeRegistry().getKey(type.getEntityType()).toString());
+        packet.putString("id", EntityType.getKey(type.getEntityType()).toString());
         packet.putInt("variant", type.getVariantData());
         packet.putBoolean("favorite", favorite);
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
@@ -148,7 +145,7 @@ public class NetworkHandler {
                 sendFavoriteSync((ServerPlayer) context.getPlayer());
             });
         } else {
-            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(Identifier.parse(packet.getString("id")));
+            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(packet.getString("id"))).map(Holder::value).orElse(null);
             int variant = packet.getInt("variant");
 
             context.getPlayer().getServer().execute(() -> {

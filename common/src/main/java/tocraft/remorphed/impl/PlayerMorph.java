@@ -5,7 +5,6 @@ import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;

@@ -4,31 +4,22 @@ import dev.tocraft.skinshifter.SkinShifter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import tocraft.craftedcore.patched.client.CGraphics;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.remorphed.screen.RemorphedScreen;
-import tocraft.walkers.impl.PlayerDataProvider;
+import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.network.impl.SwapPackets;
-import net.minecraft.client.gui.components.AbstractButton;
-import java.util.concurrent.CompletableFuture;
 
-//#if MC>=1201
-import net.minecraft.client.gui.GuiGraphics;
-//#else
-//$$ import com.mojang.blaze3d.vertex.PoseStack;
-//#endif
-//#if MC>1182
-import net.minecraft.client.gui.components.Tooltip;
-//#else
-//$$ import net.minecraft.client.gui.screens.Screen;
-//$$ import tocraft.craftedcore.patched.TComponent;
-//#endif
+import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
@@ -37,27 +28,15 @@ public class PlayerWidget extends AbstractButton {
     public PlayerWidget(int x, int y, int width, int height, RemorphedScreen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
         this.parent = parent;
-        //#if MC>1182
         setTooltip(Tooltip.create(Component.translatable("remorphed.player_icon")));
-        //#endif
     }
 
     @Override
-    //#if MC>1194
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-    //#elseif MC>1182
-    //$$ public void renderWidget(PoseStack guiGraphics, int mouseX, int mouseY, float delta) {
-    //#else
-    //$$ public void renderButton(PoseStack guiGraphics, int mouseX, int mouseY, float delta) {
-    //#endif
         AbstractClientPlayer player = Minecraft.getInstance().player;
-            if (player != null) {
-            //#if MC>1201
+        if (player != null) {
             ResourceLocation skinLocation = player.getSkin().texture();
-            //#else
-            //$$ ResourceLocation skinLocation = player.getSkinTextureLocation();
-            //#endif
-            if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(player) != null) {
+            if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(player) != player.getUUID()) {
                 // still render own skin as icon when in another skin
                 PlayerProfile playerProfile = PlayerProfile.getCachedProfile(player.getUUID());
                 if (playerProfile != null && playerProfile.skin() != null) {
@@ -68,26 +47,17 @@ public class PlayerWidget extends AbstractButton {
                 }
             }
 
-            CGraphics.blit(guiGraphics, skinLocation, getX(), getY(), getWidth(), getHeight(), 8.0f, 8, 8, 8, 64, 64);
-                CGraphics.blit(guiGraphics, skinLocation, getX(), getY(), getWidth(), getHeight(), 40.0f, 8, 8, 8, 64, 64);
+            guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 8.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
+            guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 40.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
         } else {
-            //#if MC>1182
             super.renderWidget(guiGraphics, mouseX, mouseY, delta);
-            //#else
-            //$$ super.renderButton(guiGraphics, mouseX, mouseY, delta);
-            //#endif
         }
-        //#if MC<=1182
-        //$$ if (isHoveredOrFocused()) {
-        //$$     renderToolTip(guiGraphics, mouseX, mouseY);
-        //$$ }
-        //#endif
     }
 
     @Override
     public void onPress() {
         if (Minecraft.getInstance().player != null) {
-            if (((PlayerDataProvider) Minecraft.getInstance().player).walkers$getCurrentShape() != null) {
+            if (PlayerShape.getCurrentShape(Minecraft.getInstance().player) != null) {
                 SwapPackets.sendSwapRequest();
                 parent.onClose();
             }
@@ -98,31 +68,8 @@ public class PlayerWidget extends AbstractButton {
         }
     }
 
-    //#if MC>1182
     @Override
     public void updateWidgetNarration(NarrationElementOutput builder) {
-    
+
     }
-    //#else
-    //$$ @Override
-    //$$ public void updateNarration(NarrationElementOutput narrationElementOutput) {
-    //$$
-    //$$ }
-    //$$
-    //$$ public int getX() {
-    //$$     return x;
-    //$$ }
-    //$$ public int getY() {
-    //$$     return y;
-    //$$ }
-    //$$
-    //$$ @Override
-    //$$ public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-    //$$     Screen currentScreen = Minecraft.getInstance().screen;
-    //$$
-    //$$     if (currentScreen != null) {
-    //$$         currentScreen.renderTooltip(poseStack,  TComponent.translatable("remorphed.player_icon"), mouseX, mouseY);
-    //$$     }
-    //$$ }
-    //#endif
 }

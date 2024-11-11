@@ -1,5 +1,7 @@
 package tocraft.remorphed.mixin;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -8,13 +10,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import tocraft.craftedcore.patched.CEntity;
-import tocraft.craftedcore.patched.Identifier;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.Walkers;
@@ -50,7 +51,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void serverTick(CallbackInfo info) {
-        if (!CEntity.level(this).isClientSide) {
+        if (!this.level().isClientSide) {
             Remorphed.sync((ServerPlayer) (Object) this);
         }
     }
@@ -72,7 +73,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {
                 CompoundTag entryTag = new CompoundTag();
-                entryTag.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
+                entryTag.putString("id", EntityType.getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
                 entryTag.putInt("killAmount", killAmount);
                 unlockedShapes.add(entryTag);
@@ -86,7 +87,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$favoriteShapes.forEach(shape -> {
             if (shape != null) {
                 CompoundTag entryTag = new CompoundTag();
-                entryTag.putString("id", Walkers.getEntityTypeRegistry().getKey(shape.getEntityType()).toString());
+                entryTag.putString("id", EntityType.getKey(shape.getEntityType()).toString());
                 entryTag.putInt("variant", shape.getVariantData());
                 favoriteShapes.add(entryTag);
             }
@@ -125,7 +126,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @SuppressWarnings("unchecked")
     @Unique
-    public void remorphed$readData(CompoundTag tag) {
+    public void remorphed$readData(@NotNull CompoundTag tag) {
         remorphed$unlockedShapes.clear();
         remorphed$favoriteShapes.clear();
         remorphed$unlockedSkins.clear();
@@ -134,20 +135,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         ListTag unlockedShapes = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
         unlockedShapes.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                ResourceLocation typeId = Identifier.parse(((CompoundTag) entry).getString("id"));
+                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
                 int typeVariantId = ((CompoundTag) entry).getInt("variant");
                 int killAmount = ((CompoundTag) entry).getInt("killAmount");
 
-                remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId), typeVariantId), killAmount);
+                remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), killAmount);
             }
         });
         ListTag favoriteShapes = tag.getList(FAVORITE_SHAPES, ListTag.TAG_COMPOUND);
         favoriteShapes.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                ResourceLocation typeId = Identifier.parse(((CompoundTag) entry).getString("id"));
+                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
                 int typeVariantId = ((CompoundTag) entry).getInt("variant");
 
-                remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) Walkers.getEntityTypeRegistry().get(typeId), typeVariantId));
+                remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId));
             }
         });
 
