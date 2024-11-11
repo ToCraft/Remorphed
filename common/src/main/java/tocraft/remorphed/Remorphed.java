@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tocraft.craftedcore.config.ConfigLoader;
@@ -35,10 +36,10 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.util.*;
 
 public class Remorphed {
-
+    @ApiStatus.Internal
     public static final Logger LOGGER = LoggerFactory.getLogger(Remorphed.class);
     public static final String MODID = "remorphed";
-    public static final RemorphedConfig CONFIG = ConfigLoader.read(MODID, RemorphedConfig.class);
+    public static final RemorphedConfig CONFIG = ConfigLoader.register(MODID);
     public static boolean displayVariantsInMenu = true;
     public static boolean displayTraitsInMenu = true;
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");

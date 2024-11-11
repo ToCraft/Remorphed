@@ -16,6 +16,7 @@
   "remorphed.help.config_description": "Öffne die Config-Datei /config/walkers.json bzw. /config/remorphed.json um die Elemente des Mods zu kontrollieren.",
   "remorphed.help.credits_label": "Credits",
   "remorphed.help.credits_general": "General: To_Craft, Chronos_Sacaria, Draylar, x64architecture, Pyrofab, AllanChain, James103, lawleagle",
+  // FIXME: ADAPT
   "remorphed.help.credits_translators": "Übersetzter: Aktuell nur ich (To_Craft), du kannst gerne mithelfen, um erwähnt zu werden! Es gibt sogar eine besondere Textur für devs o.O",
   "remorphed.help.return": "Drücke eine beliebige Taste.",
   "remorphed.hasShape_success": "%s hat %s freigeschaltet.",
