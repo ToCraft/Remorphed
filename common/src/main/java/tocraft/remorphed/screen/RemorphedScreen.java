@@ -17,6 +17,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.FakeClientPlayer;
@@ -181,6 +183,7 @@ public class RemorphedScreen extends Screen {
         int top = 35;
 
         context.pose().pushPose();
+        context.flush();
         RenderSystem.enableScissor(
                 (int) ((double) 0 * scaledFactor),
                 (int) ((double) 0 * scaledFactor),
@@ -195,7 +198,6 @@ public class RemorphedScreen extends Screen {
 
         RenderSystem.disableScissor();
 
-        context.pose().popPose();
     }
 
     @Override
@@ -310,7 +312,8 @@ public class RemorphedScreen extends Screen {
         Remorphed.LOGGER.info("Loaded {} players for rendering", unlockedSkins.size());
     }
 
-    private SearchWidget createSearchBar() {
+    @Contract(" -> new")
+    private @NotNull SearchWidget createSearchBar() {
         return new SearchWidget(
                 getWindow().getGuiScaledWidth() / 2f - (getWindow().getGuiScaledWidth() / 4f / 2) - 5,
                 5,
@@ -318,7 +321,7 @@ public class RemorphedScreen extends Screen {
                 20f);
     }
 
-    private Button createHelpButton() {
+    private @NotNull Button createHelpButton() {
         Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> Minecraft.getInstance().setScreen(new RemorphedHelpScreen()));
 
         int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
@@ -329,7 +332,7 @@ public class RemorphedScreen extends Screen {
         return helpButton.build();
     }
 
-    private Button createVariantsButton() {
+    private @NotNull Button createVariantsButton() {
         Button.Builder variantsButton = Button.builder(Component.translatable("remorphed.display_variants"), (widget) -> {
             Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
             Minecraft.getInstance().setScreen(new RemorphedScreen());
@@ -342,7 +345,7 @@ public class RemorphedScreen extends Screen {
         return variantsButton.build();
     }
 
-    private Button createTraitsButton() {
+    private @NotNull Button createTraitsButton() {
         Button.Builder traitButton = Button.builder(Component.translatable("remorphed.show_traits"), (widget) -> Remorphed.displayTraitsInMenu = !Remorphed.displayTraitsInMenu);
         int xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
 
@@ -354,7 +357,8 @@ public class RemorphedScreen extends Screen {
         return traitButton.build();
     }
 
-    private PlayerWidget createPlayerButton() {
+    @Contract(" -> new")
+    private @NotNull PlayerWidget createPlayerButton() {
         return new PlayerWidget(
                 (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 5),
                 5,
@@ -363,7 +367,8 @@ public class RemorphedScreen extends Screen {
                 this);
     }
 
-    private SpecialShapeWidget createSpecialShapeButton() {
+    @Contract(" -> new")
+    private @NotNull SpecialShapeWidget createSpecialShapeButton() {
         return new SpecialShapeWidget(
                 (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 35),
                 5,
@@ -372,7 +377,7 @@ public class RemorphedScreen extends Screen {
                 this);
     }
 
-    private Window getWindow() {
+    private @NotNull Window getWindow() {
         return Minecraft.getInstance().getWindow();
     }
 
