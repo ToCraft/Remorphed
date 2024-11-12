@@ -2,6 +2,7 @@ remorphed 5
 ================
 
 - port to 1.21.2
+- add turkish by Feitan_Portor
 
 remorphed 4.2
 ================

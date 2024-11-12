@@ -61,7 +61,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             List<ResourceLocation> renderedTraits = new ArrayList<>();
             for (ShapeTrait<T> trait : TraitRegistry.getAll(entity)) {
                 if (trait != null && trait.getIcon() != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
-                    guiGraphics.blitSprite(RenderType::guiTexturedOverlay, trait.getIcon(), getX() + rowIndex, getY() + blitOffset, 0, 18, 18);
+                    guiGraphics.blitSprite(RenderType::guiTextured, trait.getIcon(), getX() + rowIndex, getY() + blitOffset, 0, 18, 18);
                     // prevent infinite traits to be rendered
                     if (blitOffset >= getHeight() - 18) {
                         rowIndex += 18;
