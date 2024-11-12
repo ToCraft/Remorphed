@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 @Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
     private final RemorphedScreen parent;
+    private boolean willCache = true;
 
     public PlayerWidget(int x, int y, int width, int height, RemorphedScreen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
@@ -36,14 +37,15 @@ public class PlayerWidget extends AbstractButton {
         AbstractClientPlayer player = Minecraft.getInstance().player;
         if (player != null) {
             ResourceLocation skinLocation = player.getSkin().texture();
-            if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(player) != player.getUUID()) {
+            if (Remorphed.foundSkinShifter && !player.getUUID().equals(SkinShifter.getCurrentSkin(player))) {
                 // still render own skin as icon when in another skin
                 PlayerProfile playerProfile = PlayerProfile.getCachedProfile(player.getUUID());
                 if (playerProfile != null && playerProfile.skin() != null) {
                     skinLocation = playerProfile.getSkinId();
-                } else {
+                } else if (this.willCache) {
                     // cache profile asynchronous
                     CompletableFuture.runAsync(() -> PlayerProfile.ofId(player.getUUID()));
+                    this.willCache = false;
                 }
             }
 
