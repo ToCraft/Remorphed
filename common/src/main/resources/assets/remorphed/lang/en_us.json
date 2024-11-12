@@ -16,7 +16,7 @@
   "remorphed.help.config_description": "Visit the config file at /config/remorphed.json5 to control all elements of the mod.",
   "remorphed.help.credits_label": "Credits",
   "remorphed.help.credits_general": "General: To_Craft, Chronos_Sacaria, Draylar, x64architecture, Pyrofab, AllanChain, James103, lawleagle",
-  "remorphed.help.credits_translators": "Translators: Right now just me (To_Craft), but YOU are welcome the help! There's even a custom texture for devs o.O",
+  "remorphed.help.credits_translators": "Translators: To_Craft, yichifauzi, shap-po and Feitan_Portor.",
   "remorphed.help.return": "Press any key to close this menu.",
   "remorphed.hasShape_success": "%s has unlocked %s.",
   "remorphed.hasShape_fail": "%s didn't unlocked %s.",
@@ -32,5 +32,5 @@
   "remorphed.traits": "Display Traits",
   "remorphed.player_icon": "Transform back into a player",
   "remorphed.special_shape_available": "Congratulations on your special shape!",
-  "remorphed.special_shape_unavailable": "Unlock a wolf first"
+  "remorphed.special_shape_unavailable": "Unlock a wolf first!"
 }
