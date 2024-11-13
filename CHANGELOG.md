@@ -1,7 +1,8 @@
-remorphed 5
+remorphed 5.0
 ================
 
 - port to 1.21.2
+- fix menu not loading in async mode
 - add turkish by Feitan_Portor
 
 remorphed 4.2
