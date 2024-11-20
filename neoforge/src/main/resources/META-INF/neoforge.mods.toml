@@ -20,14 +20,12 @@ logoFile = "pack.png"
 
 [[dependencies.remorphed]]
 modId = "minecraft"
-mandatory = true
 versionRange = "[${minecraft_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remorphed]]
 modId = "craftedcore"
-mandatory = true
 type = "required"
 versionRange = "[${craftedcore_version},)"
 ordering = "AFTER"
@@ -35,8 +33,14 @@ side = "BOTH"
 
 [[dependencies.remorphed]]
 modId = "walkers"
-mandatory = true
 type = "required"
 versionRange = "[${woodwalkers_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.remorphed]]
+modId = "skinshifter"
+type = "optional"
+versionRange = "[${skinshifter_version},)"
 ordering = "AFTER"
 side = "BOTH"
