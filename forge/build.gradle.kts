@@ -19,7 +19,9 @@ loom {
 }
 
 dependencies {
-    modApi("dev.tocraft:craftedcore-forge:${parent!!.name}-${rootProject.properties["craftedcore_version"]}")
+    modApi("dev.tocraft:craftedcore-forge:${parent!!.name}-${rootProject.properties["craftedcore_version"]}") {
+        exclude("me.shedaniel.cloth")
+    }
     modApi("dev.tocraft:walkers-forge:${parent!!.name}-${rootProject.properties["woodwalkers_version"]}")
     modApi("dev.tocraft:skinshifter-forge:${parent!!.name}-${rootProject.properties["skinshifter_version"]}")
 }

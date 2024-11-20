@@ -1,7 +1,8 @@
 remorphed 4.3
 ================
-- 
+
 - add turkish by Feitan_Portor
+- fix player blacklist handling
 
 remorphed 4.2
 ================

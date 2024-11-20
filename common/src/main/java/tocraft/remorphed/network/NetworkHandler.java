@@ -73,7 +73,7 @@ public class NetworkHandler {
     private static void handleMorphRequestPacket(ModernNetworking.Context context, CompoundTag compound) {
         context.getPlayer().getServer().execute(() -> {
             // check if player is blacklisted
-            if (Walkers.CONFIG.playerUUIDBlacklist.contains(context.getPlayer().getUUID())) {
+            if (Walkers.isPlayerBlacklisted(context.getPlayer().getUUID()) && Walkers.CONFIG.blacklistPreventsMorphing) {
                 context.getPlayer().displayClientMessage(TComponent.translatable("walkers.player_blacklisted"), true);
                 return;
             }
