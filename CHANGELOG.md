@@ -1,3 +1,8 @@
+remorphed 5.1
+================
+
+- fix player blacklist handling
+
 remorphed 5.0
 ================
 
