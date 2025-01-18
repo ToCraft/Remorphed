@@ -7,18 +7,23 @@ import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LongTextWidget extends AbstractScrollArea {
-    private final List<MultiLineTextWidget> text = new ArrayList<>();
+    protected final List<MultiLineTextWidget> text = new ArrayList<>();
+    protected final boolean separators;
 
-    public LongTextWidget(int x, int y, int width, int height) {
+    public LongTextWidget(int x, int y, int width, int height, boolean separators) {
         super(x, y, width, height, Component.nullToEmpty(""));
+        this.separators = separators;
     }
 
     @Override
@@ -70,11 +75,25 @@ public class LongTextWidget extends AbstractScrollArea {
 
         guiGraphics.disableScissor();
         renderScrollbar(guiGraphics);
+
+        if (separators) {
+            renderSeparators(guiGraphics);
+        }
+    }
+
+
+    protected void renderSeparators(@NotNull GuiGraphics guiGraphics) {
+        guiGraphics.blit(RenderType::guiTextured, Screen.INWORLD_HEADER_SEPARATOR, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+        guiGraphics.blit(RenderType::guiTextured, Screen.INWORLD_FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
     }
 
     @Override
     protected void updateWidgetNarration(@NotNull NarrationElementOutput narrationElementOutput) {
-        narrationElementOutput.add(NarratedElementType.TITLE, getMessage());
+        MutableComponent narration = Component.empty();
+        for (MultiLineTextWidget widget : text) {
+            narration.append(widget.getMessage());
+        }
+        narrationElementOutput.add(NarratedElementType.TITLE, narration);
     }
 
     @Override

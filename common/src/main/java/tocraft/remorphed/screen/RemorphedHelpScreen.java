@@ -36,7 +36,7 @@ public class RemorphedHelpScreen extends Screen {
     }
 
     protected void addContents() {
-        this.list = this.layout.addToContents(new LongTextWidget(0, this.layout.getHeaderHeight(), this.width, this.layout.getContentHeight()));
+        this.list = this.layout.addToContents(new LongTextWidget(0, this.layout.getHeaderHeight(), this.width, this.layout.getContentHeight(), true));
 
         // Add Text
         this.list.addText(Component.translatable("remorphed.help.welcome"));
