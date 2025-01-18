@@ -53,6 +53,11 @@ public class SpecialShapeWidget extends AbstractButton {
         if (!isCurrent && !isAvailable) {
             guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/unavailable.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 15, 15, 15, 15);
         }
+        
+        // Highlight when focused
+        if (isHoveredOrFocused()) {
+            guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/head_focus.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16, 16, 16);
+        }
     }
 
     @Override
