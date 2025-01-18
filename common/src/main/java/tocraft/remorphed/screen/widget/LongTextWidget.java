@@ -29,7 +29,7 @@ public class LongTextWidget extends AbstractScrollArea {
 
     @Override
     protected int contentHeight() {
-        int i = 4;
+        int i = 8; // 4 space below and on top of the text
 
         for (MultiLineTextWidget widget : text) {
              i+= widget.getHeight();
@@ -65,7 +65,7 @@ public class LongTextWidget extends AbstractScrollArea {
         guiGraphics.enableScissor(this.getX(), this.getY(), this.getRight(), this.getBottom());
 
         int x = this.getX() + (getWidth() - textWidth()) / 2;
-        int y = getY() - (int) scrollAmount();
+        int y = getY() - (int) scrollAmount() + 4; // 4 space on top
         for (MultiLineTextWidget widget : this.text) {
             widget.setPosition(x, y);
             widget.setMaxWidth(textWidth());
