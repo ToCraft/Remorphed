@@ -10,8 +10,6 @@ import net.minecraft.network.chat.Component;
 import tocraft.remorphed.Remorphed;
 
 public abstract class ShapeWidget extends AbstractButton {
-    public static final int SHAPE_SIZE_MODIFIER = 20;
-
     private final Screen parent;
     private boolean crashed = false;
     private boolean isFavorite;

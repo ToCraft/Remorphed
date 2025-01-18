@@ -10,6 +10,7 @@ import java.util.Map;
 
 @SuppressWarnings("CanBeFinal")
 public class RemorphedConfig implements Config {
+    @Comment("<<< General >>>")
     @Synchronize
     public boolean creativeUnlockAll = true;
     public int killToUnlock = 1;
@@ -25,6 +26,16 @@ public class RemorphedConfig implements Config {
             put("minecraft:wither", 2);
         }
     };
+    @Comment("<<< Menu Customization >>>\n")
+    public boolean show_variants_by_default = false;
+    public boolean show_traits_by_default = true;
+    @Comment("scale the shapes in the menu")
+    public int entity_size = 20;
+    public int shapes_per_row = 6;
+    @Comment("Whether the selected mob shall be displayed as the first mob")
+    public boolean sort_selected = false;
+    @Comment("Whether the menu should automatically focus on the selected shape")
+    public boolean focus_selected = true;
 
     @Override
     public String getName() {

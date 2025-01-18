@@ -9,7 +9,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import tocraft.remorphed.Remorphed;
 
 import java.util.List;
 
@@ -17,7 +17,6 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidget.ShapeRow> {
     private static final int ITEM_HEIGHT = 35;
-    public static final int ITEMS_PER_ROW = 6;
 
     public ShapeListWidget(Minecraft minecraft, int width, @NotNull HeaderAndFooterLayout layout) {
         super(minecraft, width, layout.getContentHeight(), layout.getHeaderHeight(), ITEM_HEIGHT);
@@ -25,6 +24,10 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
 
     public int addRow(ShapeWidget[] widgets) {
         return addEntry(new ShapeRow(widgets));
+    }
+
+    public int rowHeight() {
+        return itemHeight;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
                 ShapeWidget widget = widgets[i];
 
                 if (widget != null) {
-                    int w = width / ITEMS_PER_ROW;
+                    int w = width / Remorphed.CONFIG.shapes_per_row;
 
                     widget.setPosition(left + w * i, top);
                     widget.setSize(w, height);

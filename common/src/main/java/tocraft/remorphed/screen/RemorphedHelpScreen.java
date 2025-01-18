@@ -72,7 +72,7 @@ public class RemorphedHelpScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode < 258) {
+        if (keyCode < 257 && keyCode != 32) {
             onClose();
             return true;
         } else {

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import tocraft.craftedcore.platform.PlayerProfile;
+import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.FakeClientPlayer;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.impl.PlayerDataProvider;
@@ -26,7 +27,7 @@ public class SkinWidget extends ShapeWidget {
 
     public SkinWidget(int x, int y, int width, int height, @NotNull PlayerProfile skin, @NotNull FakeClientPlayer fakePlayer, Screen parent, boolean isFavorite, boolean isCurrent) {
         super(x, y, width, height, parent, isFavorite, isCurrent);
-        this.size = (int) (SHAPE_SIZE_MODIFIER * (1 / (Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth()))));
+        this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth()))));
         this.skin = skin;
         this.fakePlayer = fakePlayer;
         setTooltip(Tooltip.create(Component.literal(skin.name())));

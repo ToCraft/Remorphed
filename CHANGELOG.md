@@ -3,6 +3,7 @@ remorphed 6.0
 
 - fix player blacklist handling
 - **rework menu**
+- more customization options in the config!
 - change key to open the menu to "B"
 - don't display variants by default
 

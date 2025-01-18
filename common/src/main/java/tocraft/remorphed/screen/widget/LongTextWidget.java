@@ -58,9 +58,10 @@ public class LongTextWidget extends AbstractScrollArea {
     protected void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         guiGraphics.enableScissor(this.getX(), this.getY(), this.getRight(), this.getBottom());
 
+        int x = this.getX() + (getWidth() - textWidth()) / 2;
         int y = getY() - (int) scrollAmount();
         for (MultiLineTextWidget widget : this.text) {
-            widget.setPosition(this.getX() + (getWidth() - textWidth()) / 2, y);
+            widget.setPosition(x, y);
             widget.setMaxWidth(textWidth());
             widget.render(guiGraphics, mouseX, mouseY, delta);
 

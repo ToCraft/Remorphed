@@ -35,8 +35,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static tocraft.remorphed.screen.widget.ShapeListWidget.ITEMS_PER_ROW;
-
 @Environment(EnvType.CLIENT)
 public class RemorphedMenu extends Screen {
     @Nullable
@@ -91,23 +89,25 @@ public class RemorphedMenu extends Screen {
 
             ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
-
             // handle favorites
             unlockedShapes.sort((first, second) -> {
-                if (Objects.equals(first, currentShape)) {
-                    return -1;
-                } else if (Objects.equals(second, currentShape)) {
-                    return 1;
-                } else {
-                    boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
-                    boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
-                    if (firstIsFav == secondIsFav) {
-                        return 0;
-                    } else if (firstIsFav) {
+                // sort by selected
+                if (Remorphed.CONFIG.sort_selected) {
+                    if (Objects.equals(first, currentShape)) {
                         return -1;
-                    } else {
+                    } else if (Objects.equals(second, currentShape)) {
                         return 1;
                     }
+                }
+                // sort by favorite
+                boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
+                boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
+                if (firstIsFav == secondIsFav) {
+                    return 0;
+                } else if (firstIsFav) {
+                    return -1;
+                } else {
+                    return 1;
                 }
             });
 
@@ -184,21 +184,23 @@ public class RemorphedMenu extends Screen {
             this.list.clearEntries();
 
             // add widget for each entity to be rendered
-            int rows = (int) Math.ceil((float) (rendered.size() + skinProfiles.size()) / ITEMS_PER_ROW);
+            int rows = (int) Math.ceil((float) (rendered.size() + skinProfiles.size()) / Remorphed.CONFIG.shapes_per_row);
 
             ShapeType<LivingEntity> currentType = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
-
+            int currentRow = 0;
 
             for (int i = 0; i <= rows; i++) {
                 List<ShapeWidget> row = new ArrayList<>();
 
-                for (int j = 0; j < ITEMS_PER_ROW; j++) {
-                    int listIndex = i * ITEMS_PER_ROW + j;
+                for (int j = 0; j < Remorphed.CONFIG.shapes_per_row; j++) {
+                    int listIndex = i * Remorphed.CONFIG.shapes_per_row + j;
 
                     if (Remorphed.foundSkinShifter && listIndex < skinProfiles.size()) {
                         PlayerProfile skinProfile = skinProfiles.get(listIndex);
                         FakeClientPlayer fakePlayer = renderPlayers.get(skinProfile);
                         if (fakePlayer != null) {
+                            boolean bl = Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.id()) && currentType == null;
+                            if (bl) currentRow = i;
                             row.add(new SkinWidget(
                                     0,
                                     0,
@@ -208,7 +210,7 @@ public class RemorphedMenu extends Screen {
                                     new FakeClientPlayer(minecraft.level, skinProfile),
                                     this,
                                     PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
-                                    Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.id()) && currentType == null
+                                    bl
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid skin profile: {}", skinProfile);
@@ -217,6 +219,8 @@ public class RemorphedMenu extends Screen {
                         ShapeType<?> type = rendered.get(listIndex - skinProfiles.size());
                         Mob entity = renderEntities.get(type);
                         if (entity != null) {
+                            boolean bl = type.equals(currentType);
+                            if (bl) currentRow = i;
                             row.add(new EntityWidget<>(
                                     0,
                                     0,
@@ -226,7 +230,7 @@ public class RemorphedMenu extends Screen {
                                     entity,
                                     this,
                                     PlayerMorph.getFavoriteShapes(minecraft.player).contains(type),
-                                    type.equals(currentType)
+                                    bl
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());
@@ -235,6 +239,11 @@ public class RemorphedMenu extends Screen {
                 }
 
                 this.list.addRow(row.toArray(ShapeWidget[]::new));
+            }
+
+            if (Remorphed.CONFIG.focus_selected) {
+                // auto center the selected shape
+                this.list.setScrollAmount((double) this.list.rowHeight() * (currentRow - 2));
             }
         }
     }
