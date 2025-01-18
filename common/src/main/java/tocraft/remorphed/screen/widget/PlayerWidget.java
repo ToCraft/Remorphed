@@ -27,7 +27,7 @@ public class PlayerWidget extends AbstractButton {
     private boolean willCache = true;
 
     public PlayerWidget(int x, int y, int width, int height, Screen parent) {
-        super(x, y, width, height, Component.nullToEmpty(""));
+        super(x, y, width, height, Component.nullToEmpty("Head"));
         this.parent = parent;
         setTooltip(Tooltip.create(Component.translatable("remorphed.player_icon")));
     }
@@ -51,8 +51,11 @@ public class PlayerWidget extends AbstractButton {
 
             guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 8.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
             guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 40.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
-        } else {
-            super.renderWidget(guiGraphics, mouseX, mouseY, delta);
+        }
+
+        // Highlight when focused
+        if (isHoveredOrFocused()) {
+            guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/head_focus.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16, 16, 16);
         }
     }
 

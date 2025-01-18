@@ -5,6 +5,7 @@ import dev.tocraft.skinshifter.SkinShifter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -33,6 +34,8 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static tocraft.remorphed.screen.widget.ShapeListWidget.ITEMS_PER_ROW;
 
 @Environment(EnvType.CLIENT)
 public class RemorphedMenu extends Screen {
@@ -173,13 +176,20 @@ public class RemorphedMenu extends Screen {
         });
     }
 
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // make the background DARK
+        renderTransparentBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
     @SuppressWarnings("unchecked")
     private void populateShapeWidgets(@NotNull List<ShapeType<?>> rendered, @NotNull List<PlayerProfile> skinProfiles) {
         if (this.list != null && minecraft != null && minecraft.player != null) {
             this.list.clearEntries();
 
             // add widget for each entity to be rendered
-            int rows = (int) Math.ceil((rendered.size() + skinProfiles.size()) / 5f);
+            int rows = (int) Math.ceil((float) (rendered.size() + skinProfiles.size()) / ITEMS_PER_ROW);
 
             ShapeType<LivingEntity> currentType = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
 
@@ -187,8 +197,8 @@ public class RemorphedMenu extends Screen {
             for (int i = 0; i <= rows; i++) {
                 List<ShapeWidget> row = new ArrayList<>();
 
-                for (int j = 0; j < 5; j++) {
-                    int listIndex = i * 5 + j;
+                for (int j = 0; j < ITEMS_PER_ROW; j++) {
+                    int listIndex = i * ITEMS_PER_ROW + j;
 
                     if (Remorphed.foundSkinShifter && listIndex < skinProfiles.size()) {
                         PlayerProfile skinProfile = skinProfiles.get(listIndex);

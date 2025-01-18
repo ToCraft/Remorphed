@@ -9,14 +9,18 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @SuppressWarnings("UnusedReturnValue")
 @Environment(EnvType.CLIENT)
 public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidget.ShapeRow> {
+    private static final int ITEM_HEIGHT = 35;
+    public static final int ITEMS_PER_ROW = 6;
+
     public ShapeListWidget(Minecraft minecraft, int width, @NotNull HeaderAndFooterLayout layout) {
-        super(minecraft, width, layout.getContentHeight(), layout.getHeaderHeight(), 35);
+        super(minecraft, width, layout.getContentHeight(), layout.getHeaderHeight(), ITEM_HEIGHT);
     }
 
     public int addRow(ShapeWidget[] widgets) {
@@ -37,15 +41,13 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
 
         @Override
         public void render(@NotNull GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float delta) {
-            int y = top + height / 2;
-
             for (int i = 0; i < widgets.length; i++) {
                 ShapeWidget widget = widgets[i];
 
                 if (widget != null) {
-                    int w = width / 5;
+                    int w = width / ITEMS_PER_ROW;
 
-                    widget.setPosition(left + w * i, y);
+                    widget.setPosition(left + w * i, top);
                     widget.setSize(w, height);
                     widget.render(guiGraphics, mouseX, mouseY, delta);
                 }
@@ -63,10 +65,19 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
         }
     }
 
-    //#if MC<=1212
     @Override
-    protected boolean isValidMouseClick(int button) {
-        return true;
+    public int getRowWidth() {
+        return 330;
     }
+
+    @Override
+    protected void renderListBackground(GuiGraphics guiGraphics) {
+    }
+
+    //#if MC<=1212
+    //$$ @Override
+    //$$ protected boolean isValidMouseClick(int button) {
+    //$$     return true;
+    //$$ }
     //#endif
 }

@@ -10,6 +10,8 @@ import net.minecraft.network.chat.Component;
 import tocraft.remorphed.Remorphed;
 
 public abstract class ShapeWidget extends AbstractButton {
+    public static final int SHAPE_SIZE_MODIFIER = 20;
+
     private final Screen parent;
     private boolean crashed = false;
     private boolean isFavorite;
@@ -34,20 +36,10 @@ public abstract class ShapeWidget extends AbstractButton {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean bl = mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
-        if (bl && Minecraft.getInstance().player != null) {
-            // switch to new shape
-            if (button == 0 && !isCurrent) {
-                // Update 2nd Shape
-                sendSwap2ndShapeRequest();
-                // close active screen handler
-                parent.onClose();
-            }
-            // Add to favorites
-            else if (button == 1) {
-                isFavorite = !isFavorite;
-                sendFavoriteRequest(isFavorite);
-            }
+        // Add to favorites
+        if (isHovered() && Minecraft.getInstance().player != null && button == 1) {
+            isFavorite = !isFavorite;
+            sendFavoriteRequest(isFavorite);
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
@@ -56,6 +48,11 @@ public abstract class ShapeWidget extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         if (!crashed) {
+            // make the widget is even DARKER when hovered
+            if (isHoveredOrFocused()) {
+                guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/focused.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
+            }
+
             renderShape(guiGraphics);
 
             // Render selected outline
@@ -71,7 +68,13 @@ public abstract class ShapeWidget extends AbstractButton {
 
     @Override
     public void onPress() {
-
+        // switch to new shape
+        if (!isCurrent) {
+            // Update 2nd Shape
+            sendSwap2ndShapeRequest();
+            // close active screen handler
+            parent.onClose();
+        }
     }
 
     @Override

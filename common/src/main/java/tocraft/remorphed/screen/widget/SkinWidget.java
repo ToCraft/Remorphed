@@ -26,7 +26,7 @@ public class SkinWidget extends ShapeWidget {
 
     public SkinWidget(int x, int y, int width, int height, @NotNull PlayerProfile skin, @NotNull FakeClientPlayer fakePlayer, Screen parent, boolean isFavorite, boolean isCurrent) {
         super(x, y, width, height, parent, isFavorite, isCurrent);
-        this.size = (int) (25 * (1 / (Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth()))));
+        this.size = (int) (SHAPE_SIZE_MODIFIER * (1 / (Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth()))));
         this.skin = skin;
         this.fakePlayer = fakePlayer;
         setTooltip(Tooltip.create(Component.literal(skin.name())));

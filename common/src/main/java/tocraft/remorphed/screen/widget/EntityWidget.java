@@ -35,7 +35,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
 
     public EntityWidget(int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current) {
         super(x, y, width, height, parent, isFavorite, current); // int x, int y, int width, int height, message
-        this.size = (int) (25 * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
+        this.size = (int) (SHAPE_SIZE_MODIFIER * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         this.type = type;
         this.entity = entity;
         entity.setGlowingTag(true);
