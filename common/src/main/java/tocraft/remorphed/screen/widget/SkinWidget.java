@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +15,6 @@ import org.joml.Vector3f;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.impl.FakeClientPlayer;
 import tocraft.remorphed.network.NetworkHandler;
-import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.impl.PlayerDataProvider;
 import tocraft.walkers.network.impl.SwapPackets;
 
@@ -24,7 +24,7 @@ public class SkinWidget extends ShapeWidget {
     private final FakeClientPlayer fakePlayer;
     private final int size;
 
-    public SkinWidget(float x, float y, float width, float height, @NotNull PlayerProfile skin, @NotNull FakeClientPlayer fakePlayer, RemorphedScreen parent, boolean isFavorite, boolean isCurrent) {
+    public SkinWidget(int x, int y, int width, int height, @NotNull PlayerProfile skin, @NotNull FakeClientPlayer fakePlayer, Screen parent, boolean isFavorite, boolean isCurrent) {
         super(x, y, width, height, parent, isFavorite, isCurrent);
         this.size = (int) (25 * (1 / (Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth()))));
         this.skin = skin;

@@ -1,7 +1,9 @@
-remorphed 5.1
+remorphed 6.0
 ================
 
 - fix player blacklist handling
+- **rework menu**
+- change key to open the menu to "B"
 
 remorphed 5.0
 ================

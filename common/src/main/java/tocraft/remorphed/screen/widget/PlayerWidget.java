@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
@@ -15,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
-import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.network.impl.SwapPackets;
 
@@ -23,10 +23,10 @@ import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
-    private final RemorphedScreen parent;
+    private final Screen parent;
     private boolean willCache = true;
 
-    public PlayerWidget(int x, int y, int width, int height, RemorphedScreen parent) {
+    public PlayerWidget(int x, int y, int width, int height, Screen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
         this.parent = parent;
         setTooltip(Tooltip.create(Component.translatable("remorphed.player_icon")));

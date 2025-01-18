@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import tocraft.craftedcore.event.client.ClientTickEvents;
 import tocraft.remorphed.RemorphedClient;
-import tocraft.remorphed.screen.RemorphedScreen;
+import tocraft.remorphed.screen.RemorphedMenu;
 
 @Environment(EnvType.CLIENT)
 public class KeyPressHandler implements ClientTickEvents.Client {
@@ -14,7 +14,7 @@ public class KeyPressHandler implements ClientTickEvents.Client {
         assert client.player != null;
 
         if (RemorphedClient.MENU_KEY.consumeClick()) {
-            Minecraft.getInstance().setScreen(new RemorphedScreen());
+            Minecraft.getInstance().setScreen(new RemorphedMenu());
         }
     }
 }

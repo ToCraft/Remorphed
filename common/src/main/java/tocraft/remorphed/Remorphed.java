@@ -42,6 +42,7 @@ public class Remorphed {
     public static final RemorphedConfig CONFIG = ConfigLoader.register(MODID);
     public static boolean displayVariantsInMenu = true;
     public static boolean displayTraitsInMenu = true;
+    @ApiStatus.Internal
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {

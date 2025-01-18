@@ -4,18 +4,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.screen.RemorphedScreen;
 
 public abstract class ShapeWidget extends AbstractButton {
-    private final RemorphedScreen parent;
+    private final Screen parent;
     private boolean crashed = false;
     private boolean isFavorite;
     private final boolean isCurrent;
 
-    public ShapeWidget(float x, float y, float width, float height, RemorphedScreen parent, boolean isFavorite, boolean isCurrent) {
+    public ShapeWidget(float x, float y, float width, float height, Screen parent, boolean isFavorite, boolean isCurrent) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty(""));
         this.parent = parent;
         this.isFavorite = isFavorite;

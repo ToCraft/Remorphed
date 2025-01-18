@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
-import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
@@ -29,11 +29,11 @@ import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class SpecialShapeWidget extends AbstractButton {
-    private final RemorphedScreen parent;
+    private final Screen parent;
     private final boolean isCurrent;
     private final boolean isAvailable;
 
-    public SpecialShapeWidget(int x, int y, int width, int height, RemorphedScreen parent) {
+    public SpecialShapeWidget(int x, int y, int width, int height, Screen parent) {
         super(x, y, width, height, Component.nullToEmpty(""));
         this.parent = parent;
 

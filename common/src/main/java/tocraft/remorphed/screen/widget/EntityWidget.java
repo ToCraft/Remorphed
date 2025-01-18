@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -18,7 +19,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
-import tocraft.remorphed.screen.RemorphedScreen;
 import tocraft.walkers.api.variant.ShapeType;
 import tocraft.walkers.traits.ShapeTrait;
 import tocraft.walkers.traits.TraitRegistry;
@@ -33,8 +33,8 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     private final T entity;
     private final int size;
 
-    public EntityWidget(float x, float y, float width, float height, ShapeType<T> type, @NotNull T entity, RemorphedScreen parent, boolean isFavorite, boolean current) {
-        super((int) x, (int) y, (int) width, (int) height, parent, isFavorite, current); // int x, int y, int width, int height, message
+    public EntityWidget(int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current) {
+        super(x, y, width, height, parent, isFavorite, current); // int x, int y, int width, int height, message
         this.size = (int) (25 * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         this.type = type;
         this.entity = entity;
@@ -55,21 +55,25 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     @Override
     protected void renderShape(GuiGraphics guiGraphics) {
         if (Remorphed.displayTraitsInMenu) {
+            int iconS = width / 5;
+
+
             // Render Trait Icons first
             int blitOffset = 0;
             int rowIndex = 0;
             List<ResourceLocation> renderedTraits = new ArrayList<>();
-            for (ShapeTrait<T> trait : TraitRegistry.getAll(entity)) {
+            List<ShapeTrait<T>> traits = TraitRegistry.getAll(entity);
+            for (ShapeTrait<T> trait : traits) {
                 if (trait != null && trait.getIcon() != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
-                    guiGraphics.blitSprite(RenderType::guiTextured, trait.getIcon(), getX() + rowIndex, getY() + blitOffset, 18, 18);
+                    guiGraphics.blitSprite(RenderType::guiTextured, trait.getIcon(), getX() + rowIndex, getY() + blitOffset, iconS, iconS);
                     // prevent infinite amounts of traits to be rendered
-                    if (blitOffset >= getHeight() - 18) {
-                        rowIndex += 18;
+                    if (blitOffset >= getHeight() - iconS) {
+                        rowIndex += iconS;
                         blitOffset = 0;
                     } else {
-                        blitOffset += 18;
+                        blitOffset += iconS;
                     }
-                    if (rowIndex >= getWidth() - 18) {
+                    if (rowIndex >= getWidth() - iconS) {
                         break;
                     }
                     renderedTraits.add(trait.getId());
