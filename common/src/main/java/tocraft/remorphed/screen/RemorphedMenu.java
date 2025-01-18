@@ -42,7 +42,7 @@ public class RemorphedMenu extends Screen {
     @Nullable
     protected ShapeListWidget list;
     public final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
-    private String lastSearchContents = "";
+    private static String lastSearchContents = "";
 
     private final List<ShapeType<?>> unlockedShapes = new CopyOnWriteArrayList<>();
     private final List<PlayerProfile> unlockedSkins = new CopyOnWriteArrayList<>();
@@ -147,33 +147,28 @@ public class RemorphedMenu extends Screen {
                     }
                 });
             }
-
-            populateShapeWidgets(unlockedShapes, unlockedSkins);
         }
 
-        // implement search handler
+        // implement search handler and display matching entities
         searchBar.setResponder(text -> {
-            setFocused(searchBar);
+            // re-filter if the text contents changed
+            ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
+            children().removeIf(button -> button instanceof EntityWidget);
 
-            // Only re-filter if the text contents changed
-            if (!lastSearchContents.equals(text)) {
-                ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
-                children().removeIf(button -> button instanceof EntityWidget);
+            List<ShapeType<?>> filteredShapes = unlockedShapes
+                    .stream()
+                    .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
+                    .toList();
+            List<PlayerProfile> filteredSkins = unlockedSkins
+                    .stream()
+                    .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
+                    .toList();
 
-                List<ShapeType<?>> filteredShapes = unlockedShapes
-                        .stream()
-                        .filter(type -> text.isEmpty() || ShapeType.createTooltipText(renderEntities.get(type)).getString().toUpperCase().contains(text.toUpperCase()) || EntityType.getKey(type.getEntityType()).toString().toUpperCase().contains(text.toUpperCase()))
-                        .toList();
-                List<PlayerProfile> filteredSkins = unlockedSkins
-                        .stream()
-                        .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
-                        .toList();
-
-                populateShapeWidgets(filteredShapes, filteredSkins);
-            }
+            populateShapeWidgets(filteredShapes, filteredSkins);
 
             lastSearchContents = text;
         });
+        searchBar.insertText(lastSearchContents);
     }
 
     @Override
