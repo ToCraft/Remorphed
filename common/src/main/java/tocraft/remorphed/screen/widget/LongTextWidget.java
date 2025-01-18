@@ -5,6 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -85,6 +86,16 @@ public class LongTextWidget extends AbstractScrollArea {
     protected void renderSeparators(@NotNull GuiGraphics guiGraphics) {
         guiGraphics.blit(RenderType::guiTextured, Screen.INWORLD_HEADER_SEPARATOR, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
         guiGraphics.blit(RenderType::guiTextured, Screen.INWORLD_FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+    }
+
+    public void updateSize(int width, HeaderAndFooterLayout layout) {
+        this.updateSizeAndPosition(width, layout.getContentHeight(), layout.getHeaderHeight());
+    }
+
+    public void updateSizeAndPosition(int width, int height, int y) {
+        this.setSize(width, height);
+        this.setPosition(0, y);
+        this.refreshScrollAmount();
     }
 
     @Override

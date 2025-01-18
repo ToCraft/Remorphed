@@ -83,7 +83,7 @@ public class RemorphedHelpScreen extends Screen {
     protected void repositionElements() {
         this.layout.arrangeElements();
         if (this.list != null) {
-            this.list.setSize(this.width, this.layout.getContentHeight());
+            this.list.updateSize(this.width, layout);
         }
     }
 }
