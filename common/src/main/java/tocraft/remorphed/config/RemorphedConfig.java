@@ -26,7 +26,7 @@ public class RemorphedConfig implements Config {
             put("minecraft:wither", 2);
         }
     };
-    @Comment("<<< Menu Customization >>>\n")
+    @Comment("\n<<< Menu Customization >>>")
     public boolean show_variants_by_default = false;
     public boolean show_traits_by_default = true;
     @Comment("scale the shapes in the menu")
@@ -36,6 +36,8 @@ public class RemorphedConfig implements Config {
     public boolean sort_selected = false;
     @Comment("Whether the menu should automatically focus on the selected shape")
     public boolean focus_selected = true;
+    @Comment("The width of the rows in the menu")
+    public int row_width = 330;
 
     @Override
     public String getName() {

@@ -14,6 +14,7 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
+import tocraft.remorphed.Remorphed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class LongTextWidget extends AbstractScrollArea {
     }
 
     protected int textWidth() {
-        return 330;
+        return Remorphed.CONFIG.row_width;
     }
 
     @Override

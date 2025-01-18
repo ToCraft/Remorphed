@@ -70,7 +70,7 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
 
     @Override
     public int getRowWidth() {
-        return 330;
+        return Remorphed.CONFIG.row_width;
     }
 
     @Override
