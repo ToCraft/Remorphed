@@ -16,11 +16,7 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidget.ShapeRow> {
     public ShapeListWidget(Minecraft minecraft, int width, @NotNull HeaderAndFooterLayout layout) {
-        this(minecraft, width, layout.getContentHeight(), layout.getHeaderHeight(), 35);
-    }
-
-    private ShapeListWidget(Minecraft minecraft, int width, int height, int y, int itemHeight) {
-        super(minecraft, width, height, y, itemHeight);
+        super(minecraft, width, layout.getContentHeight(), layout.getHeaderHeight(), 35);
     }
 
     public int addRow(ShapeWidget[] widgets) {
@@ -66,4 +62,11 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
             return List.of(widgets);
         }
     }
+
+    //#if MC<=1212
+    @Override
+    protected boolean isValidMouseClick(int button) {
+        return true;
+    }
+    //#endif
 }

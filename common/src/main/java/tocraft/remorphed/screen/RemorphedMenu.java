@@ -83,7 +83,7 @@ public class RemorphedMenu extends Screen {
     protected void addContents() {
         this.list = this.layout.addToContents(new ShapeListWidget(this.minecraft, this.width, this.layout));
 
-        if (minecraft != null) {
+        if (minecraft != null && minecraft.player != null) {
             populateUnlockedRenderEntities(minecraft.player);
 
             ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
@@ -175,16 +175,14 @@ public class RemorphedMenu extends Screen {
 
     @SuppressWarnings("unchecked")
     private void populateShapeWidgets(@NotNull List<ShapeType<?>> rendered, @NotNull List<PlayerProfile> skinProfiles) {
-        if (this.list != null) {
+        if (this.list != null && minecraft != null && minecraft.player != null) {
             this.list.clearEntries();
 
             // add widget for each entity to be rendered
             int rows = (int) Math.ceil((rendered.size() + skinProfiles.size()) / 5f);
 
-            ShapeType<LivingEntity> currentType = null;
-            if (minecraft != null) {
-                currentType = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
-            }
+            ShapeType<LivingEntity> currentType = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
+
 
             for (int i = 0; i <= rows; i++) {
                 List<ShapeWidget> row = new ArrayList<>();
@@ -298,26 +296,24 @@ public class RemorphedMenu extends Screen {
     }
 
     private @NotNull Button createVariantsButton() {
-        Button.Builder variantsButton = Button.builder(Component.translatable("remorphed.display_variants"), (widget) -> {
+        Component text = Component.translatable("remorphed.display_variants");
+        Button.Builder variantsButton = Button.builder(text, (widget) -> {
             Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
             Minecraft.getInstance().setScreen(new RemorphedMenu());
         });
 
-        variantsButton.size(100, 20);
+
+        variantsButton.size(Minecraft.getInstance().font.width(text.getString()) + 20, 20);
         variantsButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".variants")));
 
         return variantsButton.build();
     }
 
     private @NotNull Button createTraitsButton() {
-        Button.Builder traitButton = Button.builder(Component.translatable("remorphed.show_traits"), (widget) -> Remorphed.displayTraitsInMenu = !Remorphed.displayTraitsInMenu);
-        int xOffset = 0;
-        if (Minecraft.getInstance().player != null) {
-            xOffset = Walkers.hasSpecialShape(Minecraft.getInstance().player.getUUID()) ? 30 : 0;
-        }
+        Component text = Component.translatable("remorphed.show_traits");
+        Button.Builder traitButton = Button.builder(text, (widget) -> Remorphed.displayTraitsInMenu = !Remorphed.displayTraitsInMenu);
 
-        int xPos = (int) (getWindow().getGuiScaledWidth() / 2f + (getWindow().getGuiScaledWidth() / 8f) + 65 + xOffset);
-        traitButton.size(Math.min(50, getWindow().getGuiScaledWidth() - xPos), 20);
+        traitButton.size(Minecraft.getInstance().font.width(text.getString()) + 20, 20);
         traitButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".traits")));
 
         return traitButton.build();
