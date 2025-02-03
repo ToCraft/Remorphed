@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import tocraft.walkers.Walkers;
+import tocraft.walkers.api.PlayerShapeChanger;
 import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.*;
@@ -37,13 +38,19 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     private final Set<UUID> remorphed$favoriteSkins = new CopyOnWriteArraySet<>();
     @Unique
-    private final String UNLOCKED_SHAPES = "UnlockedShapes";
+    private final Map<ShapeType<?>, Integer> remorphed$ShapeMorphCounter = new ConcurrentHashMap<>();
     @Unique
-    private final String FAVORITE_SHAPES = "FavoriteShapes";
+    private final Map<UUID, Integer> remorphed$SkinMorphCounter = new ConcurrentHashMap<>();
     @Unique
-    private final String UNLOCKED_SKINS = "UnlockedSkins";
+    private static final String UNLOCKED_SHAPES = "UnlockedShapes";
     @Unique
-    private final String FAVORITE_SKINS = "FavoriteSkins";
+    private static final String FAVORITE_SHAPES = "FavoriteShapes";
+    @Unique
+    private static final String UNLOCKED_SKINS = "UnlockedSkins";
+    @Unique
+    private static  final String FAVORITE_SKINS = "FavoriteSkins";
+    @Unique
+    private static final String MORPH_COUNTER = "MorphCounter";
 
     private PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level world) {
         super(type, world);
@@ -57,17 +64,17 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-    private void readNbt(CompoundTag tag, CallbackInfo info) {
+    private void readNbt(@NotNull CompoundTag tag, CallbackInfo info) {
         remorphed$readData(tag.getCompound(Remorphed.MODID));
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-    private void writeNbt(CompoundTag tag, CallbackInfo info) {
+    private void writeNbt(@NotNull CompoundTag tag, CallbackInfo info) {
         tag.put(Remorphed.MODID, remorphed$writeData());
     }
 
     @Unique
-    private CompoundTag remorphed$writeData() {
+    private @NotNull CompoundTag remorphed$writeData() {
         CompoundTag tag = new CompoundTag();
         ListTag unlockedShapes = new ListTag();
         remorphed$unlockedShapes.forEach((shape, killAmount) -> {
@@ -121,6 +128,30 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             tag.put(FAVORITE_SKINS, favoriteSkins);
         }
 
+        ListTag morphCounter = new ListTag();
+        remorphed$ShapeMorphCounter.forEach((type, count) -> {
+            if (count > 0 && type != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putBoolean("isSkin", false);
+                entryTag.putString("id", EntityType.getKey(type.getEntityType()).toString());
+                entryTag.putInt("variant", type.getVariantData());
+                entryTag.putInt("counter", count);
+                morphCounter.add(entryTag);
+            }
+        });
+        remorphed$SkinMorphCounter.forEach((skinId, count) -> {
+            if (count > 0 && skinId != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putBoolean("isSkin", true);
+                entryTag.putUUID("uuid", skinId);
+                entryTag.putInt("counter", count);
+                morphCounter.add(entryTag);
+            }
+        });
+        if (!morphCounter.isEmpty()) {
+            tag.put(MORPH_COUNTER, morphCounter);
+        }
+
         return tag;
     }
 
@@ -131,6 +162,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$favoriteShapes.clear();
         remorphed$unlockedSkins.clear();
         remorphed$favoriteSkins.clear();
+        remorphed$SkinMorphCounter.clear();
+        remorphed$ShapeMorphCounter.clear();
 
         ListTag unlockedShapes = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
         unlockedShapes.forEach(entry -> {
@@ -166,6 +199,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                 UUID skinId = ((CompoundTag) entry).getUUID("uuid");
 
                 remorphed$favoriteSkins.add(skinId);
+            }
+        });
+
+        ListTag morphCounter = tag.getList(MORPH_COUNTER, ListTag.TAG_COMPOUND);
+        morphCounter.forEach(entry -> {
+            boolean isSkin = ((CompoundTag) entry).getBoolean("isSkin");
+            int count = ((CompoundTag) entry).getInt("counter");
+            if (isSkin) {
+                UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+                remorphed$SkinMorphCounter.put(skinId, count);
+            } else {
+                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
+                int typeVariantId = ((CompoundTag) entry).getInt("variant");
+                remorphed$ShapeMorphCounter.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), count);
             }
         });
     }
@@ -224,5 +271,38 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Override
     public Set<UUID> remorphed$getFavoriteSkins() {
         return remorphed$favoriteSkins;
+    }
+
+    @Unique
+    @Override
+    public void remorphed$handleSwap(ShapeType<? extends LivingEntity> type) {
+        int counter = remorphed$ShapeMorphCounter.getOrDefault(type, 0) + 1;
+        int killValue = Remorphed.getKillValue(type.getEntityType());
+
+        if (killValue > 0 && counter >= killValue) {
+            counter = 0;
+            // remove one kill
+            remorphed$unlockedShapes.put(type, remorphed$getKills(type) - 1);
+
+            // check and remove 2nd Shape if necessary
+            //noinspection ConstantValue
+            if ((Object) this instanceof ServerPlayer serverPlayer && !Remorphed.canUseShape(serverPlayer, type)) {
+                PlayerShapeChanger.change2ndShape(serverPlayer, null);
+            }
+        }
+        remorphed$ShapeMorphCounter.put(type, counter);
+    }
+    @Unique
+    @Override
+    public void remorphed$handleSwap(UUID skinId) {
+        int counter = remorphed$SkinMorphCounter.getOrDefault(skinId, 0) + 1;
+        counter++;
+        int killValue = Remorphed.CONFIG.playerKillValue;
+        if (killValue > 0 && counter >= killValue) {
+            counter = 0;
+            // remove one kill
+            remorphed$unlockedSkins.put(skinId, remorphed$getKills(skinId) - 1);
+        }
+        remorphed$SkinMorphCounter.put(skinId, counter);
     }
 }

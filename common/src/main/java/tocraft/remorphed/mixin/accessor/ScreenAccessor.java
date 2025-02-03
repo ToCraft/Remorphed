@@ -13,5 +13,5 @@ import java.util.List;
 @Mixin(Screen.class)
 public interface ScreenAccessor {
     @Accessor("narratables")
-    List<NarratableEntry> getSelectables();
+    List<NarratableEntry> getNarratables();
 }

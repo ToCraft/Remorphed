@@ -25,6 +25,7 @@ import tocraft.walkers.api.variant.ShapeType;
 import java.util.Set;
 import java.util.UUID;
 
+// TODO: Add custom morph to normal Packet and disable walkers' morphing
 public class NetworkHandler {
     public static final ResourceLocation MORPH_REQUEST = Remorphed.id("morph_request");
     public static final ResourceLocation UNLOCKED_SYNC = Remorphed.id("unlocked_sync");
@@ -67,7 +68,7 @@ public class NetworkHandler {
     }
 
     @SuppressWarnings({"DataFlowIssue", "unchecked"})
-    private static void handleMorphRequestPacket(ModernNetworking.Context context, CompoundTag compound) {
+    private static void handleMorphRequestPacket(ModernNetworking.@NotNull Context context, CompoundTag compound) {
         context.getPlayer().getServer().execute(() -> {
             // check if player is blacklisted
             if (Walkers.isPlayerBlacklisted(context.getPlayer().getUUID()) && Walkers.CONFIG.blacklistPreventsMorphing) {
@@ -78,6 +79,7 @@ public class NetworkHandler {
             if (compound.contains("playerUUID") && Remorphed.foundSkinShifter) {
                 UUID targetSkinUUID = compound.getUUID("playerUUID");
                 SkinShifter.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
+                PlayerMorph.handleSwap(context.getPlayer(), targetSkinUUID);
             } else {
                 ResourceLocation typeId = ResourceLocation.parse(compound.getString("id"));
                 int typeVariant = compound.getInt("variant");
@@ -89,8 +91,10 @@ public class NetworkHandler {
                 ShapeType<? extends LivingEntity> type = ShapeType.from(eType, typeVariant);
                 // update Player
                 boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
-                if (result && type != null)
+                if (result && type != null) {
                     PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
+                    PlayerMorph.handleSwap(context.getPlayer(), type);
+                }
 
                 // Refresh player dimensions
                 context.getPlayer().refreshDimensions();
@@ -113,7 +117,7 @@ public class NetworkHandler {
         ModernNetworking.sendToPlayer(player, NetworkHandler.FAVORITE_SYNC, tag);
     }
 
-    public static void sendFavoriteRequest(ShapeType<? extends LivingEntity> type, boolean favorite) {
+    public static void sendFavoriteRequest(@NotNull ShapeType<? extends LivingEntity> type, boolean favorite) {
         CompoundTag packet = new CompoundTag();
         packet.putString("id", EntityType.getKey(type.getEntityType()).toString());
         packet.putInt("variant", type.getVariantData());
@@ -121,7 +125,7 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
 
-    public static void sendFavoriteRequest(PlayerProfile playerProfile, boolean favorite) {
+    public static void sendFavoriteRequest(@NotNull PlayerProfile playerProfile, boolean favorite) {
         CompoundTag packet = new CompoundTag();
         packet.putUUID("playerUUID", playerProfile.id());
         packet.putBoolean("favorite", favorite);
@@ -129,7 +133,7 @@ public class NetworkHandler {
     }
 
     @SuppressWarnings({"unchecked", "DataFlowIssue"})
-    private static void handleFavoriteRequestPacket(ModernNetworking.Context context, CompoundTag packet) {
+    private static void handleFavoriteRequestPacket(ModernNetworking.Context context, @NotNull CompoundTag packet) {
         boolean favorite = packet.getBoolean("favorite");
 
         if (packet.contains("playerUUID")) {

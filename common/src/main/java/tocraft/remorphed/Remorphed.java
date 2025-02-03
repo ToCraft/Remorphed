@@ -25,7 +25,7 @@ import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
 import tocraft.remorphed.handler.LivingDeathHandler;
 import tocraft.remorphed.handler.PlayerRespawnHandler;
-import tocraft.remorphed.handler.ShapeEventsCallback;
+import tocraft.remorphed.handler.UnlockShapeCallback;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
@@ -46,7 +46,7 @@ public class Remorphed {
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {
-        ShapeEvents.UNLOCK_SHAPE.register(new ShapeEventsCallback());
+        ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         if (!CONFIG.unlockFriendlyNormal) {
             ApiLevel.setApiLevel(ApiLevel.MORPHING_AND_VARIANTS_MENU_ONLY);
         }
@@ -100,10 +100,13 @@ public class Remorphed {
         return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= CONFIG.killToUnlockPlayers || CONFIG.killToUnlockPlayers == 0) && CONFIG.killToUnlockPlayers != -1).map(PlayerProfile::ofId).filter(Objects::nonNull).toList());
     }
 
-    public static int getKillToUnlock(EntityType<?> entityType) {
-        String id = EntityType.getKey(entityType).toString();
-        if (Remorphed.CONFIG.killToUnlockByType.containsKey(id)) return Remorphed.CONFIG.killToUnlockByType.get(id);
-        else return Remorphed.CONFIG.killToUnlock;
+    public static int getKillToUnlock(EntityType<?> type) {
+        return Remorphed.CONFIG.killToUnlockByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killToUnlock);
+
+    }
+
+    public static int getKillValue(EntityType<?> type) {
+        return Remorphed.CONFIG.killValueByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killValue);
     }
 
     public static void sync(ServerPlayer player) {

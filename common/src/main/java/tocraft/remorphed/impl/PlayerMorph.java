@@ -46,4 +46,12 @@ public class PlayerMorph {
     public static Set<UUID> getFavoriteSkinIds(Player player) {
         return ((RemorphedPlayerDataProvider) player).remorphed$getFavoriteSkins();
     }
+
+    public static void handleSwap(Player player, ShapeType<? extends LivingEntity> type) {
+        ((RemorphedPlayerDataProvider) player).remorphed$handleSwap(type);
+    }
+
+    public static void handleSwap(Player player, UUID skinId) {
+        ((RemorphedPlayerDataProvider) player).remorphed$handleSwap(skinId);
+    }
 }

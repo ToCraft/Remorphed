@@ -1,3 +1,8 @@
+remorphed 6.1
+================
+
+- remove kills after morphing multiple times
+
 remorphed 6.0
 ================
 

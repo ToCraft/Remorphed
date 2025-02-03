@@ -11,7 +11,7 @@ import tocraft.walkers.Walkers;
 import tocraft.walkers.api.events.ShapeEvents;
 import tocraft.walkers.api.variant.ShapeType;
 
-public class ShapeEventsCallback implements ShapeEvents.UnlockShapeCallback {
+public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
     @Override
     public InteractionResult unlock(ServerPlayer player, ShapeType<?> type) {
         if (type != null) {

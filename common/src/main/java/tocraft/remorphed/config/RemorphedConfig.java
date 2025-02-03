@@ -15,6 +15,9 @@ public class RemorphedConfig implements Config {
     public boolean creativeUnlockAll = true;
     public int killToUnlock = 1;
     public int killToUnlockPlayers = 2;
+    @Comment("After unlocking a shape, the player can loose it for morphing into it will remove one kill per (by default) 5 times morphing. Set to 0 to disable.")
+    public int killValue = 5;
+    public int playerKillValue = 2;
     public boolean autoTransform = false;
     @Synchronize
     public boolean lockTransform = false;
@@ -24,6 +27,12 @@ public class RemorphedConfig implements Config {
         {
             put("minecraft:ender_dragon", 2);
             put("minecraft:wither", 2);
+        }
+    };
+    public Map<String, Integer> killValueByType = new HashMap<>() {
+        {
+            put("minecraft:ender_dragon", 10);
+            put("minecraft:wither", 10);
         }
     };
     @Comment("\n<<< Menu Customization >>>")

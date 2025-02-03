@@ -152,7 +152,7 @@ public class RemorphedMenu extends Screen {
         // implement search handler and display matching entities
         searchBar.setResponder(text -> {
             // re-filter if the text contents changed
-            ((ScreenAccessor) this).getSelectables().removeIf(button -> button instanceof EntityWidget);
+            ((ScreenAccessor) this).getNarratables().removeIf(button -> button instanceof EntityWidget);
             children().removeIf(button -> button instanceof EntityWidget);
 
             List<ShapeType<?>> filteredShapes = unlockedShapes
