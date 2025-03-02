@@ -16,7 +16,7 @@ import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.FakeClientPlayer;
 import tocraft.remorphed.network.NetworkHandler;
-import tocraft.walkers.impl.PlayerDataProvider;
+import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.network.impl.SwapPackets;
 
 @Environment(EnvType.CLIENT)
@@ -42,7 +42,7 @@ public class SkinWidget extends ShapeWidget {
     protected void sendSwap2ndShapeRequest() {
         NetworkHandler.sendSwapSkinRequest(skin);
         Player player = Minecraft.getInstance().player;
-        if (player != null && ((PlayerDataProvider) player).walkers$getCurrentShape() != null) {
+        if (player != null && PlayerShape.getCurrentShape(player) != null) {
             SwapPackets.sendSwapRequest();
         }
     }

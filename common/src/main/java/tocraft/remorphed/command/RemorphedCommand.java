@@ -42,7 +42,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .requires(source -> source.hasPermission(2)).build();
 
         /*
-         * Used to remove a unlocked shape of the specified Player.
+         * Used to remove an unlocked shape of the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> removeShape = Commands.literal("removeShape")
                 .then(Commands.argument("player", EntityArgument.players())
