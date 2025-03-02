@@ -2,6 +2,8 @@ remorphed 6.1
 ================
 
 - remove kills after morphing multiple times
+- fix crash with special shape widget
+- update to craftedcore 6.0 & walkers 6.2
 
 remorphed 6.0
 ================

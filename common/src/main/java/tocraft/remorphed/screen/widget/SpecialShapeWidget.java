@@ -39,10 +39,11 @@ public class SpecialShapeWidget extends AbstractButton {
 
         // check if current shape is the special shape
         CompoundTag nbt = new CompoundTag();
-        if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf)
+        if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) {
             wolf.saveWithoutId(nbt);
+        }
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
-        this.isAvailable = Remorphed.canUseEveryShape(Minecraft.getInstance().player) || (PlayerMorph.getUnlockedShapes(Minecraft.getInstance().player)).keySet().stream().anyMatch(type -> type.getEntityType().equals(EntityType.WOLF));
+        this.isAvailable = Minecraft.getInstance().player != null && (Remorphed.canUseEveryShape(Minecraft.getInstance().player) || (PlayerMorph.getUnlockedShapes(Minecraft.getInstance().player)).keySet().stream().anyMatch(type -> type != null && type.getEntityType().equals(EntityType.WOLF)));
         setTooltip(Tooltip.create(Component.translatable(isAvailable ? "remorphed.special_shape_available" : "remorphed.special_shape_unavailable")));
     }
 
