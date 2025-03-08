@@ -273,6 +273,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         return remorphed$favoriteSkins;
     }
 
+    // FIXME: Not working with Walkers' unlockEveryVariant - e.g. when killing a pale wolf and morphing into an ashen one, the counter doesn't work and cheats kills
     @Unique
     @Override
     public void remorphed$handleSwap(ShapeType<? extends LivingEntity> type) {

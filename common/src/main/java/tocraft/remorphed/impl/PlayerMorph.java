@@ -1,5 +1,6 @@
 package tocraft.remorphed.impl;
 
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import tocraft.craftedcore.platform.PlayerProfile;
@@ -21,6 +22,10 @@ public class PlayerMorph {
 
     public static int getKills(Player player, ShapeType<? extends LivingEntity> type) {
         return ((RemorphedPlayerDataProvider) player).remorphed$getKills(type);
+    }
+
+    public static int getKills(Player player, EntityType<?> type) {
+        return getUnlockedShapes(player).entrySet().stream().filter(e -> e.getKey() != null && type.equals(e.getKey().getEntityType())).map(Map.Entry::getValue).reduce(0, Integer::sum);
     }
 
     public static Set<ShapeType<?>> getFavoriteShapes(Player player) {

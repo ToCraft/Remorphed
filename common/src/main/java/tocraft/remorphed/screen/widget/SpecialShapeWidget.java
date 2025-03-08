@@ -15,7 +15,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Wolf;
 import org.jetbrains.annotations.NotNull;
 import tocraft.remorphed.Remorphed;
-import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
@@ -43,7 +42,7 @@ public class SpecialShapeWidget extends AbstractButton {
             wolf.saveWithoutId(nbt);
         }
         this.isCurrent = nbt.contains("isSpecial") && nbt.getBoolean("isSpecial");
-        this.isAvailable = Minecraft.getInstance().player != null && (Remorphed.canUseEveryShape(Minecraft.getInstance().player) || (PlayerMorph.getUnlockedShapes(Minecraft.getInstance().player)).keySet().stream().anyMatch(type -> type != null && type.getEntityType().equals(EntityType.WOLF)));
+        this.isAvailable = Minecraft.getInstance().player != null && Remorphed.canUseShape(Minecraft.getInstance().player, EntityType.WOLF);
         setTooltip(Tooltip.create(Component.translatable(isAvailable ? "remorphed.special_shape_available" : "remorphed.special_shape_unavailable")));
     }
 

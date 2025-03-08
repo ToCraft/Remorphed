@@ -81,6 +81,10 @@ public class Remorphed {
         return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type.getEntityType()));
     }
 
+    public static boolean canUseShape(Player player, EntityType<?> type) {
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type));
+    }
+
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
         if (canUseEveryShape(player)) {
             return ShapeType.getAllTypes(player.level());
