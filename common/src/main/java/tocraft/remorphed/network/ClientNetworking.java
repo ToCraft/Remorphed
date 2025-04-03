@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.client.CraftedCoreClient;
 import tocraft.craftedcore.network.ModernNetworking;
 import tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
+import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -53,6 +54,25 @@ public class ClientNetworking {
             });
         }
 
+        final Map<ShapeType<?>, Integer> shapeCounter = new HashMap<>();
+        final Map<UUID, Integer> skinCounter = new HashMap<>();
+        if (compound.contains("MorphCounter")) {
+            compound.getList("MorphCounter", Tag.TAG_COMPOUND).forEach(entry -> {
+                boolean isSkin = ((CompoundTag) entry).getBoolean("isSkin");
+                int count = ((CompoundTag) entry).getInt("counter");
+                if (isSkin) {
+                    UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+                    skinCounter.put(skinId, count);
+                } else {
+                    ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
+                    int typeVariantId = ((CompoundTag) entry).getInt("variant");
+                    shapeCounter.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), count);
+                }
+            });
+        }
+
+        Remorphed.LOGGER.warn(shapeCounter.toString());
+
         runOrQueue(context, player -> {
             @Nullable
             Player syncTarget = player.getCommandSenderWorld().getPlayerByUUID(uuid);
@@ -62,6 +82,10 @@ public class ClientNetworking {
                 PlayerMorph.getUnlockedShapes(player).putAll(unlockedShapes);
                 PlayerMorph.getUnlockedSkinIds(player).clear();
                 PlayerMorph.getUnlockedSkinIds(player).putAll(unlockedSkins);
+                PlayerMorph.getShapeCounter(player).clear();
+                PlayerMorph.getShapeCounter(player).putAll(shapeCounter);
+                PlayerMorph.getSkinCounter(player).clear();
+                PlayerMorph.getSkinCounter(player).putAll(skinCounter);
             }
         });
     }

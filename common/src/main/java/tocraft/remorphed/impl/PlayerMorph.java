@@ -12,10 +12,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PlayerMorph {
-    public static void clearCounter(Player player) {
-        ((RemorphedPlayerDataProvider) player).remorphed$clearCounter();
-    }
-
     public static Map<ShapeType<? extends LivingEntity>, Integer> getUnlockedShapes(Player player) {
         return ((RemorphedPlayerDataProvider) player).remorphed$getUnlockedShapes();
     }
@@ -56,8 +52,8 @@ public class PlayerMorph {
         return ((RemorphedPlayerDataProvider) player).remorphed$getFavoriteSkins();
     }
 
-    public static boolean handleSwap(Player player, ShapeType<? extends LivingEntity> type) {
-        return ((RemorphedPlayerDataProvider) player).remorphed$handleSwap(type);
+    public static void handleSwap(Player player, ShapeType<? extends LivingEntity> type) {
+        ((RemorphedPlayerDataProvider) player).remorphed$handleSwap(type);
     }
 
     public static void handleSwap(Player player, UUID skinId) {
@@ -71,4 +67,11 @@ public class PlayerMorph {
     public static int getCounter(Player player, UUID skinId) {
         return ((RemorphedPlayerDataProvider) player).remorphed$getCounter(skinId);
     }
-}
+
+    public static Map<ShapeType<?>, Integer> getShapeCounter(Player player) {
+        return ((RemorphedPlayerDataProvider) player).remorphed$getShapeCounter();
+    }
+
+    public static Map<UUID, Integer> getSkinCounter(Player player) {
+        return ((RemorphedPlayerDataProvider) player).remorphed$getSkinCounter();
+    }}

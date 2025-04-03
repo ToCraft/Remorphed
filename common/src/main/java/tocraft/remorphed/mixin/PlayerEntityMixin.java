@@ -295,11 +295,15 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Unique
     @Override
-    public boolean remorphed$handleSwap(ShapeType<? extends LivingEntity> type) {
+    public void remorphed$handleSwap(ShapeType<? extends LivingEntity> type) {
+        if (((Player) (Object) this).isCreative()) {
+            return;
+        }
+
         int counter = remorphed$getCounter(type) + 1;
         int killValue = Remorphed.getKillValue(type.getEntityType());
 
-        if (killValue > 0 && counter > killValue) {
+        if (killValue > 0 && counter >= killValue) {
             // get current kill amount
             int k = remorphed$unlockedShapes.getOrDefault(type, 0);
             ShapeType<?> killType = type;
@@ -339,18 +343,18 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             if ((Object) this instanceof ServerPlayer serverPlayer && !Remorphed.canUseShape(serverPlayer, type)) {
                 PlayerShapeChanger.change2ndShape(serverPlayer, null);
             }
-
-            // check if swapping should fail
-            return Remorphed.canUseShape((Player) (Object) this, type);
         } else {
             // raise counter
             remorphed$ShapeMorphCounter.put(type, remorphed$ShapeMorphCounter.getOrDefault(type, 0) + 1);
-            return true;
         }
     }
     @Unique
     @Override
     public void remorphed$handleSwap(UUID skinId) {
+        if (((Player) (Object) this).isCreative()) {
+            return;
+        }
+
         int counter = remorphed$SkinMorphCounter.getOrDefault(skinId, 0) + 1;
         counter++;
         int killValue = Remorphed.CONFIG.playerKillValue;
@@ -371,8 +375,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Unique
     @Override
-    public void remorphed$clearCounter() {
-        remorphed$ShapeMorphCounter.clear();
-        remorphed$SkinMorphCounter.clear();
+    public Map<ShapeType<?>, Integer> remorphed$getShapeCounter() {
+        return remorphed$ShapeMorphCounter;
+    }
+
+    @Unique
+    @Override
+    public Map<UUID, Integer> remorphed$getSkinCounter() {
+        return remorphed$SkinMorphCounter;
     }
 }

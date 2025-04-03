@@ -33,8 +33,8 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     private final T entity;
     private final int size;
 
-    public EntityWidget(int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current) {
-        super(x, y, width, height, parent, isFavorite, current); // int x, int y, int width, int height, message
+    public EntityWidget(int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability) {
+        super(x, y, width, height, parent, isFavorite, current, availability); // int x, int y, int width, int height, message
         this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         this.type = type;
         this.entity = entity;
@@ -54,7 +54,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
 
     @Override
     protected void renderShape(GuiGraphics guiGraphics) {
-        if (Remorphed.displayTraitsInMenu) {
+        if (Remorphed.displayDataInMenu) {
             int iconS = width / 5;
 
 

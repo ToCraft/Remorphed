@@ -210,7 +210,8 @@ public class RemorphedMenu extends Screen {
                                     new FakeClientPlayer(minecraft.level, skinProfile),
                                     this,
                                     PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
-                                    bl
+                                    bl,
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.CONFIG.playerKillValue < 1 ? -1 : Remorphed.CONFIG.playerKillValue * PlayerMorph.getPlayerKills(minecraft.player, skinProfile.id()) - PlayerMorph.getCounter(minecraft.player, skinProfile.id())
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid skin profile: {}", skinProfile);
@@ -230,8 +231,10 @@ public class RemorphedMenu extends Screen {
                                     entity,
                                     this,
                                     PlayerMorph.getFavoriteShapes(minecraft.player).contains(type),
-                                    bl
+                                    bl,
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * PlayerMorph.getKills(minecraft.player, type) - PlayerMorph.getCounter(minecraft.player, type)
                             ));
+                            Remorphed.LOGGER.warn("Entity: {} with: {}", type.getEntityType(), PlayerMorph.getCounter(minecraft.player, type));
                         } else {
                             Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());
                         }
@@ -325,7 +328,7 @@ public class RemorphedMenu extends Screen {
 
     private @NotNull Button createTraitsButton() {
         Component text = Component.translatable("remorphed.show_traits");
-        Button.Builder traitButton = Button.builder(text, (widget) -> Remorphed.displayTraitsInMenu = !Remorphed.displayTraitsInMenu);
+        Button.Builder traitButton = Button.builder(text, (widget) -> Remorphed.displayDataInMenu = !Remorphed.displayDataInMenu);
 
         traitButton.size(Minecraft.getInstance().font.width(text.getString()) + 20, 20);
         traitButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".traits")));

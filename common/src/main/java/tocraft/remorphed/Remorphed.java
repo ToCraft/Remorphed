@@ -42,7 +42,7 @@ public class Remorphed {
     public static final String MODID = "remorphed";
     public static final RemorphedConfig CONFIG = ConfigLoader.register(MODID);
     public static boolean displayVariantsInMenu = CONFIG.show_variants_by_default;
-    public static boolean displayTraitsInMenu = CONFIG.show_traits_by_default;
+    public static boolean displayDataInMenu = CONFIG.show_traits_by_default;
     @ApiStatus.Internal
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
@@ -148,11 +148,36 @@ public class Remorphed {
         });
         if (!skinsList.isEmpty()) compoundTag.put("UnlockedSkins", skinsList);
 
+        ListTag morphCounter = new ListTag();
+        PlayerMorph.getShapeCounter(changed).forEach((type, count) -> {
+            if (count > 0 && type != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putBoolean("isSkin", false);
+                entryTag.putString("id", EntityType.getKey(type.getEntityType()).toString());
+                entryTag.putInt("variant", type.getVariantData());
+                entryTag.putInt("counter", count);
+                morphCounter.add(entryTag);
+            }
+        });
+        PlayerMorph.getSkinCounter(changed).forEach((skinId, count) -> {
+            if (count > 0 && skinId != null) {
+                CompoundTag entryTag = new CompoundTag();
+                entryTag.putBoolean("isSkin", true);
+                entryTag.putUUID("uuid", skinId);
+                entryTag.putInt("counter", count);
+                morphCounter.add(entryTag);
+            }
+        });
+        if (!morphCounter.isEmpty()) {
+            compoundTag.put("MorphCounter", morphCounter);
+        }
+
         compoundTag.putUUID("uuid", changed.getUUID());
         ModernNetworking.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, compoundTag);
     }
 
-    public static ResourceLocation id(String name) {
+    @Contract("_ -> new")
+    public static @NotNull ResourceLocation id(String name) {
         return ResourceLocation.fromNamespaceAndPath(MODID, name);
     }
 }

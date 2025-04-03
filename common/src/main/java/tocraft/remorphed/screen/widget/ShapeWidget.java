@@ -14,12 +14,14 @@ public abstract class ShapeWidget extends AbstractButton {
     private boolean crashed = false;
     private boolean isFavorite;
     private final boolean isCurrent;
+    private final int availability;
 
-    public ShapeWidget(float x, float y, float width, float height, Screen parent, boolean isFavorite, boolean isCurrent) {
+    public ShapeWidget(float x, float y, float width, float height, Screen parent, boolean isFavorite, boolean isCurrent, int availability) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty(""));
         this.parent = parent;
         this.isFavorite = isFavorite;
         this.isCurrent = isCurrent;
+        this.availability = availability;
     }
 
     protected abstract void sendFavoriteRequest(boolean isFavorite);
@@ -49,6 +51,13 @@ public abstract class ShapeWidget extends AbstractButton {
             // make the widget is even DARKER when hovered
             if (isHoveredOrFocused()) {
                 guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/focused.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
+            }
+
+            if (Remorphed.displayDataInMenu && availability != -1) {
+                String s = String.valueOf(availability);
+                int w = parent.getFont().width(s);
+                guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), 0xFFFFFF, false);
+                guiGraphics.flush();
             }
 
             renderShape(guiGraphics);

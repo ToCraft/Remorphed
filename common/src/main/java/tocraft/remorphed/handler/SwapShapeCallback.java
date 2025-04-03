@@ -12,12 +12,8 @@ public class SwapShapeCallback implements ShapeEvents.ShapeSwapCallback {
     @Override
     public InteractionResult swap(ServerPlayer player, @Nullable LivingEntity to) {
         if (to instanceof LivingEntity) {
-            ShapeType<?> type = ShapeType.from(to);
-            boolean bl = PlayerMorph.handleSwap(player, type);
-            return bl ? InteractionResult.PASS : InteractionResult.FAIL;
+            PlayerMorph.handleSwap(player, ShapeType.from(to));
         }
-        else {
-            return InteractionResult.PASS;
-        }
+        return InteractionResult.PASS;
     }
 }
