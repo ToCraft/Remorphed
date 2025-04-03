@@ -271,6 +271,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
     private static void clearShapes(@NotNull CommandSourceStack source, ServerPlayer player) {
         PlayerMorph.getUnlockedShapes(player).clear();
+        PlayerMorph.clearCounter(player);
 
         source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".clearShapes", player.getDisplayName()), true);
         PlayerShapeChanger.change2ndShape(player, null);

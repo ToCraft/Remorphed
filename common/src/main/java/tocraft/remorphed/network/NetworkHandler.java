@@ -93,7 +93,6 @@ public class NetworkHandler {
                 boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
                 if (result && type != null) {
                     PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
-                    PlayerMorph.handleSwap(context.getPlayer(), type);
                 }
 
                 // Refresh player dimensions

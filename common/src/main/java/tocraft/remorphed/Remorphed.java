@@ -25,6 +25,7 @@ import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
 import tocraft.remorphed.handler.LivingDeathHandler;
 import tocraft.remorphed.handler.PlayerRespawnHandler;
+import tocraft.remorphed.handler.SwapShapeCallback;
 import tocraft.remorphed.handler.UnlockShapeCallback;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
@@ -47,6 +48,7 @@ public class Remorphed {
 
     public void initialize() {
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
+        ShapeEvents.SWAP_SHAPE.register(new SwapShapeCallback());
         if (!CONFIG.unlockFriendlyNormal) {
             ApiLevel.setApiLevel(ApiLevel.MORPHING_AND_VARIANTS_MENU_ONLY);
         }

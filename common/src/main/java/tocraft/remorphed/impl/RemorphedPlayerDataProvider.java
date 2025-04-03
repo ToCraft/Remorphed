@@ -28,6 +28,9 @@ public interface RemorphedPlayerDataProvider {
 
     Set<UUID> remorphed$getFavoriteSkins();
 
-    void remorphed$handleSwap(ShapeType<? extends LivingEntity> type);
-    void remorphed$handleSwap(UUID shapeId);
+    boolean remorphed$handleSwap(ShapeType<? extends LivingEntity> type);
+    int remorphed$getCounter(ShapeType<? extends LivingEntity> type);
+    int remorphed$getCounter(UUID skinId);
+    void remorphed$handleSwap(UUID skinId);
+    void remorphed$clearCounter();
 }

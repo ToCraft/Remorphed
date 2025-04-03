@@ -234,7 +234,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     public int remorphed$getKills(ShapeType<? extends LivingEntity> type) {
         if (Walkers.CONFIG.unlockEveryVariant) {
             int killAmount = 0;
-            for (Integer i : remorphed$unlockedShapes.entrySet().stream().filter(entry -> entry.getKey().getEntityType().equals(type.getEntityType())).map(Map.Entry::getValue).toList()) {
+            for (int i : remorphed$unlockedShapes.entrySet().stream().filter(entry -> entry.getKey().getEntityType().equals(type.getEntityType())).map(Map.Entry::getValue).toList()) {
                 killAmount += i;
             }
             return killAmount;
@@ -273,25 +273,80 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         return remorphed$favoriteSkins;
     }
 
-    // FIXME: Not working with Walkers' unlockEveryVariant - e.g. when killing a pale wolf and morphing into an ashen one, the counter doesn't work and cheats kills
     @Unique
     @Override
-    public void remorphed$handleSwap(ShapeType<? extends LivingEntity> type) {
-        int counter = remorphed$ShapeMorphCounter.getOrDefault(type, 0) + 1;
+    public int remorphed$getCounter(ShapeType<? extends LivingEntity> type) {
+        if (Walkers.CONFIG.unlockEveryVariant) {
+            int counter = 0;
+            for (int i : remorphed$ShapeMorphCounter.entrySet().stream().filter(entry -> entry.getKey().getEntityType().equals(type.getEntityType())).map(Map.Entry::getValue).toList()) {
+                counter += i;
+            }
+            return counter;
+        } else {
+            return remorphed$ShapeMorphCounter.getOrDefault(type, 0);
+        }
+    }
+
+    @Unique
+    @Override
+    public int remorphed$getCounter(UUID skinId) {
+        return remorphed$SkinMorphCounter.getOrDefault(skinId, 0);
+    }
+
+    @Unique
+    @Override
+    public boolean remorphed$handleSwap(ShapeType<? extends LivingEntity> type) {
+        int counter = remorphed$getCounter(type) + 1;
         int killValue = Remorphed.getKillValue(type.getEntityType());
 
-        if (killValue > 0 && counter >= killValue) {
-            counter = 0;
+        if (killValue > 0 && counter > killValue) {
+            // get current kill amount
+            int k = remorphed$unlockedShapes.getOrDefault(type, 0);
+            ShapeType<?> killType = type;
+
+            // check the kill amount of other variants if current one is zero
+            if (Walkers.CONFIG.unlockEveryVariant) {
+                List<? extends ShapeType<?>> variants = ShapeType.getAllTypes(type.getEntityType());
+                for (int i = 0; k <= 0 && i < variants.size(); i++) {
+                    killType = variants.get(i);
+                    k = remorphed$unlockedShapes.getOrDefault(killType, 0);
+                }
+            }
+
             // remove one kill
-            remorphed$unlockedShapes.put(type, remorphed$getKills(type) - 1);
+            if (k <= 1) {
+                int k2 = remorphed$unlockedShapes.remove(killType);
+            } else {
+                remorphed$unlockedShapes.put(killType, k - 1);
+            }
+
+            // reset counter
+            if (Walkers.CONFIG.unlockEveryVariant) {
+                ShapeType<? extends LivingEntity> ctype;
+                List<? extends ShapeType<?>> variants = ShapeType.getAllTypes(type.getEntityType());
+                for (int i = 0; counter > 0 && i < variants.size(); i++) {
+                    Integer c = remorphed$ShapeMorphCounter.remove(variants.get(i));
+                    if (c != null) {
+                        counter -= c;
+                    }
+                }
+            } else {
+                remorphed$ShapeMorphCounter.remove(type);
+            }
 
             // check and remove 2nd Shape if necessary
             //noinspection ConstantValue
             if ((Object) this instanceof ServerPlayer serverPlayer && !Remorphed.canUseShape(serverPlayer, type)) {
                 PlayerShapeChanger.change2ndShape(serverPlayer, null);
             }
+
+            // check if swapping should fail
+            return Remorphed.canUseShape((Player) (Object) this, type);
+        } else {
+            // raise counter
+            remorphed$ShapeMorphCounter.put(type, remorphed$ShapeMorphCounter.getOrDefault(type, 0) + 1);
+            return true;
         }
-        remorphed$ShapeMorphCounter.put(type, counter);
     }
     @Unique
     @Override
@@ -300,10 +355,24 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         counter++;
         int killValue = Remorphed.CONFIG.playerKillValue;
         if (killValue > 0 && counter >= killValue) {
-            counter = 0;
+            // reset counter
+            remorphed$SkinMorphCounter.remove(skinId);
             // remove one kill
-            remorphed$unlockedSkins.put(skinId, remorphed$getKills(skinId) - 1);
+            int k = remorphed$getKills(skinId) - 1;
+            if (k <= 0) {
+                remorphed$unlockedSkins.remove(skinId);
+            } else {
+                remorphed$unlockedSkins.put(skinId, k);
+            }
+        } else {
+            remorphed$SkinMorphCounter.put(skinId, counter);
         }
-        remorphed$SkinMorphCounter.put(skinId, counter);
+    }
+
+    @Unique
+    @Override
+    public void remorphed$clearCounter() {
+        remorphed$ShapeMorphCounter.clear();
+        remorphed$SkinMorphCounter.clear();
     }
 }

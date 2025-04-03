@@ -25,8 +25,8 @@ public class RemorphedConfig implements Config {
     public boolean unlockFriendlyNormal = false;
     public Map<String, Integer> killToUnlockByType = new HashMap<>() {
         {
-            put("minecraft:ender_dragon", 2);
-            put("minecraft:wither", 2);
+            put("minecraft:ender_dragon", 1);
+            put("minecraft:wither", 1);
         }
     };
     public Map<String, Integer> killValueByType = new HashMap<>() {
