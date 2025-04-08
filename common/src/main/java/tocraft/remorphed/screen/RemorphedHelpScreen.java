@@ -11,7 +11,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import tocraft.remorphed.screen.widget.*;
+import tocraft.craftedcore.gui.LongTextWidget;
+import tocraft.remorphed.Remorphed;
 
 @Environment(EnvType.CLIENT)
 public class RemorphedHelpScreen extends Screen {
@@ -36,7 +37,7 @@ public class RemorphedHelpScreen extends Screen {
     }
 
     protected void addContents() {
-        this.list = this.layout.addToContents(new LongTextWidget(0, this.layout.getHeaderHeight(), this.width, this.layout.getContentHeight(), true));
+        this.list = this.layout.addToContents(new LongTextWidget(0, this.layout.getHeaderHeight(), this.width, this.layout.getContentHeight(), true, Remorphed.CONFIG.row_width));
 
         // Add Text
         this.list.addText(Component.translatable("remorphed.help.welcome"));

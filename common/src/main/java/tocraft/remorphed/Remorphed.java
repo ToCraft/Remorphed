@@ -1,6 +1,9 @@
 package tocraft.remorphed;
 
+import com.mojang.authlib.GameProfile;
+import dev.tocraft.skinshifter.data.SkinPlayerData;
 import net.fabricmc.api.EnvType;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -19,7 +22,6 @@ import tocraft.craftedcore.event.common.EntityEvents;
 import tocraft.craftedcore.event.common.PlayerEvents;
 import tocraft.craftedcore.network.ModernNetworking;
 import tocraft.craftedcore.platform.PlatformData;
-import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.craftedcore.platform.VersionChecker;
 import tocraft.remorphed.command.RemorphedCommand;
 import tocraft.remorphed.config.RemorphedConfig;
@@ -102,8 +104,8 @@ public class Remorphed {
     }
 
     @Contract("_ -> new")
-    public static @NotNull List<PlayerProfile> getUnlockedSkins(Player player) {
-        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= CONFIG.killToUnlockPlayers || CONFIG.killToUnlockPlayers == 0) && CONFIG.killToUnlockPlayers != -1).map(PlayerProfile::ofId).filter(Objects::nonNull).toList());
+    public static @NotNull List<GameProfile> getUnlockedSkins(Player player) {
+        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= CONFIG.killToUnlockPlayers || CONFIG.killToUnlockPlayers == 0) && CONFIG.killToUnlockPlayers != -1).map(id -> SkinPlayerData.getSkinProfile(id).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).toList());
     }
 
     public static int getKillToUnlock(EntityType<?> type) {
@@ -141,7 +143,7 @@ public class Remorphed {
         unlockedSkins.forEach((skinId, killAmount) -> {
             if (killAmount > 0 && skinId != null) {
                 CompoundTag compound = new CompoundTag();
-                compound.putUUID("uuid", skinId);
+                compound.putIntArray("uuid", UUIDUtil.uuidToIntArray(skinId));
                 compound.putInt("killAmount", killAmount);
                 skinsList.add(compound);
             }
@@ -163,7 +165,7 @@ public class Remorphed {
             if (count > 0 && skinId != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putBoolean("isSkin", true);
-                entryTag.putUUID("uuid", skinId);
+                entryTag.putIntArray("uuid", UUIDUtil.uuidToIntArray(skinId));
                 entryTag.putInt("counter", count);
                 morphCounter.add(entryTag);
             }
@@ -172,7 +174,7 @@ public class Remorphed {
             compoundTag.put("MorphCounter", morphCounter);
         }
 
-        compoundTag.putUUID("uuid", changed.getUUID());
+        compoundTag.putIntArray("uuid", UUIDUtil.uuidToIntArray(changed.getUUID()));
         ModernNetworking.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, compoundTag);
     }
 

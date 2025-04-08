@@ -1,5 +1,6 @@
 package tocraft.remorphed.network;
 
+import com.mojang.authlib.GameProfile;
 import dev.tocraft.skinshifter.SkinShifter;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,7 +15,6 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.network.ModernNetworking;
-import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.Walkers;
@@ -60,9 +60,9 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(NetworkHandler.MORPH_REQUEST, compound);
     }
 
-    public static <T extends LivingEntity> void sendSwapSkinRequest(@NotNull PlayerProfile playerProfile) {
+    public static <T extends LivingEntity> void sendSwapSkinRequest(@NotNull GameProfile playerProfile) {
         CompoundTag compound = new CompoundTag();
-        compound.putUUID("playerUUID", playerProfile.id());
+        compound.putUUID("playerUUID", playerProfile.getId());
 
         ModernNetworking.sendToServer(NetworkHandler.MORPH_REQUEST, compound);
     }
@@ -124,9 +124,9 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
 
-    public static void sendFavoriteRequest(@NotNull PlayerProfile playerProfile, boolean favorite) {
+    public static void sendFavoriteRequest(@NotNull GameProfile playerProfile, boolean favorite) {
         CompoundTag packet = new CompoundTag();
-        packet.putUUID("playerUUID", playerProfile.id());
+        packet.putUUID("playerUUID", playerProfile.getId());
         packet.putBoolean("favorite", favorite);
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }

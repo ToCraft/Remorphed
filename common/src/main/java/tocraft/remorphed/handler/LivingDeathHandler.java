@@ -23,7 +23,7 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
 
                 if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
                     PlayerShapeChanger.change2ndShape(killer, type);
-                    PlayerShape.updateShapes(killer, type.create(killer.level()));
+                    PlayerShape.updateShapes(killer, type.create(killer.level(), killer));
                 }
             }
         } else if (entity instanceof Player && source.getEntity() instanceof ServerPlayer killer) {

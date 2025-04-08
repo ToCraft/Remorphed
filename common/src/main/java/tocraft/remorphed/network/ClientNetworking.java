@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import tocraft.craftedcore.client.CraftedCoreClient;
 import tocraft.craftedcore.network.ModernNetworking;
 import tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
-import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -70,8 +69,6 @@ public class ClientNetworking {
                 }
             });
         }
-
-        Remorphed.LOGGER.warn(shapeCounter.toString());
 
         runOrQueue(context, player -> {
             @Nullable

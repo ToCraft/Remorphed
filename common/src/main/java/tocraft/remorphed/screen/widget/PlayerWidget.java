@@ -1,6 +1,8 @@
 package tocraft.remorphed.screen.widget;
 
+import com.mojang.authlib.GameProfile;
 import dev.tocraft.skinshifter.SkinShifter;
+import dev.tocraft.skinshifter.data.SkinPlayerData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -11,20 +13,23 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import tocraft.craftedcore.platform.PlayerProfile;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.network.impl.SwapPackets;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
     private final Screen parent;
-    private boolean willCache = true;
+    private final boolean willCache = true;
 
     public PlayerWidget(int x, int y, int width, int height, Screen parent) {
         super(x, y, width, height, Component.nullToEmpty("Head"));
@@ -39,14 +44,8 @@ public class PlayerWidget extends AbstractButton {
             ResourceLocation skinLocation = player.getSkin().texture();
             if (Remorphed.foundSkinShifter && !player.getUUID().equals(SkinShifter.getCurrentSkin(player))) {
                 // still render own skin as icon when in another skin
-                PlayerProfile playerProfile = PlayerProfile.getCachedProfile(player.getUUID());
-                if (playerProfile != null && playerProfile.skin() != null) {
-                    skinLocation = playerProfile.getSkinId();
-                } else if (this.willCache) {
-                    // cache profile asynchronous
-                    CompletableFuture.runAsync(() -> PlayerProfile.ofId(player.getUUID()));
-                    this.willCache = false;
-                }
+                var skin = getPlayerSkin(player);
+                skinLocation = skin.getNow(Optional.empty()).map(PlayerSkin::texture).orElse(skinLocation);
             }
 
             guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 8.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
@@ -76,5 +75,10 @@ public class PlayerWidget extends AbstractButton {
     @Override
     public void updateWidgetNarration(NarrationElementOutput builder) {
 
+    }
+
+    private static @NotNull CompletableFuture<Optional<PlayerSkin>> getPlayerSkin(Player player) {
+        CompletableFuture<Optional<GameProfile>> profileFuture = SkinPlayerData.getSkinProfile(player.getUUID());
+        return profileFuture.thenApply((profile) -> profile.map((gameProfile) -> Minecraft.getInstance().getSkinManager().getInsecureSkin(gameProfile)));
     }
 }

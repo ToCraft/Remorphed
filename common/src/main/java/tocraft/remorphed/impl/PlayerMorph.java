@@ -1,14 +1,13 @@
 package tocraft.remorphed.impl;
 
+import com.mojang.authlib.GameProfile;
+import dev.tocraft.skinshifter.data.SkinPlayerData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import tocraft.craftedcore.platform.PlayerProfile;
 import tocraft.walkers.api.variant.ShapeType;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PlayerMorph {
@@ -44,8 +43,8 @@ public class PlayerMorph {
         return ((RemorphedPlayerDataProvider) player).remorphed$getKills(uuid);
     }
 
-    public static Set<PlayerProfile> getFavoriteSkins(Player player) {
-        return getFavoriteSkinIds(player).stream().map(PlayerProfile::ofId).collect(Collectors.toSet());
+    public static Set<GameProfile> getFavoriteSkins(Player player) {
+        return getFavoriteSkinIds(player).stream().map(p -> SkinPlayerData.getSkinProfile(p).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     public static Set<UUID> getFavoriteSkinIds(Player player) {
@@ -74,4 +73,5 @@ public class PlayerMorph {
 
     public static Map<UUID, Integer> getSkinCounter(Player player) {
         return ((RemorphedPlayerDataProvider) player).remorphed$getSkinCounter();
-    }}
+    }
+}

@@ -1,10 +1,16 @@
+remorphed 6.2
+================
+
+- port to 1.21.5 & improve SkinShifter integrity
+- EoL for versions older then 1.21.5
+
 remorphed 6.1
 ================
 
 - remove kills after morphing multiple times
 - add a counter to the menu for possible morphs
 - fix crash with special shape widget
-- update to craftedcore 6.0 & walkers 6.2
+- update to craftedcore 6.2, walkers 6.3 & skinshifter 1.4
 
 remorphed 6.0
 ================

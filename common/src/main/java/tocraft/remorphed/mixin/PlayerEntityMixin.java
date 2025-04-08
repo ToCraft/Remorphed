@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,6 +30,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused"})
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
+    @Shadow
+    public abstract boolean isCreative();
+
     @Unique
     private final Map<ShapeType<? extends LivingEntity>, Integer> remorphed$unlockedShapes = new HashMap<>();
     @Unique
@@ -48,7 +52,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique
     private static final String UNLOCKED_SKINS = "UnlockedSkins";
     @Unique
-    private static  final String FAVORITE_SKINS = "FavoriteSkins";
+    private static final String FAVORITE_SKINS = "FavoriteSkins";
     @Unique
     private static final String MORPH_COUNTER = "MorphCounter";
 
@@ -348,6 +352,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             remorphed$ShapeMorphCounter.put(type, remorphed$ShapeMorphCounter.getOrDefault(type, 0) + 1);
         }
     }
+
     @Unique
     @Override
     public void remorphed$handleSwap(UUID skinId) {
