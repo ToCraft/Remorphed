@@ -1,7 +1,7 @@
 remorphed 6.2
 ================
 
-- port to 1.21.5 & improve SkinShifter integrity
+- port to 1.21.5 & improve Woodwalkers integrity
 - EoL for versions older then 1.21.5
 
 remorphed 6.1

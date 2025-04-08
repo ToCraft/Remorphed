@@ -3,11 +3,10 @@ package tocraft.remorphed.network;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Holder;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,21 +33,21 @@ public class ClientNetworking {
 
     @SuppressWarnings("unchecked")
     public static void handleUnlockedSyncPacket(ModernNetworking.Context context, @NotNull CompoundTag compound) {
-        final UUID uuid = compound.getUUID("uuid");
+        final UUID uuid = UUIDUtil.uuidFromIntArray(compound.getIntArray("uuid").orElseThrow());
         final Map<ShapeType<?>, Integer> unlockedShapes = new HashMap<>();
         if (compound.contains("UnlockedShapes")) {
-            compound.getList("UnlockedShapes", Tag.TAG_COMPOUND).forEach(entryTag -> {
-                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(((CompoundTag) entryTag).getString("id"))).map(Holder::value).orElse(null);
-                int variant = ((CompoundTag) entryTag).getInt("variant");
-                int killAmount = ((CompoundTag) entryTag).getInt("killAmount");
+            compound.getListOrEmpty("UnlockedShapes").forEach(entryTag -> {
+                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(((CompoundTag) entryTag).getString("id").orElseThrow())).map(Holder::value).orElse(null);
+                int variant = ((CompoundTag) entryTag).getIntOr("variant", -1);
+                int killAmount = ((CompoundTag) entryTag).getIntOr("killAmount", 0);
                 unlockedShapes.put(ShapeType.from(eType, variant), killAmount);
             });
         }
         final Map<UUID, Integer> unlockedSkins = new HashMap<>();
         if (compound.contains("UnlockedSkins")) {
-            compound.getList("UnlockedSkins", Tag.TAG_COMPOUND).forEach(entryTag -> {
-                UUID unlockedSkinUUID = ((CompoundTag) entryTag).getUUID("uuid");
-                int killAmount = ((CompoundTag) entryTag).getInt("killAmount");
+            compound.getListOrEmpty("UnlockedSkins").forEach(entryTag -> {
+                UUID unlockedSkinUUID = UUIDUtil.uuidFromIntArray(((CompoundTag) entryTag).getIntArray("uuid").orElseThrow());
+                int killAmount = ((CompoundTag) entryTag).getIntOr("killAmount", 0);
                 unlockedSkins.put(unlockedSkinUUID, killAmount);
             });
         }
@@ -56,15 +55,15 @@ public class ClientNetworking {
         final Map<ShapeType<?>, Integer> shapeCounter = new HashMap<>();
         final Map<UUID, Integer> skinCounter = new HashMap<>();
         if (compound.contains("MorphCounter")) {
-            compound.getList("MorphCounter", Tag.TAG_COMPOUND).forEach(entry -> {
-                boolean isSkin = ((CompoundTag) entry).getBoolean("isSkin");
-                int count = ((CompoundTag) entry).getInt("counter");
+            compound.getListOrEmpty("MorphCounter").forEach(entry -> {
+                boolean isSkin = ((CompoundTag) entry).getBoolean("isSkin").orElseThrow();
+                int count = ((CompoundTag) entry).getIntOr("counter", 0);
                 if (isSkin) {
-                    UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+                    UUID skinId = UUIDUtil.uuidFromIntArray(((CompoundTag) entry).getIntArray("uuid").orElseThrow());
                     skinCounter.put(skinId, count);
                 } else {
-                    ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
-                    int typeVariantId = ((CompoundTag) entry).getInt("variant");
+                    ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id").orElseThrow());
+                    int typeVariantId = ((CompoundTag) entry).getIntOr("variant", -1);
                     shapeCounter.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), count);
                 }
             });
@@ -92,10 +91,10 @@ public class ClientNetworking {
         ClientNetworking.runOrQueue(context, player -> {
             PlayerMorph.getFavoriteShapes(player).clear();
             PlayerMorph.getFavoriteSkinIds(player).clear();
-            ListTag shapeIds = tag.getList("FavoriteShapes", Tag.TAG_COMPOUND);
-            ListTag skinIds = tag.getList("FavoriteSkins", Tag.TAG_INT_ARRAY);
+            ListTag shapeIds = tag.getListOrEmpty("FavoriteShapes");
+            ListTag skinIds = tag.getListOrEmpty("FavoriteSkins");
             shapeIds.forEach(compound -> PlayerMorph.getFavoriteShapes(player).add(ShapeType.from((CompoundTag) compound)));
-            skinIds.forEach(skinId -> PlayerMorph.getFavoriteSkinIds(player).add(NbtUtils.loadUUID(skinId)));
+            skinIds.forEach(skinId -> PlayerMorph.getFavoriteSkinIds(player).add(UUIDUtil.uuidFromIntArray(skinId.asIntArray().orElseThrow())));
         });
     }
 

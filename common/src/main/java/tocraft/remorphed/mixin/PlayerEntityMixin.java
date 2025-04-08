@@ -1,6 +1,7 @@
 package tocraft.remorphed.mixin;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -69,7 +70,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     private void readNbt(@NotNull CompoundTag tag, CallbackInfo info) {
-        remorphed$readData(tag.getCompound(Remorphed.MODID));
+        remorphed$readData(tag.getCompoundOrEmpty(Remorphed.MODID));
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
@@ -111,7 +112,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$unlockedSkins.forEach((skinId, killAmount) -> {
             if (killAmount > 0 && skinId != null) {
                 CompoundTag entryTag = new CompoundTag();
-                entryTag.putUUID("uuid", skinId);
+                entryTag.putIntArray("uuid", UUIDUtil.uuidToIntArray(skinId));
                 entryTag.putInt("killAmount", killAmount);
                 unlockedSkins.add(entryTag);
             }
@@ -124,7 +125,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$favoriteSkins.forEach(skinId -> {
             if (skinId != null) {
                 CompoundTag entryTag = new CompoundTag();
-                entryTag.putUUID("uuid", skinId);
+                entryTag.putIntArray("uuid", UUIDUtil.uuidToIntArray(skinId));
                 favoriteSkins.add(entryTag);
             }
         });
@@ -147,7 +148,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             if (count > 0 && skinId != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putBoolean("isSkin", true);
-                entryTag.putUUID("uuid", skinId);
+                entryTag.putIntArray("uuid", UUIDUtil.uuidToIntArray(skinId));
                 entryTag.putInt("counter", count);
                 morphCounter.add(entryTag);
             }
@@ -169,53 +170,53 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$SkinMorphCounter.clear();
         remorphed$ShapeMorphCounter.clear();
 
-        ListTag unlockedShapes = tag.getList(UNLOCKED_SHAPES, ListTag.TAG_COMPOUND);
+        ListTag unlockedShapes = tag.getListOrEmpty(UNLOCKED_SHAPES);
         unlockedShapes.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
-                int typeVariantId = ((CompoundTag) entry).getInt("variant");
-                int killAmount = ((CompoundTag) entry).getInt("killAmount");
+                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id").orElseThrow());
+                int typeVariantId = ((CompoundTag) entry).getIntOr("variant", -1);
+                int killAmount = ((CompoundTag) entry).getIntOr("killAmount", 0);
 
                 remorphed$unlockedShapes.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), killAmount);
             }
         });
-        ListTag favoriteShapes = tag.getList(FAVORITE_SHAPES, ListTag.TAG_COMPOUND);
+        ListTag favoriteShapes = tag.getListOrEmpty(FAVORITE_SHAPES);
         favoriteShapes.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
-                int typeVariantId = ((CompoundTag) entry).getInt("variant");
+                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id").orElseThrow());
+                int typeVariantId = ((CompoundTag) entry).getIntOr("variant", -1);
 
                 remorphed$favoriteShapes.add(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId));
             }
         });
 
-        ListTag unlockedSkins = tag.getList(UNLOCKED_SKINS, ListTag.TAG_COMPOUND);
+        ListTag unlockedSkins = tag.getListOrEmpty(UNLOCKED_SKINS);
         unlockedSkins.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                UUID skinId = ((CompoundTag) entry).getUUID("uuid");
-                int killAmount = ((CompoundTag) entry).getInt("killAmount");
+                UUID skinId = UUIDUtil.uuidFromIntArray(((CompoundTag) entry).getIntArray("uuid").orElseThrow());
+                int killAmount = ((CompoundTag) entry).getIntOr("killAmount", 0);
                 remorphed$unlockedSkins.put(skinId, killAmount);
             }
         });
-        ListTag favoriteSkins = tag.getList(FAVORITE_SKINS, ListTag.TAG_COMPOUND);
+        ListTag favoriteSkins = tag.getListOrEmpty(FAVORITE_SKINS);
         favoriteSkins.forEach(entry -> {
             if (entry instanceof CompoundTag) {
-                UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+                UUID skinId = UUIDUtil.uuidFromIntArray(((CompoundTag) entry).getIntArray("uuid").orElseThrow());
 
                 remorphed$favoriteSkins.add(skinId);
             }
         });
 
-        ListTag morphCounter = tag.getList(MORPH_COUNTER, ListTag.TAG_COMPOUND);
+        ListTag morphCounter = tag.getListOrEmpty(MORPH_COUNTER);
         morphCounter.forEach(entry -> {
-            boolean isSkin = ((CompoundTag) entry).getBoolean("isSkin");
-            int count = ((CompoundTag) entry).getInt("counter");
+            boolean isSkin = ((CompoundTag) entry).getBoolean("isSkin").orElseThrow();
+            int count = ((CompoundTag) entry).getIntOr("counter", 0);
             if (isSkin) {
-                UUID skinId = ((CompoundTag) entry).getUUID("uuid");
+                UUID skinId = UUIDUtil.uuidFromIntArray(((CompoundTag) entry).getIntArray("uuid").orElseThrow());
                 remorphed$SkinMorphCounter.put(skinId, count);
             } else {
-                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id"));
-                int typeVariantId = ((CompoundTag) entry).getInt("variant");
+                ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id").orElseThrow());
+                int typeVariantId = ((CompoundTag) entry).getIntOr("variant", -1);
                 remorphed$ShapeMorphCounter.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), count);
             }
         });
@@ -314,7 +315,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
             // check the kill amount of other variants if current one is zero
             if (Walkers.CONFIG.unlockEveryVariant) {
-                List<? extends ShapeType<?>> variants = ShapeType.getAllTypes(type.getEntityType());
+                List<? extends ShapeType<?>> variants = ShapeType.getAllTypes(type.getEntityType(), level());
                 for (int i = 0; k <= 0 && i < variants.size(); i++) {
                     killType = variants.get(i);
                     k = remorphed$unlockedShapes.getOrDefault(killType, 0);
@@ -331,7 +332,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             // reset counter
             if (Walkers.CONFIG.unlockEveryVariant) {
                 ShapeType<? extends LivingEntity> ctype;
-                List<? extends ShapeType<?>> variants = ShapeType.getAllTypes(type.getEntityType());
+                List<? extends ShapeType<?>> variants = ShapeType.getAllTypes(type.getEntityType(), level());
                 for (int i = 0; counter > 0 && i < variants.size(); i++) {
                     Integer c = remorphed$ShapeMorphCounter.remove(variants.get(i));
                     if (c != null) {

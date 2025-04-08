@@ -3,10 +3,11 @@ package tocraft.remorphed.network;
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.skinshifter.SkinShifter;
 import net.minecraft.core.Holder;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,7 +63,7 @@ public class NetworkHandler {
 
     public static <T extends LivingEntity> void sendSwapSkinRequest(@NotNull GameProfile playerProfile) {
         CompoundTag compound = new CompoundTag();
-        compound.putUUID("playerUUID", playerProfile.getId());
+        compound.putIntArray("playerUUID", UUIDUtil.uuidToIntArray(playerProfile.getId()));
 
         ModernNetworking.sendToServer(NetworkHandler.MORPH_REQUEST, compound);
     }
@@ -77,12 +78,12 @@ public class NetworkHandler {
             }
 
             if (compound.contains("playerUUID") && Remorphed.foundSkinShifter) {
-                UUID targetSkinUUID = compound.getUUID("playerUUID");
+                UUID targetSkinUUID = UUIDUtil.uuidFromIntArray(compound.getIntArray("playerUUID").orElseThrow());
                 SkinShifter.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
                 PlayerMorph.handleSwap(context.getPlayer(), targetSkinUUID);
             } else {
-                ResourceLocation typeId = ResourceLocation.parse(compound.getString("id"));
-                int typeVariant = compound.getInt("variant");
+                ResourceLocation typeId = ResourceLocation.parse(compound.getString("id").orElseThrow());
+                int typeVariant = compound.getIntOr("variant", -1);
 
                 EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null);
 
@@ -92,7 +93,7 @@ public class NetworkHandler {
                 // update Player
                 boolean result = PlayerShapeChanger.change2ndShape((ServerPlayer) context.getPlayer(), type);
                 if (result && type != null) {
-                    PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level()));
+                    PlayerShape.updateShapes((ServerPlayer) context.getPlayer(), type.create(context.getPlayer().level(), context.getPlayer()));
                 }
 
                 // Refresh player dimensions
@@ -108,7 +109,7 @@ public class NetworkHandler {
         ListTag shapeIdList = new ListTag();
         ListTag skinIdList = new ListTag();
         favoriteShapes.forEach(type -> shapeIdList.add(type.writeCompound()));
-        favoriteSkins.forEach(skin -> skinIdList.add(NbtUtils.createUUID(skin)));
+        favoriteSkins.forEach(skin -> skinIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(skin))));
         tag.put("FavoriteShapes", shapeIdList);
         tag.put("FavoriteSkins", skinIdList);
 
@@ -126,17 +127,17 @@ public class NetworkHandler {
 
     public static void sendFavoriteRequest(@NotNull GameProfile playerProfile, boolean favorite) {
         CompoundTag packet = new CompoundTag();
-        packet.putUUID("playerUUID", playerProfile.getId());
+        packet.putIntArray("playerUUID", UUIDUtil.uuidToIntArray(playerProfile.getId()));
         packet.putBoolean("favorite", favorite);
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
 
     @SuppressWarnings({"unchecked", "DataFlowIssue"})
     private static void handleFavoriteRequestPacket(ModernNetworking.Context context, @NotNull CompoundTag packet) {
-        boolean favorite = packet.getBoolean("favorite");
+        boolean favorite = packet.getBooleanOr("favorite", false);
 
         if (packet.contains("playerUUID")) {
-            UUID skinId = packet.getUUID("playerUUID");
+            UUID skinId = UUIDUtil.uuidFromIntArray(packet.getIntArray("playerUUID").orElseThrow());
 
             context.getPlayer().getServer().execute(() -> {
                 if (favorite) {
@@ -148,8 +149,8 @@ public class NetworkHandler {
                 sendFavoriteSync((ServerPlayer) context.getPlayer());
             });
         } else {
-            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(packet.getString("id"))).map(Holder::value).orElse(null);
-            int variant = packet.getInt("variant");
+            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(packet.getString("id").orElseThrow())).map(Holder::value).orElse(null);
+            int variant = packet.getIntOr("variant", -1);
 
             context.getPlayer().getServer().execute(() -> {
                 @Nullable ShapeType<?> type = ShapeType.from(entityType, variant);
