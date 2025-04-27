@@ -1,3 +1,8 @@
+remorphed 6.3
+================
+
+- remove debug logging
+
 remorphed 6.2
 ================
 

@@ -235,7 +235,6 @@ public class RemorphedMenu extends Screen {
                                     bl,
                                     Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * PlayerMorph.getKills(minecraft.player, type) - PlayerMorph.getCounter(minecraft.player, type)
                             ));
-                            Remorphed.LOGGER.warn("Entity: {} with: {}", type.getEntityType(), PlayerMorph.getCounter(minecraft.player, type));
                         } else {
                             Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());
                         }
