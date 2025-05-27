@@ -2,6 +2,7 @@ remorphed 6.3
 ================
 
 - remove debug logging
+- sync important config values
 
 remorphed 6.2
 ================
