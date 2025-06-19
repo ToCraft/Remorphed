@@ -1,7 +1,6 @@
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ToCraft/Remorphed/build_only.yml?style=for-the-badge)](https://github.com/ToCraft/Remorphed/actions/workflows/build_only.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ToCraft/Remorphed/build.yml?style=for-the-badge)](https://github.com/ToCraft/Remorphed/actions/workflows/build.yml)
 [![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.tocraft.dev%2Fpublic%2Fdev%2Ftocraft%2Fremorphed%2Fmaven-metadata.xml&style=for-the-badge&label=Remorphed)](https://maven.tocraft.dev/#/public/dev/tocraft/remorphed)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/ToCraft)
-[![Discord](https://img.shields.io/discord/1183373613508857906?style=for-the-badge&label=Discord)](https://discord.gg/Y3KqxWDUYy)
 
 # ReMorphed
 
