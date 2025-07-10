@@ -11,6 +11,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,13 +71,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-    private void readNbt(@NotNull CompoundTag tag, CallbackInfo info) {
-        remorphed$readData(tag.getCompoundOrEmpty(Remorphed.MODID));
+    private void readNbt(ValueInput in, CallbackInfo ci) {
+        remorphed$readData(in.read(Remorphed.MODID, CompoundTag.CODEC).orElse(new CompoundTag()));
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-    private void writeNbt(@NotNull CompoundTag tag, CallbackInfo info) {
-        tag.put(Remorphed.MODID, remorphed$writeData());
+    private void writeNbt(ValueOutput out, CallbackInfo ci) {
+        out.store(Remorphed.MODID, CompoundTag.CODEC, remorphed$writeData());
     }
 
     @Unique

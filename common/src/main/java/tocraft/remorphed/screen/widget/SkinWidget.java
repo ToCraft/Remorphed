@@ -50,7 +50,13 @@ public class SkinWidget extends ShapeWidget {
     @Override
     protected void renderShape(GuiGraphics guiGraphics) {
         if (skin != null) {
-            InventoryScreen.renderEntityInInventory(guiGraphics, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer);
+            int leftPos = (int) (getX() + (float) this.getWidth() / 2);
+            int topPos = (int) (getY() + this.getHeight() * .75f);
+            int k = leftPos - 20;
+            int l = topPos - 25;
+            int m = leftPos + 20;
+            int n = topPos + 35;
+            InventoryScreen.renderEntityInInventory(guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer);
         }
     }
 }

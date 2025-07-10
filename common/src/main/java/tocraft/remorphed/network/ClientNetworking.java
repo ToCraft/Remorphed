@@ -13,9 +13,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import tocraft.craftedcore.client.CraftedCoreClient;
-import tocraft.craftedcore.network.ModernNetworking;
-import tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
+import dev.tocraft.craftedcore.client.CraftedCoreClient;
+import dev.tocraft.craftedcore.network.ModernNetworking;
+import dev.tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.variant.ShapeType;
 
@@ -71,7 +71,7 @@ public class ClientNetworking {
 
         runOrQueue(context, player -> {
             @Nullable
-            Player syncTarget = player.getCommandSenderWorld().getPlayerByUUID(uuid);
+            Player syncTarget = player.level().getPlayerByUUID(uuid);
 
             if (syncTarget != null) {
                 PlayerMorph.getUnlockedShapes(player).clear();

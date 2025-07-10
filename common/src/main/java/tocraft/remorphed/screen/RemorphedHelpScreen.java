@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import tocraft.craftedcore.gui.LongTextWidget;
+import dev.tocraft.craftedcore.gui.LongTextWidget;
 import tocraft.remorphed.Remorphed;
 
 @Environment(EnvType.CLIENT)

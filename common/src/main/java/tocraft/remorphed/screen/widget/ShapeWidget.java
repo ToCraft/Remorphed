@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import tocraft.remorphed.Remorphed;
@@ -50,25 +51,24 @@ public abstract class ShapeWidget extends AbstractButton {
         if (!crashed) {
             // make the widget is even DARKER when hovered
             if (isHoveredOrFocused()) {
-                guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/focused.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/focused.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
 
             if (Remorphed.displayDataInMenu && availability != -1) {
                 String s = String.valueOf(availability);
                 int w = parent.getFont().width(s);
                 guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), 0xFFFFFF, false);
-                guiGraphics.flush();
             }
 
             renderShape(guiGraphics);
 
             // Render selected outline
             if (isCurrent) {
-                guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/selected.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/selected.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
             // Render favorite
             if (isFavorite) {
-                guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/favorite.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/favorite.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
         }
     }

@@ -25,7 +25,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import tocraft.craftedcore.event.common.CommandEvents;
+import dev.tocraft.craftedcore.event.common.CommandEvents;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.walkers.api.PlayerShapeChanger;
@@ -49,7 +49,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         LiteralCommandNode<CommandSourceStack> removeShape = Commands.literal("removeShape")
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
-                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
+                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
                                     removeShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
                                             EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                             null);
@@ -73,7 +73,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         LiteralCommandNode<CommandSourceStack> addShape = Commands.literal("addShape")
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
-                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> {
+                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
                                     addShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
                                             EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                             null);
@@ -106,7 +106,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
-                                .suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
                                         EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
                                         null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
@@ -64,18 +65,8 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             List<ResourceLocation> renderedTraits = new ArrayList<>();
             List<ShapeTrait<T>> traits = TraitRegistry.getAll(entity);
             for (ShapeTrait<T> trait : traits) {
-                if (trait != null && trait.getIcon() != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
-                    guiGraphics.blitSprite(RenderType::guiTextured, trait.getIcon(), getX() + rowIndex, getY() + blitOffset, iconS, iconS);
-                    // prevent infinite amounts of traits to be rendered
-                    if (blitOffset >= getHeight() - iconS) {
-                        rowIndex += iconS;
-                        blitOffset = 0;
-                    } else {
-                        blitOffset += iconS;
-                    }
-                    if (rowIndex >= getWidth() - iconS) {
-                        break;
-                    }
+                if (trait != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
+                    trait.renderIcon(RenderPipelines.GUI_TEXTURED, guiGraphics, getX() + rowIndex, getY() + blitOffset, iconS, iconS);
                     renderedTraits.add(trait.getId());
                 }
             }
@@ -85,7 +76,13 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
         // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
         try {
             // ARGH
-            InventoryScreen.renderEntityInInventory(guiGraphics, getX() + (float) this.getWidth() / 2, (int) (getY() + this.getHeight() * .75f), size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+            int leftPos = (int) (getX() + (float) this.getWidth() / 2);
+            int topPos = (int) (getY() + this.getHeight() * .75f);
+            int k = leftPos - 20;
+            int l = topPos - 25;
+            int m = leftPos + 20;
+            int n = topPos + 35;
+            InventoryScreen.renderEntityInInventory(guiGraphics, k, l, m, n, (int) (25 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))), new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();
@@ -94,7 +91,6 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
             entityRenderDispatcher.setRenderShadow(true);
             RenderSystem.getModelViewStack().popMatrix();
-            Lighting.setupFor3DItems();
         }
     }
 

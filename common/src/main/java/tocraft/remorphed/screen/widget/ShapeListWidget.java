@@ -76,11 +76,4 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
     @Override
     protected void renderListBackground(GuiGraphics guiGraphics) {
     }
-
-    //#if MC<=1212
-    //$$ @Override
-    //$$ protected boolean isValidMouseClick(int button) {
-    //$$     return true;
-    //$$ }
-    //#endif
 }

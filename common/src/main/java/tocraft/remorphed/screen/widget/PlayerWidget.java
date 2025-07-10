@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
@@ -48,13 +49,13 @@ public class PlayerWidget extends AbstractButton {
                 skinLocation = skin.getNow(Optional.empty()).map(PlayerSkin::texture).orElse(skinLocation);
             }
 
-            guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 8.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
-            guiGraphics.blit(RenderType::guiTextured, skinLocation, getX(), getY(), 40.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, skinLocation, getX(), getY(), 8.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, skinLocation, getX(), getY(), 40.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
         }
 
         // Highlight when focused
         if (isHoveredOrFocused()) {
-            guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/head_focus.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16, 16, 16);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/head_focus.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16, 16, 16);
         }
     }
 

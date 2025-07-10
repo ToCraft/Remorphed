@@ -1,7 +1,7 @@
 package tocraft.remorphed.handler.client;
 
 import net.minecraft.client.player.LocalPlayer;
-import tocraft.craftedcore.event.client.ClientPlayerEvents;
+import dev.tocraft.craftedcore.event.client.ClientPlayerEvents;
 import tocraft.remorphed.impl.PlayerMorph;
 
 public class ClientPlayerRespawnHandler implements ClientPlayerEvents.ClientPlayerRespawn {

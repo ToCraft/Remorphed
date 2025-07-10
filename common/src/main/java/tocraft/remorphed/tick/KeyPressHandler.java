@@ -3,7 +3,7 @@ package tocraft.remorphed.tick;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import tocraft.craftedcore.event.client.ClientTickEvents;
+import dev.tocraft.craftedcore.event.client.ClientTickEvents;
 import tocraft.remorphed.RemorphedClient;
 import tocraft.remorphed.screen.RemorphedMenu;
 

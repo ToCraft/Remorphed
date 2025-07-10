@@ -1,7 +1,7 @@
 package tocraft.remorphed.handler;
 
 import net.minecraft.server.level.ServerPlayer;
-import tocraft.craftedcore.event.common.PlayerEvents;
+import dev.tocraft.craftedcore.event.common.PlayerEvents;
 import tocraft.remorphed.impl.PlayerMorph;
 import tocraft.remorphed.network.NetworkHandler;
 

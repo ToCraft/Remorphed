@@ -8,11 +8,11 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
 import tocraft.remorphed.Remorphed;
 import tocraft.remorphed.network.NetworkHandler;
@@ -37,26 +37,26 @@ public class SpecialShapeWidget extends AbstractButton {
         this.parent = parent;
 
         // check if current shape is the special shape
-        CompoundTag nbt = new CompoundTag();
+        TagValueOutput out = TagValueOutput.createWithContext(Walkers.PROBLEM_REPORTER, Minecraft.getInstance().level.registryAccess());
         if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) {
-            wolf.saveWithoutId(nbt);
+            wolf.saveWithoutId(out);
         }
-        this.isCurrent = nbt.getBooleanOr("isSpecial", false);
+        this.isCurrent = out.buildResult().getBooleanOr("isSpecial", false);
         this.isAvailable = Minecraft.getInstance().player != null && Remorphed.canUseShape(Minecraft.getInstance().player, EntityType.WOLF);
         setTooltip(Tooltip.create(Component.translatable(isAvailable ? "remorphed.special_shape_available" : "remorphed.special_shape_unavailable")));
     }
 
     @Override
     public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/wolf.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 15, 15, 15, 15);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/wolf.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 15, 15, 15, 15);
 
         if (!isCurrent && !isAvailable) {
-            guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/unavailable.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 15, 15, 15, 15);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/unavailable.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 15, 15, 15, 15);
         }
 
         // Highlight when focused
         if (isHoveredOrFocused()) {
-            guiGraphics.blit(RenderType::guiTextured, Remorphed.id("textures/gui/head_focus.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16, 16, 16);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/head_focus.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16, 16, 16);
         }
     }
 

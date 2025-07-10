@@ -1,8 +1,8 @@
 package tocraft.remorphed.config;
 
-import tocraft.craftedcore.config.Config;
-import tocraft.craftedcore.config.annotions.Comment;
-import tocraft.craftedcore.config.annotions.Synchronize;
+import dev.tocraft.craftedcore.config.Config;
+import dev.tocraft.craftedcore.config.annotions.Comment;
+import dev.tocraft.craftedcore.config.annotions.Synchronize;
 import tocraft.remorphed.Remorphed;
 
 import java.util.HashMap;

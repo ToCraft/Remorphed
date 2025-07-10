@@ -9,8 +9,7 @@ pluginManagement {
     }
 }
 
-plugins {
-    id("dev.tocraft.modmaster.settings") version "1.2"
-}
-
 rootProject.name = "ReMorphed"
+include("common")
+include("fabric")
+include("neoforge")
