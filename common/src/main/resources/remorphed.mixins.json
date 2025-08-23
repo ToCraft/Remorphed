@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "tocraft.remorphed.mixin",
+  "package": "dev.tocraft.remorphed.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "PlayerEntityMixin"
