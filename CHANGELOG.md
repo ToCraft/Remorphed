@@ -1,7 +1,10 @@
 remorphed 7.0
 ================
 
-- port to 1.21.7
+- port to 1.21.7, Walkers 7.0
+- improve trait rendering
+- fix menu - removed "variants" button
+- **use variants menu now** for selecting mob variants (see help page in the menu)
 
 remorphed 6.3
 ================
