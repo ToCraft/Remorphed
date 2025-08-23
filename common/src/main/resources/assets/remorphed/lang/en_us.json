@@ -6,6 +6,8 @@
   "remorphed.help": "Open Remorphed help menu",
   "remorphed.help.welcome": "Welcome to Remorphed, based on Identity by Draylar, written by To_Craft.",
   "remorphed.help.credits": "Thank you to Supporters of this project!",
+  "remorphed.help.variants_label": "Selecting another Variant",
+  "remorphed.help.variants_description": "Select a custom variant by opening the variants menu with '%s'. You can cycle through variants by scrolling with your mouse wheel. Confirm the variant by pressing '%s' again.",
   "remorphed.help.support_label": "Experiencing an issue or want to post suggestions?",
   "remorphed.help.support_description": "Reach out to the Woodwalkers GitHub repository at https://github.com/ToCraft/woodwalkers-mod.",
   "remorphed.help.ability_label": "Using Abilities",

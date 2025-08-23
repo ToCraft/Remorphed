@@ -2,6 +2,7 @@ package dev.tocraft.remorphed.screen;
 
 import dev.tocraft.craftedcore.gui.LongTextWidget;
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.walkers.WalkersClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -43,8 +44,9 @@ public class RemorphedHelpScreen extends Screen {
         this.list.addText(Component.translatable("remorphed.help.welcome"));
         this.list.addText(Component.translatable("remorphed.help.credits").append("\n"));
 
-        this.list.addText(Component.translatable("remorphed.help.support_label").withStyle(ChatFormatting.BOLD));
-        this.list.addText(Component.translatable("remorphed.help.support_description").append("\n"));
+        this.list.addText(Component.translatable("remorphed.help.variants_label").withStyle(ChatFormatting.BOLD));
+        Component keyStr = WalkersClient.VARIANTS_MENU_KEY.getTranslatedKeyMessage();
+        this.list.addText(Component.translatable("remorphed.help.variants_description", keyStr, keyStr).append("\n"));
 
         this.list.addText(Component.translatable("remorphed.help.ability_label").withStyle(ChatFormatting.BOLD));
         this.list.addText(Component.translatable("remorphed.help.ability_description_1"));
@@ -53,6 +55,9 @@ public class RemorphedHelpScreen extends Screen {
 
         this.list.addText(Component.translatable("remorphed.help.config_label").withStyle(ChatFormatting.BOLD));
         this.list.addText(Component.translatable("remorphed.help.config_description").append("\n"));
+
+        this.list.addText(Component.translatable("remorphed.help.support_label").withStyle(ChatFormatting.BOLD));
+        this.list.addText(Component.translatable("remorphed.help.support_description").append("\n"));
 
         this.list.addText(Component.translatable("remorphed.help.credits_label").withStyle(ChatFormatting.BOLD));
         this.list.addText(Component.translatable("remorphed.help.credits_general"));

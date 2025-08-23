@@ -8,10 +8,6 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 }
 
-tasks.getByName<RemapJarTask>("remapJar") {
-    atAccessWideners.add("remorphed.accessWidener")
-}
-
 tasks.withType<ProcessResources> {
     @Suppress("UNCHECKED_CAST") val modMeta = parent!!.ext["mod_meta"]!! as Map<String, Any>
 

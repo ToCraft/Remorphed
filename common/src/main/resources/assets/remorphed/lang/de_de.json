@@ -6,6 +6,8 @@
   "remorphed.help": "Öffne Woodremorphed Menü",
   "remorphed.help.welcome": "Willkommen zu Remorphed, einer Variante von Morph/Identity, geschrieben von To_Craft.",
   "remorphed.help.credits": "Vielen Dank an alle Unterstützer dieses Projekts!",
+  "remorphed.help.variants_label": "Auswählen einer Variante",
+  "remorphed.help.variants_description": "Wähle eine Variante aus, indem Sie das Variantenmenü mit '%s' öffnen. Durch Scrollen mit dem Mausrad ändert sich die gezeigte Variante. Bestätige durch erneutes Drücken von '%s'.",
   "remorphed.help.support_label": "Falls du Bugs findest oder Ideen für den Mod hast, lass es mich wissen!",
   "remorphed.help.support_description": "Hier ist der Quellcode- vielleicht kommt ja deine Variante in die offizielle? https://github.com/ToCraft/woodwalkers-mod.",
   "remorphed.help.ability_label": "Verwenden von Fähigkeiten",
