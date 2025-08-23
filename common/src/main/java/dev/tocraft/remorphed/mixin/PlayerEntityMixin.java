@@ -1,5 +1,10 @@
 package dev.tocraft.remorphed.mixin;
 
+import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.impl.RemorphedPlayerDataProvider;
+import dev.tocraft.walkers.Walkers;
+import dev.tocraft.walkers.api.PlayerShapeChanger;
+import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -20,11 +25,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.impl.RemorphedPlayerDataProvider;
-import tocraft.walkers.Walkers;
-import tocraft.walkers.api.PlayerShapeChanger;
-import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

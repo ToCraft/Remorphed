@@ -1,5 +1,4 @@
 import net.fabricmc.loom.task.RemapJarTask
-import org.gradle.kotlin.dsl.getByName
 
 plugins {
     id("dev.tocraft.modmaster.neoforge")

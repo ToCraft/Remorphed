@@ -1,7 +1,7 @@
 package dev.tocraft.remorphed.neoforge;
 
-import net.neoforged.fml.common.Mod;
 import dev.tocraft.remorphed.Remorphed;
+import net.neoforged.fml.common.Mod;
 
 @SuppressWarnings("unused")
 @Mod(Remorphed.MODID)

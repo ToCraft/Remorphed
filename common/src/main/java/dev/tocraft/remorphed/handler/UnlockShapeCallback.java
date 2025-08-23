@@ -1,15 +1,15 @@
 package dev.tocraft.remorphed.handler;
 
+import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.impl.PlayerMorph;
+import dev.tocraft.walkers.Walkers;
+import dev.tocraft.walkers.api.events.ShapeEvents;
+import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.impl.PlayerMorph;
-import tocraft.walkers.Walkers;
-import tocraft.walkers.api.events.ShapeEvents;
-import tocraft.walkers.api.variant.ShapeType;
 
 public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
     @Override

@@ -1,5 +1,6 @@
 package dev.tocraft.remorphed.screen.widget;
 
+import dev.tocraft.remorphed.Remorphed;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -9,7 +10,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import org.jetbrains.annotations.NotNull;
-import dev.tocraft.remorphed.Remorphed;
 
 import java.util.List;
 

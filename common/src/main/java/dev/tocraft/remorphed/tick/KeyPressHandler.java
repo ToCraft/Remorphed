@@ -1,11 +1,11 @@
 package dev.tocraft.remorphed.tick;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import dev.tocraft.craftedcore.event.client.ClientTickEvents;
 import dev.tocraft.remorphed.RemorphedClient;
 import dev.tocraft.remorphed.screen.RemorphedMenu;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 
 @Environment(EnvType.CLIENT)
 public class KeyPressHandler implements ClientTickEvents.Client {

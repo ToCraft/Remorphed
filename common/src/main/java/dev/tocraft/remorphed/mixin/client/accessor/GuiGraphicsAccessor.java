@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface GuiGraphicsAccessor {
     @Accessor
     GuiRenderState getGuiRenderState();
+
     @Accessor
     GuiGraphics.ScissorStack getScissorStack();
 }

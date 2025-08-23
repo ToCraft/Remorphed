@@ -1,5 +1,6 @@
 package dev.tocraft.remorphed.screen.widget;
 
+import dev.tocraft.remorphed.Remorphed;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -7,7 +8,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import dev.tocraft.remorphed.Remorphed;
 
 public abstract class ShapeWidget extends AbstractButton {
     private final Screen parent;

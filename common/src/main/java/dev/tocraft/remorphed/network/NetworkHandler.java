@@ -1,7 +1,14 @@
 package dev.tocraft.remorphed.network;
 
 import com.mojang.authlib.GameProfile;
+import dev.tocraft.craftedcore.network.ModernNetworking;
+import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.skinshifter.SkinShifter;
+import dev.tocraft.walkers.Walkers;
+import dev.tocraft.walkers.api.PlayerShape;
+import dev.tocraft.walkers.api.PlayerShapeChanger;
+import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,13 +22,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import dev.tocraft.craftedcore.network.ModernNetworking;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.impl.PlayerMorph;
-import tocraft.walkers.Walkers;
-import tocraft.walkers.api.PlayerShape;
-import tocraft.walkers.api.PlayerShapeChanger;
-import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.Set;
 import java.util.UUID;

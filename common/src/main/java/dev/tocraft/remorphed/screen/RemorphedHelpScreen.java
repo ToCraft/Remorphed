@@ -1,5 +1,7 @@
 package dev.tocraft.remorphed.screen;
 
+import dev.tocraft.craftedcore.gui.LongTextWidget;
+import dev.tocraft.remorphed.Remorphed;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -11,8 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import dev.tocraft.craftedcore.gui.LongTextWidget;
-import dev.tocraft.remorphed.Remorphed;
 
 @Environment(EnvType.CLIENT)
 public class RemorphedHelpScreen extends Screen {

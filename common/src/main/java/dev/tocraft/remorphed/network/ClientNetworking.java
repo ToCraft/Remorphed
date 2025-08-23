@@ -1,5 +1,10 @@
 package dev.tocraft.remorphed.network;
 
+import dev.tocraft.craftedcore.client.CraftedCoreClient;
+import dev.tocraft.craftedcore.network.ModernNetworking;
+import dev.tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
+import dev.tocraft.remorphed.impl.PlayerMorph;
+import dev.tocraft.walkers.api.variant.ShapeType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Holder;
@@ -13,11 +18,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import dev.tocraft.craftedcore.client.CraftedCoreClient;
-import dev.tocraft.craftedcore.network.ModernNetworking;
-import dev.tocraft.craftedcore.network.client.ClientNetworking.ApplicablePacket;
-import dev.tocraft.remorphed.impl.PlayerMorph;
-import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.HashMap;
 import java.util.Map;

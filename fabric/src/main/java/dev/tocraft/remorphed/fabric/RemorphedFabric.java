@@ -1,7 +1,7 @@
 package dev.tocraft.remorphed.fabric;
 
-import net.fabricmc.api.ModInitializer;
 import dev.tocraft.remorphed.Remorphed;
+import net.fabricmc.api.ModInitializer;
 
 public class RemorphedFabric implements ModInitializer {
 

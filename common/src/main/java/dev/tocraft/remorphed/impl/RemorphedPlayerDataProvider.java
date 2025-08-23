@@ -1,7 +1,7 @@
 package dev.tocraft.remorphed.impl;
 
+import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.world.entity.LivingEntity;
-import tocraft.walkers.api.variant.ShapeType;
 
 import java.util.Map;
 import java.util.Set;

@@ -1,8 +1,12 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import com.mojang.authlib.GameProfile;
+import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
+import dev.tocraft.walkers.api.PlayerShape;
+import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -18,10 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.network.NetworkHandler;
-import tocraft.walkers.api.PlayerShape;
-import tocraft.walkers.network.impl.SwapPackets;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

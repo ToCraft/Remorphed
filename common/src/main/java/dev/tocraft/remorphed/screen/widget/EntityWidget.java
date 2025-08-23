@@ -1,14 +1,18 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.RemorphedClient;
+import dev.tocraft.remorphed.network.NetworkHandler;
+import dev.tocraft.walkers.api.variant.ShapeType;
+import dev.tocraft.walkers.traits.ShapeTrait;
+import dev.tocraft.walkers.traits.TraitRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -17,11 +21,6 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.network.NetworkHandler;
-import tocraft.walkers.api.variant.ShapeType;
-import tocraft.walkers.traits.ShapeTrait;
-import tocraft.walkers.traits.TraitRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +56,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     @Override
     protected void renderShape(GuiGraphics guiGraphics) {
         if (Remorphed.displayDataInMenu) {
-            final int iconS = width / 7;
+            final int iconS = 16; // traits are always 16x16 (since that's the item size)
 
 
             // Render Trait Icons first
@@ -67,18 +66,20 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             List<ShapeTrait<T>> traits = TraitRegistry.getAll(entity);
             for (ShapeTrait<T> trait : traits) {
                 if (trait != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
-                    trait.renderIcon(RenderPipelines.GUI_TEXTURED, guiGraphics, getX() + column, getY() + row, iconS, iconS);
-                    // prevent infinite amounts of traits to be rendered
-                    if (row >= getHeight() - iconS) {
-                        column += iconS;
-                        row = 0;
-                    } else {
-                        row += iconS;
+                    boolean bl = trait.renderIcon(RenderPipelines.GUI_TEXTURED, guiGraphics, getX() + column, getY() + row, iconS, iconS);
+                    if (bl) {
+                        // prevent traits outside of entity widget
+                        if (row + iconS >= getHeight()) {
+                            column += iconS;
+                            row = 0;
+                        } else {
+                            row += iconS;
+                        }
+                        if (column + iconS >= getWidth()) {
+                            break;
+                        }
+                        renderedTraits.add(trait.getId());
                     }
-                    if (column >= getWidth() - iconS) {
-                        break;
-                    }
-                    renderedTraits.add(trait.getId());
                 }
             }
         }

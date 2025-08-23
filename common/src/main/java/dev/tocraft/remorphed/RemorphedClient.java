@@ -1,8 +1,14 @@
 package dev.tocraft.remorphed;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.tocraft.craftedcore.event.client.ClientPlayerEvents;
+import dev.tocraft.craftedcore.event.client.ClientTickEvents;
+import dev.tocraft.craftedcore.registration.KeyBindingRegistry;
+import dev.tocraft.remorphed.handler.client.ClientPlayerRespawnHandler;
 import dev.tocraft.remorphed.mixin.client.accessor.GuiGraphicsAccessor;
+import dev.tocraft.remorphed.network.ClientNetworking;
 import dev.tocraft.remorphed.screen.render.GuiShapeRenderState;
+import dev.tocraft.remorphed.tick.KeyPressHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
@@ -16,12 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import dev.tocraft.craftedcore.event.client.ClientPlayerEvents;
-import dev.tocraft.craftedcore.event.client.ClientTickEvents;
-import dev.tocraft.craftedcore.registration.KeyBindingRegistry;
-import dev.tocraft.remorphed.handler.client.ClientPlayerRespawnHandler;
-import dev.tocraft.remorphed.network.ClientNetworking;
-import dev.tocraft.remorphed.tick.KeyPressHandler;
 
 @Environment(EnvType.CLIENT)
 public class RemorphedClient {

@@ -7,9 +7,11 @@
 ReMorphed is a morph-like mod based on Identity which aims to bring the well-known kill-to-unlock method to new
 minecraft versions.
 
-<strong>This features a menu (what walkers doesn't), new unlock-mechanics and the possibility of more than two shape!</strong>
+<strong>This features a menu (what walkers doesn't), new unlock-mechanics and the possibility of more than two
+shape!</strong>
 
-> This mod is also compatible with [SkinShifter](https://github.com/ToCraft/SkinShifter/), where you can transform into other players!
+> This mod is also compatible with [SkinShifter](https://github.com/ToCraft/SkinShifter/), where you can transform into
+> other players!
 
 ## Download
 

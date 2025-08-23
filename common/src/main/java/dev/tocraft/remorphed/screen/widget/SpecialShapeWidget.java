@@ -1,5 +1,13 @@
 package dev.tocraft.remorphed.screen.widget;
 
+import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.network.NetworkHandler;
+import dev.tocraft.walkers.Walkers;
+import dev.tocraft.walkers.api.PlayerShape;
+import dev.tocraft.walkers.api.variant.ShapeType;
+import dev.tocraft.walkers.api.variant.TypeProvider;
+import dev.tocraft.walkers.api.variant.TypeProviderRegistry;
+import dev.tocraft.walkers.network.impl.SwapVariantPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -14,14 +22,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.network.NetworkHandler;
-import tocraft.walkers.Walkers;
-import tocraft.walkers.api.PlayerShape;
-import tocraft.walkers.api.variant.ShapeType;
-import tocraft.walkers.api.variant.TypeProvider;
-import tocraft.walkers.api.variant.TypeProviderRegistry;
-import tocraft.walkers.network.impl.SwapVariantPackets;
 
 import java.util.Objects;
 import java.util.UUID;

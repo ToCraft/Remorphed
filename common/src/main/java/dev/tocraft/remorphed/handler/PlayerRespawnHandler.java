@@ -1,9 +1,9 @@
 package dev.tocraft.remorphed.handler;
 
-import net.minecraft.server.level.ServerPlayer;
 import dev.tocraft.craftedcore.event.common.PlayerEvents;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
+import net.minecraft.server.level.ServerPlayer;
 
 public class PlayerRespawnHandler implements PlayerEvents.PlayerRespawn {
     @Override
