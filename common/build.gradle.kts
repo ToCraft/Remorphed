@@ -1,7 +1,9 @@
-import java.util.*
-
 plugins {
     id("dev.tocraft.modmaster.common")
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/remorphed.accessWidener")
 }
 
 dependencies {

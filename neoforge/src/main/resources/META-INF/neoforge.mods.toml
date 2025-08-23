@@ -6,6 +6,8 @@ license = "MIT"
 
 [[mixins]]
 config = "remorphed.mixins.json"
+[[mixins]]
+config = "remorphed-neoforge.mixins.json"
 
 [[mods]]
 modId = "remorphed"

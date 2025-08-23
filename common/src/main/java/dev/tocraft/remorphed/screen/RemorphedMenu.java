@@ -27,8 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.FakeClientPlayer;
 import dev.tocraft.remorphed.impl.PlayerMorph;
-import dev.tocraft.remorphed.mixin.accessor.ScreenAccessor;
-import dev.tocraft.remorphed.screen.widget.*;
+import dev.tocraft.remorphed.mixin.client.accessor.ScreenAccessor;
 import tocraft.walkers.Walkers;
 import tocraft.walkers.api.PlayerShape;
 import tocraft.walkers.api.variant.ShapeType;
@@ -225,6 +224,7 @@ public class RemorphedMenu extends Screen {
                             boolean bl = type.equals(currentType);
                             if (bl) currentRow = i;
                             row.add(new EntityWidget<>(
+                                    i * Remorphed.CONFIG.shapes_per_row + j,
                                     0,
                                     0,
                                     0,

@@ -1,14 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.tocraft.remorphed.mixin",
+  "package": "dev.tocraft.remorphed.fabric.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "PlayerEntityMixin"
   ],
   "client": [
-    "client.accessor.GuiGraphicsAccessor",
-    "client.accessor.ScreenAccessor"
+    "client.GuiRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

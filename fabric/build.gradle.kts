@@ -1,5 +1,16 @@
+import net.fabricmc.loom.task.RemapJarTask
+import org.gradle.kotlin.dsl.getByName
+
 plugins {
     id("dev.tocraft.modmaster.fabric")
+}
+
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+tasks.getByName<RemapJarTask>("remapJar") {
+    atAccessWideners.add("remorphed.accessWidener")
 }
 
 tasks.withType<ProcessResources> {

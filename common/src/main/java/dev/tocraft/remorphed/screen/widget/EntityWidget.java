@@ -1,6 +1,7 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.tocraft.remorphed.RemorphedClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -31,12 +32,14 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     private final ShapeType<T> type;
     private final T entity;
     private final int size;
+    private final int id;
 
-    public EntityWidget(int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability) {
+    public EntityWidget(int id, int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability) {
         super(x, y, width, height, parent, isFavorite, current, availability); // int x, int y, int width, int height, message
         this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         this.type = type;
         this.entity = entity;
+        this.id = id;
         entity.setGlowingTag(true);
         setTooltip(Tooltip.create(ShapeType.createTooltipText(entity)));
     }
@@ -80,7 +83,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             int l = topPos - 25;
             int m = leftPos + 20;
             int n = topPos + 35;
-            InventoryScreen.renderEntityInInventory(guiGraphics, k, l, m, n, (int) (25 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))), new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, (int) (25 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))), new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();

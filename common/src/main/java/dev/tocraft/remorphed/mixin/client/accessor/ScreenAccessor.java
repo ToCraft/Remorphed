@@ -1,4 +1,4 @@
-package dev.tocraft.remorphed.mixin.accessor;
+package dev.tocraft.remorphed.mixin.client.accessor;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
