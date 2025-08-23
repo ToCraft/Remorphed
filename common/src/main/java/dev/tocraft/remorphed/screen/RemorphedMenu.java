@@ -48,7 +48,6 @@ public class RemorphedMenu extends Screen {
     private final Map<ShapeType<?>, Mob> renderEntities = new ConcurrentHashMap<>();
     private final Map<GameProfile, FakeClientPlayer> renderPlayers = new ConcurrentHashMap<>();
 
-    private final Button variantsButton = createVariantsButton();
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
     private final PlayerWidget playerButton = createPlayerButton();
@@ -70,7 +69,8 @@ public class RemorphedMenu extends Screen {
     protected void addHeader() {
         LinearLayout linearLayout = this.layout.addToHeader(LinearLayout.horizontal()).spacing(8);
 
-        linearLayout.addChild(variantsButton);
+        linearLayout.addChild(traitsButton);
+
         linearLayout.addChild(searchBar);
         linearLayout.addChild(helpButton);
         linearLayout.addChild(playerButton);
@@ -78,8 +78,6 @@ public class RemorphedMenu extends Screen {
         if (minecraft != null && minecraft.player != null && Walkers.hasSpecialShape(minecraft.player.getUUID())) {
             linearLayout.addChild(specialShapeButton);
         }
-
-        linearLayout.addChild(traitsButton);
     }
 
     protected void addContents() {
@@ -114,17 +112,15 @@ public class RemorphedMenu extends Screen {
 
 
             // filter unlocked
-            if (!Remorphed.displayVariantsInMenu) {
-                List<ShapeType<?>> newUnlocked = new ArrayList<>();
-                for (ShapeType<?> shapeType : unlockedShapes) {
-                    if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                        newUnlocked.add(shapeType);
-                    }
+            List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            for (ShapeType<?> shapeType : unlockedShapes) {
+                if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    newUnlocked.add(shapeType);
                 }
-
-                unlockedShapes.clear();
-                unlockedShapes.addAll(newUnlocked);
             }
+
+            unlockedShapes.clear();
+            unlockedShapes.addAll(newUnlocked);
 
             if (Remorphed.foundSkinShifter) {
                 populateUnlockedRenderPlayers(minecraft.player);
@@ -311,20 +307,6 @@ public class RemorphedMenu extends Screen {
         helpButton.size(20, 20);
         helpButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".help")));
         return helpButton.build();
-    }
-
-    private @NotNull Button createVariantsButton() {
-        Component text = Component.translatable("remorphed.display_variants");
-        Button.Builder variantsButton = Button.builder(text, (widget) -> {
-            Remorphed.displayVariantsInMenu = !Remorphed.displayVariantsInMenu;
-            Minecraft.getInstance().setScreen(new RemorphedMenu());
-        });
-
-
-        variantsButton.size(Minecraft.getInstance().font.width(text.getString()) + 20, 20);
-        variantsButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".variants")));
-
-        return variantsButton.build();
     }
 
     private @NotNull Button createTraitsButton() {

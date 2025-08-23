@@ -43,7 +43,6 @@ public class Remorphed {
     public static final Logger LOGGER = LoggerFactory.getLogger(Remorphed.class);
     public static final String MODID = "remorphed";
     public static final RemorphedConfig CONFIG = ConfigLoader.register(MODID);
-    public static boolean displayVariantsInMenu = CONFIG.show_variants_by_default;
     public static boolean displayDataInMenu = CONFIG.show_traits_by_default;
     @ApiStatus.Internal
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");

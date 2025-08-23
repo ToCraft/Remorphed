@@ -42,7 +42,6 @@ public class RemorphedConfig implements Config {
         }
     };
     @Comment("\n<<< Menu Customization >>>")
-    public boolean show_variants_by_default = false;
     public boolean show_traits_by_default = true;
     @Comment("scale the shapes in the menu")
     public int entity_size = 20;

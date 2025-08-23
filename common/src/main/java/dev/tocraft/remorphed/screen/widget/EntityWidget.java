@@ -57,17 +57,27 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     @Override
     protected void renderShape(GuiGraphics guiGraphics) {
         if (Remorphed.displayDataInMenu) {
-            int iconS = width / 5;
+            final int iconS = width / 7;
 
 
             // Render Trait Icons first
-            int blitOffset = 0;
-            int rowIndex = 0;
+            int row = 0;
+            int column = 0;
             List<ResourceLocation> renderedTraits = new ArrayList<>();
             List<ShapeTrait<T>> traits = TraitRegistry.getAll(entity);
             for (ShapeTrait<T> trait : traits) {
                 if (trait != null && (!renderedTraits.contains(trait.getId()) || trait.iconMightDiffer())) {
-                    trait.renderIcon(RenderPipelines.GUI_TEXTURED, guiGraphics, getX() + rowIndex, getY() + blitOffset, iconS, iconS);
+                    trait.renderIcon(RenderPipelines.GUI_TEXTURED, guiGraphics, getX() + column, getY() + row, iconS, iconS);
+                    // prevent infinite amounts of traits to be rendered
+                    if (row >= getHeight() - iconS) {
+                        column += iconS;
+                        row = 0;
+                    } else {
+                        row += iconS;
+                    }
+                    if (column >= getWidth() - iconS) {
+                        break;
+                    }
                     renderedTraits.add(trait.getId());
                 }
             }
@@ -83,7 +93,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             int l = topPos - 25;
             int m = leftPos + 20;
             int n = topPos + 35;
-            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, (int) (25 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))), new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();
