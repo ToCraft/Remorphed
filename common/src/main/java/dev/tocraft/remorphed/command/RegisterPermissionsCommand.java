@@ -1,0 +1,125 @@
+package dev.tocraft.remorphed.command;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.tocraft.craftedcore.event.common.CommandEvents;
+import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.permission.PermissionManager;
+import dev.tocraft.remorphed.permission.PermissionRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Command to manually trigger permission registration
+ * This is useful for admins to ensure permissions are visible in LuckPerms GUI
+ */
+public class RegisterPermissionsCommand implements CommandEvents.CommandRegistration {
+    
+    @Override
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher, net.minecraft.commands.CommandBuildContext registry, Commands.CommandSelection selection) {
+        dispatcher.register(Commands.literal("remorphed-register-permissions")
+            .requires(source -> source.hasPermission(2))
+            .executes(this::execute));
+    }
+    
+    private int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayerOrException();
+        
+        source.sendSuccess(() -> Component.literal("§6[ReMorphed] §7Triggering permission registration..."), false);
+        
+        // Run permission registration in a separate thread to avoid blocking
+        Thread registrationThread = new Thread(() -> {
+            try {
+                // Trigger permission checks to ensure they're registered
+                PermissionManager manager = PermissionRegistry.getInstance();
+                
+                // Check ALL permissions to ensure they're all registered
+                // This is the most comprehensive approach
+                Set<String> allPermissions = getAllPermissions();
+                final int totalPermissions = allPermissions.size();
+                int checked = 0;
+                
+                for (String permission : allPermissions) {
+                    try {
+                        manager.hasPermission(player, permission);
+                        checked++;
+                        Thread.sleep(10); // Small delay between checks
+                        
+                        // Log progress every 100 permissions (less verbose)
+                        if (checked % 100 == 0 && checked > 0) {
+                            final int currentChecked = checked;
+                            source.getServer().execute(() -> {
+                                source.sendSuccess(() -> Component.literal("§6[ReMorphed] §7Checked " + currentChecked + "/" + totalPermissions + " permissions..."), false);
+                            });
+                        }
+                    } catch (Exception e) {
+                        // Continue with other permissions
+                    }
+                }
+                
+                // Send success message
+                source.getServer().execute(() -> {
+                    source.sendSuccess(() -> Component.literal("§6[ReMorphed] §aPermission registration completed! Check your LuckPerms GUI."), false);
+                });
+                
+            } catch (Exception e) {
+                source.getServer().execute(() -> {
+                    source.sendFailure(Component.literal("§6[ReMorphed] §cPermission registration failed: " + e.getMessage()));
+                });
+            }
+        });
+        
+        registrationThread.setName("ReMorphed-PermissionRegistration");
+        registrationThread.start();
+        
+        return 1;
+    }
+    
+    private Set<String> getAllPermissions() {
+        Set<String> permissions = new HashSet<>();
+        
+        // Core permissions
+        permissions.add("remorphed.menu");
+        permissions.add("remorphed.morph");
+        permissions.add("remorphed.creative");
+        permissions.add("remorphed.bypass.lock");
+        
+        // Command permissions
+        permissions.add("remorphed.command.addShape");
+        permissions.add("remorphed.command.removeShape");
+        permissions.add("remorphed.command.clearShapes");
+        permissions.add("remorphed.command.hasShape");
+        permissions.add("remorphed.command.addSkin");
+        permissions.add("remorphed.command.removeSkin");
+        permissions.add("remorphed.command.clearSkins");
+        permissions.add("remorphed.command.hasSkin");
+        
+        // Entity type permissions for all registered entities
+        BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
+            ResourceLocation key = EntityType.getKey(entityType);
+            if (key != null) {
+                permissions.add("remorphed.type." + key.toString());
+            }
+        });
+        
+        // Dynamic configuration permissions (0-20 range for common use cases)
+        for (int i = 0; i <= 20; i++) {
+            permissions.add("remorphed.unlockKills." + i);
+            permissions.add("remorphed.playerUnlockKills." + i);
+            permissions.add("remorphed.killValue." + i);
+            permissions.add("remorphed.playerKillValue." + i);
+        }
+        
+        return permissions;
+    }
+}

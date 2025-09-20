@@ -9,6 +9,9 @@ import dev.tocraft.craftedcore.network.ModernNetworking;
 import dev.tocraft.craftedcore.platform.PlatformData;
 import dev.tocraft.craftedcore.platform.VersionChecker;
 import dev.tocraft.remorphed.command.RemorphedCommand;
+import dev.tocraft.remorphed.command.ListPermissionsCommand;
+import dev.tocraft.remorphed.command.RegisterPermissionsCommand;
+import dev.tocraft.remorphed.command.TestPermissionsCommand;
 import dev.tocraft.remorphed.config.RemorphedConfig;
 import dev.tocraft.remorphed.handler.LivingDeathHandler;
 import dev.tocraft.remorphed.handler.PlayerRespawnHandler;
@@ -16,6 +19,7 @@ import dev.tocraft.remorphed.handler.SwapShapeCallback;
 import dev.tocraft.remorphed.handler.UnlockShapeCallback;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
+import dev.tocraft.remorphed.permission.PermissionRegistry;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
@@ -48,6 +52,9 @@ public class Remorphed {
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {
+        // Initialize permission system
+        PermissionRegistry.initialize();
+        
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         ShapeEvents.SWAP_SHAPE.register(new SwapShapeCallback());
         if (!CONFIG.unlockFriendlyNormal) {
@@ -65,6 +72,9 @@ public class Remorphed {
         NetworkHandler.registerPacketReceiver();
 
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
+        CommandEvents.REGISTRATION.register(new ListPermissionsCommand());
+        CommandEvents.REGISTRATION.register(new RegisterPermissionsCommand());
+        CommandEvents.REGISTRATION.register(new TestPermissionsCommand());
         EntityEvents.LIVING_DEATH.register(new LivingDeathHandler());
         PlayerEvents.PLAYER_RESPAWN.register(new PlayerRespawnHandler());
 
@@ -77,15 +87,55 @@ public class Remorphed {
     }
 
     public static boolean canUseEveryShape(@NotNull Player player) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            // Check permission-based creative override
+            if (PermissionRegistry.getInstance().canUseCreativeMode(serverPlayer)) {
+                return true;
+            }
+        }
         return player.isCreative() && CONFIG.creativeUnlockAll;
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type.getEntityType()));
+        if (player instanceof ServerPlayer serverPlayer) {
+            // Check basic morph permission
+            if (!PermissionRegistry.getInstance().canMorph(serverPlayer)) {
+                return false;
+            }
+            
+            // Check entity type specific permission
+            if (type != null && !PermissionRegistry.getInstance().canMorphIntoType(serverPlayer, type.getEntityType())) {
+                return false;
+            }
+            
+            // Check bypass transform lock permission
+            if (Remorphed.CONFIG.lockTransform && !PermissionRegistry.getInstance().canBypassTransformLock(serverPlayer)) {
+                return false;
+            }
+        }
+        
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
     }
 
     public static boolean canUseShape(Player player, EntityType<?> type) {
-        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type));
+        if (player instanceof ServerPlayer serverPlayer) {
+            // Check basic morph permission
+            if (!PermissionRegistry.getInstance().canMorph(serverPlayer)) {
+                return false;
+            }
+            
+            // Check entity type specific permission
+            if (type != null && !PermissionRegistry.getInstance().canMorphIntoType(serverPlayer, type)) {
+                return false;
+            }
+            
+            // Check bypass transform lock permission
+            if (Remorphed.CONFIG.lockTransform && !PermissionRegistry.getInstance().canBypassTransformLock(serverPlayer)) {
+                return false;
+            }
+        }
+        
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
     }
 
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
@@ -104,16 +154,48 @@ public class Remorphed {
 
     @Contract("_ -> new")
     public static @NotNull List<GameProfile> getUnlockedSkins(Player player) {
-        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= CONFIG.killToUnlockPlayers || CONFIG.killToUnlockPlayers == 0) && CONFIG.killToUnlockPlayers != -1).map(id -> SkinPlayerData.getSkinProfile(id).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).toList());
+        int killRequirement = getPlayerKillRequirement(player);
+        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= killRequirement || killRequirement == 0) && killRequirement != -1).map(id -> SkinPlayerData.getSkinProfile(id).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).toList());
     }
 
     public static int getKillToUnlock(EntityType<?> type) {
         return Remorphed.CONFIG.killToUnlockByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killToUnlock);
-
+    }
+    
+    public static int getKillToUnlock(Player player, EntityType<?> type) {
+        int defaultKills = getKillToUnlock(type);
+        if (player instanceof ServerPlayer serverPlayer) {
+            return PermissionRegistry.getInstance().getKillRequirement(serverPlayer, type, defaultKills);
+        }
+        return defaultKills;
     }
 
     public static int getKillValue(EntityType<?> type) {
         return Remorphed.CONFIG.killValueByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killValue);
+    }
+    
+    public static int getKillValue(Player player, EntityType<?> type) {
+        int defaultValue = getKillValue(type);
+        if (player instanceof ServerPlayer serverPlayer) {
+            return PermissionRegistry.getInstance().getKillValue(serverPlayer, type, defaultValue);
+        }
+        return defaultValue;
+    }
+    
+    public static int getPlayerKillRequirement(Player player) {
+        int defaultKills = CONFIG.killToUnlockPlayers;
+        if (player instanceof ServerPlayer serverPlayer) {
+            return PermissionRegistry.getInstance().getPlayerKillRequirement(serverPlayer, defaultKills);
+        }
+        return defaultKills;
+    }
+    
+    public static int getPlayerKillValue(Player player) {
+        int defaultValue = CONFIG.playerKillValue;
+        if (player instanceof ServerPlayer serverPlayer) {
+            return PermissionRegistry.getInstance().getPlayerKillValue(serverPlayer, defaultValue);
+        }
+        return defaultValue;
     }
 
     public static void sync(ServerPlayer player) {

@@ -29,6 +29,7 @@ public class ClientNetworking {
         ModernNetworking.registerReceiver(ModernNetworking.Side.S2C, NetworkHandler.UNLOCKED_SYNC,
                 ClientNetworking::handleUnlockedSyncPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.S2C, NetworkHandler.FAVORITE_SYNC, ClientNetworking::handleFavoriteSyncPacket);
+        ModernNetworking.registerReceiver(ModernNetworking.Side.S2C, NetworkHandler.PERMISSION_RESPONSE, PermissionCheckPacket::handlePermissionResponse);
     }
 
     @SuppressWarnings("unchecked")

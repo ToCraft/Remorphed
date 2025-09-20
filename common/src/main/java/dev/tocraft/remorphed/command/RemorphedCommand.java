@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.tocraft.craftedcore.event.common.CommandEvents;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
+import dev.tocraft.remorphed.permission.PermissionRegistry;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
@@ -47,6 +48,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to remove an unlocked shape of the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> removeShape = Commands.literal("removeShape")
+                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                    PermissionRegistry.getInstance().canUseCommand(player, "removeShape"))
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
@@ -71,6 +74,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to add a shape to the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> addShape = Commands.literal("addShape")
+                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                    PermissionRegistry.getInstance().canUseCommand(player, "addShape"))
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
@@ -95,6 +100,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to remove all unlocked shapes of the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> clearShapes = Commands.literal("clearShapes")
+                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                    PermissionRegistry.getInstance().canUseCommand(player, "clearShapes"))
                 .then(Commands.argument("player", EntityArgument.players()).executes(context -> {
                     clearShapes(context.getSource(), EntityArgument.getPlayer(context, "player"));
                     return 1;
@@ -104,6 +111,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to check if a player has unlocked a specific shape
          */
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
+                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                    PermissionRegistry.getInstance().canUseCommand(player, "hasShape"))
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
@@ -127,6 +136,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
         if (Remorphed.foundSkinShifter) {
             LiteralCommandNode<CommandSourceStack> removeSkin = Commands.literal("removeSkin")
+                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                        PermissionRegistry.getInstance().canUseCommand(player, "removeSkin"))
                     .then(Commands.argument("player", EntityArgument.players())
                             .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                     .executes(context -> {
@@ -156,6 +167,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     }))).build();
 
             LiteralCommandNode<CommandSourceStack> addSkin = Commands.literal("addSkin")
+                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                        PermissionRegistry.getInstance().canUseCommand(player, "addSkin"))
                     .then(Commands.argument("player", EntityArgument.players())
                             .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                     .executes(context -> {
@@ -185,6 +198,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     }))).build();
 
             LiteralCommandNode<CommandSourceStack> clearSkins = Commands.literal("clearSkins")
+                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                        PermissionRegistry.getInstance().canUseCommand(player, "clearSkins"))
                     .then(Commands.argument("player", EntityArgument.players()).executes(context -> {
                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
                         clearSkins(context.getSource(), player);
@@ -195,6 +210,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
              * Used to check if a player has unlocked a specific shape
              */
             LiteralCommandNode<CommandSourceStack> hasSkin = Commands.literal("hasSkin")
+                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
+                        PermissionRegistry.getInstance().canUseCommand(player, "hasSkin"))
                     .then(Commands.argument("player", EntityArgument.players())
                             .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                     .executes(context -> {

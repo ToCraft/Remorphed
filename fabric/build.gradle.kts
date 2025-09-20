@@ -30,4 +30,7 @@ dependencies {
     modApi("dev.tocraft:skinshifter-fabric:${rootProject.properties["skinshifter_version"]}") {
         exclude("dev.tocraft", "craftedcore")
     }
+    
+    // Fabric Permissions API
+    modApi("me.lucko:fabric-permissions-api:0.3.1")
 }
