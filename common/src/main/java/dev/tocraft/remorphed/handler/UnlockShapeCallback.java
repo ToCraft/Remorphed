@@ -2,6 +2,7 @@ package dev.tocraft.remorphed.handler;
 
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
+import dev.tocraft.remorphed.permission.PermissionRegistry;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
 import dev.tocraft.walkers.api.variant.ShapeType;
@@ -15,6 +16,11 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
     @Override
     public InteractionResult unlock(ServerPlayer player, ShapeType<?> type) {
         if (type != null) {
+            // Check if player has permission to unlock this entity type
+            if (!PermissionRegistry.getInstance().canMorphIntoType(player, type.getEntityType())) {
+                return InteractionResult.FAIL;
+            }
+            
             // check if the walkers unlock mechanic should be used
             if (!Remorphed.CONFIG.lockTransform && Remorphed.CONFIG.unlockFriendlyNormal) {
                 LivingEntity entityToBeUnlocked = type.create(player.level(), player);

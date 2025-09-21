@@ -3,6 +3,7 @@ package dev.tocraft.remorphed.handler;
 import dev.tocraft.craftedcore.event.common.EntityEvents;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
+import dev.tocraft.remorphed.permission.PermissionRegistry;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
@@ -19,15 +20,29 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
         if (!(entity instanceof Player) && source.getEntity() instanceof ServerPlayer killer) {
             ShapeType<?> type = ShapeType.from(entity);
             if (type != null && (!Walkers.CONFIG.blacklistPreventsUnlocking || !Walkers.isPlayerBlacklisted(killer.getUUID()))) {
-                PlayerMorph.addKill(killer, type);
+                // Check if player has permission to unlock this entity type
+                if (PermissionRegistry.getInstance().canMorphIntoType(killer, type.getEntityType())) {
+                    PlayerMorph.addKill(killer, type);
 
-                if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
-                    PlayerShapeChanger.change2ndShape(killer, type);
-                    PlayerShape.updateShapes(killer, type.create(killer.level(), killer));
+                    if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
+                        PlayerShapeChanger.change2ndShape(killer, type);
+                        PlayerShape.updateShapes(killer, type.create(killer.level(), killer));
+                    }
                 }
             }
         } else if (entity instanceof Player && source.getEntity() instanceof ServerPlayer killer) {
-            PlayerMorph.addPlayerKill(killer, entity.getUUID());
+            // Check if player has permission to unlock player skins (requires SkinShifter)
+            if (Remorphed.foundSkinShifter) {
+                // For now, we'll allow player kills if the player has any skin-related permission
+                // This could be made more specific in the future if needed
+                if (PermissionRegistry.getInstance().hasPermission(killer, "remorphed.command.addSkin") || 
+                    PermissionRegistry.getInstance().hasPermission(killer, "remorphed.*")) {
+                    PlayerMorph.addPlayerKill(killer, entity.getUUID());
+                }
+            } else {
+                // If SkinShifter isn't installed, don't track player kills
+                PlayerMorph.addPlayerKill(killer, entity.getUUID());
+            }
         }
 
         return InteractionResult.PASS;

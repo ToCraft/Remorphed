@@ -69,8 +69,9 @@ common/src/main/java/dev/tocraft/remorphed/network/
 - `remorphed.command.hasSkin` - Check skin command (requires SkinShifter)
 
 ### Entity Types
-- `remorphed.type.<entity_id>` - Permission to morph into specific entities
+- `remorphed.type.<entity_id>` - Permission to unlock and morph into specific entities
   - Example: `remorphed.type.minecraft:zombie`
+  - Controls both unlocking (via killing) and morphing functionality
 
 ### Configuration Overrides
 - `remorphed.unlockKills.<number>` - Override kill requirements (0-20)
@@ -121,6 +122,8 @@ common/src/main/java/dev/tocraft/remorphed/network/
 - `RemorphedCommand.java`: Added permission requirements to all commands
 - `KeyPressHandler.java`: Added permission checks for menu access
 - `NetworkHandler.java`: Added permission check packet handling
+- `LivingDeathHandler.java`: Added permission checks to prevent unlocking unauthorized entities
+- `UnlockShapeCallback.java`: Added permission checks to prevent unlocking unauthorized entities
 
 ### Dependencies
 - `fabric/build.gradle.kts`: Added Fabric Permissions API dependency
@@ -163,5 +166,17 @@ common/src/main/java/dev/tocraft/remorphed/network/
 - ✅ Manual registration command works reliably
 - ✅ Debug tools provide clear troubleshooting information
 
+## Key Features
+
+### Synchronized Unlock/Morph Control
+- **Entity Type Permissions**: `remorphed.type.<entity_id>` controls both unlocking and morphing
+- **Kill Prevention**: Players cannot gain kill progress for entities they lack permission for
+- **Unlock Prevention**: Players cannot unlock entities through any method without permission
+- **Menu Sync**: Client menus only show entities the player can both unlock and morph into
+
+### Player Skin Control
+- **Skin Permissions**: Player skin unlocking requires skin-related command permissions
+- **Integrated with SkinShifter**: Only tracks player kills when SkinShifter is installed and player has permissions
+
 ## Conclusion
-The permission system provides comprehensive control over all ReMorphed features while maintaining clean, efficient code. The manual registration approach for Fabric ensures reliability, while NeoForge works automatically. Server administrators can fine-tune the mod experience using their preferred permission management plugin.
+The permission system provides comprehensive control over all ReMorphed features while maintaining clean, efficient code. The synchronized unlock/morph system ensures players can only work with entities they have permission for, creating a cohesive permission experience. The manual registration approach for Fabric ensures reliability, while NeoForge works automatically. Server administrators can fine-tune the mod experience using their preferred permission management plugin.

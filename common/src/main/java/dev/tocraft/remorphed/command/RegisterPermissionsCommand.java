@@ -94,7 +94,7 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         permissions.add("remorphed.creative");
         permissions.add("remorphed.bypass.lock");
         
-        // Command permissions
+        // Command permissions (basic)
         permissions.add("remorphed.command.addShape");
         permissions.add("remorphed.command.removeShape");
         permissions.add("remorphed.command.clearShapes");
@@ -103,6 +103,26 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         permissions.add("remorphed.command.removeSkin");
         permissions.add("remorphed.command.clearSkins");
         permissions.add("remorphed.command.hasSkin");
+        
+        // Command permissions (.self variants)
+        permissions.add("remorphed.command.addShape.self");
+        permissions.add("remorphed.command.removeShape.self");
+        permissions.add("remorphed.command.clearShapes.self");
+        permissions.add("remorphed.command.hasShape.self");
+        permissions.add("remorphed.command.addSkin.self");
+        permissions.add("remorphed.command.removeSkin.self");
+        permissions.add("remorphed.command.clearSkins.self");
+        permissions.add("remorphed.command.hasSkin.self");
+        
+        // Command permissions (.others variants)
+        permissions.add("remorphed.command.addShape.others");
+        permissions.add("remorphed.command.removeShape.others");
+        permissions.add("remorphed.command.clearShapes.others");
+        permissions.add("remorphed.command.hasShape.others");
+        permissions.add("remorphed.command.addSkin.others");
+        permissions.add("remorphed.command.removeSkin.others");
+        permissions.add("remorphed.command.clearSkins.others");
+        permissions.add("remorphed.command.hasSkin.others");
         
         // Entity type permissions for all registered entities
         BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {

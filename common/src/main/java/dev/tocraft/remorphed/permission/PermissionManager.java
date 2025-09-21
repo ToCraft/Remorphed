@@ -38,6 +38,45 @@ public interface PermissionManager {
     }
     
     /**
+     * Check if a player has permission to use a command on themselves
+     * @param player The player to check
+     * @param command The command name (e.g., "addShape", "removeShape")
+     * @return true if the player can use the command on themselves
+     */
+    default boolean canUseCommandOnSelf(@NotNull ServerPlayer player, @NotNull String command) {
+        return hasPermission(player, "remorphed.command." + command + ".self") || 
+               hasPermission(player, "remorphed.command." + command);
+    }
+    
+    /**
+     * Check if a player has permission to use a command on others
+     * @param player The player to check
+     * @param command The command name (e.g., "addShape", "removeShape")
+     * @return true if the player can use the command on others
+     */
+    default boolean canUseCommandOnOthers(@NotNull ServerPlayer player, @NotNull String command) {
+        return hasPermission(player, "remorphed.command." + command + ".others") || 
+               hasPermission(player, "remorphed.command." + command);
+    }
+    
+    /**
+     * Check if a player has permission to use a command on a specific target
+     * @param executor The player executing the command
+     * @param target The target player
+     * @param command The command name (e.g., "addShape", "removeShape")
+     * @return true if the player can use the command on the target
+     */
+    default boolean canUseCommandOnTarget(@NotNull ServerPlayer executor, @NotNull ServerPlayer target, @NotNull String command) {
+        if (executor.getUUID().equals(target.getUUID())) {
+            // Using command on self
+            return canUseCommandOnSelf(executor, command);
+        } else {
+            // Using command on others
+            return canUseCommandOnOthers(executor, command);
+        }
+    }
+    
+    /**
      * Check if a player has permission to morph into a specific entity type
      * @param player The player to check
      * @param entityType The entity type to check

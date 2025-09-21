@@ -7,6 +7,7 @@ import dev.tocraft.craftedcore.event.common.CommandEvents;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.permission.PermissionRegistry;
+import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
@@ -38,18 +39,29 @@ import java.util.concurrent.CompletableFuture;
 
 // TODO: Throw when no Player can be found
 public class RemorphedCommand implements CommandEvents.CommandRegistration {
+    
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registry, CommandSelection selection) {
 
         LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(Remorphed.MODID)
-                .requires(source -> source.hasPermission(2)).build();
+                .requires(source -> source.hasPermission(0)).build();
 
         /*
          * Used to remove an unlocked shape of the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> removeShape = Commands.literal("removeShape")
-                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                    PermissionRegistry.getInstance().canUseCommand(player, "removeShape"))
+                .requires(source -> {
+                    // Console usage (no player entity) - allow if has permission level 2+
+                    if (source.getEntity() == null) {
+                        return source.hasPermission(2);
+                    }
+                    // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                    if (source.getEntity() instanceof ServerPlayer player) {
+                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "removeShape") ||
+                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "removeShape");
+                    }
+                    return false;
+                })
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
@@ -60,7 +72,6 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                 }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
-
                                             removeShape(context.getSource(),
                                                     EntityArgument.getPlayer(context, "player"),
                                                     EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
@@ -74,8 +85,18 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to add a shape to the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> addShape = Commands.literal("addShape")
-                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                    PermissionRegistry.getInstance().canUseCommand(player, "addShape"))
+                .requires(source -> {
+                    // Console usage (no player entity) - allow if has permission level 2+
+                    if (source.getEntity() == null) {
+                        return source.hasPermission(2);
+                    }
+                    // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                    if (source.getEntity() instanceof ServerPlayer player) {
+                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "addShape") ||
+                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "addShape");
+                    }
+                    return false;
+                })
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
                                 .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
@@ -100,8 +121,18 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to remove all unlocked shapes of the specified Player.
          */
         LiteralCommandNode<CommandSourceStack> clearShapes = Commands.literal("clearShapes")
-                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                    PermissionRegistry.getInstance().canUseCommand(player, "clearShapes"))
+                .requires(source -> {
+                    // Console usage (no player entity) - allow if has permission level 2+
+                    if (source.getEntity() == null) {
+                        return source.hasPermission(2);
+                    }
+                    // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                    if (source.getEntity() instanceof ServerPlayer player) {
+                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "clearShapes") ||
+                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "clearShapes");
+                    }
+                    return false;
+                })
                 .then(Commands.argument("player", EntityArgument.players()).executes(context -> {
                     clearShapes(context.getSource(), EntityArgument.getPlayer(context, "player"));
                     return 1;
@@ -111,13 +142,25 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
          * Used to check if a player has unlocked a specific shape
          */
         LiteralCommandNode<CommandSourceStack> hasShape = Commands.literal("hasShape")
-                .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                    PermissionRegistry.getInstance().canUseCommand(player, "hasShape"))
+                .requires(source -> {
+                    // Console usage (no player entity) - allow if has permission level 2+
+                    if (source.getEntity() == null) {
+                        return source.hasPermission(2);
+                    }
+                    // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                    if (source.getEntity() instanceof ServerPlayer player) {
+                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "hasShape") ||
+                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "hasShape");
+                    }
+                    return false;
+                })
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
-                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
+                                    return hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
                                         EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
-                                        null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+                                        null);
+                                }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
 
@@ -136,8 +179,18 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
         if (Remorphed.foundSkinShifter) {
             LiteralCommandNode<CommandSourceStack> removeSkin = Commands.literal("removeSkin")
-                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                        PermissionRegistry.getInstance().canUseCommand(player, "removeSkin"))
+                    .requires(source -> {
+                        // Console usage (no player entity) - allow if has permission level 2+
+                        if (source.getEntity() == null) {
+                            return source.hasPermission(2);
+                        }
+                        // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                        if (source.getEntity() instanceof ServerPlayer player) {
+                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "removeSkin") ||
+                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "removeSkin");
+                        }
+                        return false;
+                    })
                     .then(Commands.argument("player", EntityArgument.players())
                             .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                     .executes(context -> {
@@ -167,8 +220,18 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     }))).build();
 
             LiteralCommandNode<CommandSourceStack> addSkin = Commands.literal("addSkin")
-                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                        PermissionRegistry.getInstance().canUseCommand(player, "addSkin"))
+                    .requires(source -> {
+                        // Console usage (no player entity) - allow if has permission level 2+
+                        if (source.getEntity() == null) {
+                            return source.hasPermission(2);
+                        }
+                        // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                        if (source.getEntity() instanceof ServerPlayer player) {
+                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "addSkin") ||
+                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "addSkin");
+                        }
+                        return false;
+                    })
                     .then(Commands.argument("player", EntityArgument.players())
                             .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                     .executes(context -> {
@@ -198,8 +261,18 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     }))).build();
 
             LiteralCommandNode<CommandSourceStack> clearSkins = Commands.literal("clearSkins")
-                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                        PermissionRegistry.getInstance().canUseCommand(player, "clearSkins"))
+                    .requires(source -> {
+                        // Console usage (no player entity) - allow if has permission level 2+
+                        if (source.getEntity() == null) {
+                            return source.hasPermission(2);
+                        }
+                        // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                        if (source.getEntity() instanceof ServerPlayer player) {
+                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "clearSkins") ||
+                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "clearSkins");
+                        }
+                        return false;
+                    })
                     .then(Commands.argument("player", EntityArgument.players()).executes(context -> {
                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
                         clearSkins(context.getSource(), player);
@@ -210,8 +283,18 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
              * Used to check if a player has unlocked a specific shape
              */
             LiteralCommandNode<CommandSourceStack> hasSkin = Commands.literal("hasSkin")
-                    .requires(source -> source.getEntity() instanceof ServerPlayer player && 
-                        PermissionRegistry.getInstance().canUseCommand(player, "hasSkin"))
+                    .requires(source -> {
+                        // Console usage (no player entity) - allow if has permission level 2+
+                        if (source.getEntity() == null) {
+                            return source.hasPermission(2);
+                        }
+                        // Player usage - check if they can use command at all (will check target-specific permissions in execution)
+                        if (source.getEntity() instanceof ServerPlayer player) {
+                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "hasSkin") ||
+                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "hasSkin");
+                        }
+                        return false;
+                    })
                     .then(Commands.argument("player", EntityArgument.players())
                             .then(Commands.argument("playerUUID", UuidArgument.uuid())
                                     .executes(context -> {
@@ -252,6 +335,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static int hasShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasShape")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return 0;
+            }
+        }
+        
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
@@ -267,6 +358,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static void removeShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeShape")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
@@ -276,6 +375,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static void addShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addShape")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
@@ -285,6 +392,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static void clearShapes(@NotNull CommandSourceStack source, ServerPlayer player) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearShapes")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         PlayerMorph.getUnlockedShapes(player).clear();
         PlayerMorph.getShapeCounter(player).clear();
 
@@ -309,6 +424,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static void hasSkin(CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasSkin")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         if (PlayerMorph.getUnlockedSkinIds(player).containsKey(playerProfile.getId())) {
             source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_success",
                     player.getName(), playerProfile.getName()), true);
@@ -319,18 +442,42 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     private static void removeSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeSkin")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         PlayerMorph.getUnlockedSkinIds(player).remove(playerProfile.getId());
 
         source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".removeSkin", playerProfile.getName(), player.getName()), true);
     }
 
     private static void addSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addSkin")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         PlayerMorph.getUnlockedSkinIds(player).put(playerProfile.getId(), Remorphed.CONFIG.killToUnlockPlayers);
 
         source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".addSkin", player.getName(), playerProfile.getName()), true);
     }
 
     private static void clearSkins(@NotNull CommandSourceStack source, ServerPlayer player) {
+        // Check permissions if executed by a player
+        if (source.getEntity() instanceof ServerPlayer executor) {
+            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearSkins")) {
+                source.sendFailure(Component.translatable("commands.generic.permission"));
+                return;
+            }
+        }
+        
         PlayerMorph.getUnlockedSkinIds(player).clear();
         PlayerMorph.getSkinCounter(player).clear();
 
