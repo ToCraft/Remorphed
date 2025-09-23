@@ -163,11 +163,7 @@ public class Remorphed {
     }
     
     public static int getKillToUnlock(Player player, EntityType<?> type) {
-        int defaultKills = getKillToUnlock(type);
-        if (player instanceof ServerPlayer serverPlayer) {
-            return PermissionRegistry.getInstance().getKillRequirement(serverPlayer, type, defaultKills);
-        }
-        return defaultKills;
+        return getKillToUnlock(type);
     }
 
     public static int getKillValue(EntityType<?> type) {
@@ -175,27 +171,15 @@ public class Remorphed {
     }
     
     public static int getKillValue(Player player, EntityType<?> type) {
-        int defaultValue = getKillValue(type);
-        if (player instanceof ServerPlayer serverPlayer) {
-            return PermissionRegistry.getInstance().getKillValue(serverPlayer, type, defaultValue);
-        }
-        return defaultValue;
+        return getKillValue(type);
     }
     
     public static int getPlayerKillRequirement(Player player) {
-        int defaultKills = CONFIG.killToUnlockPlayers;
-        if (player instanceof ServerPlayer serverPlayer) {
-            return PermissionRegistry.getInstance().getPlayerKillRequirement(serverPlayer, defaultKills);
-        }
-        return defaultKills;
+        return CONFIG.killToUnlockPlayers;
     }
     
     public static int getPlayerKillValue(Player player) {
-        int defaultValue = CONFIG.playerKillValue;
-        if (player instanceof ServerPlayer serverPlayer) {
-            return PermissionRegistry.getInstance().getPlayerKillValue(serverPlayer, defaultValue);
-        }
-        return defaultValue;
+        return CONFIG.playerKillValue;
     }
 
     public static void sync(ServerPlayer player) {

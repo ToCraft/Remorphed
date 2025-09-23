@@ -18,14 +18,6 @@ public interface PermissionManager {
      */
     boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission);
     
-    /**
-     * Check if a player has permission to access the ReMorphed menu
-     * @param player The player to check
-     * @return true if the player can access the menu
-     */
-    default boolean canAccessMenu(@NotNull ServerPlayer player) {
-        return hasPermission(player, "remorphed.menu");
-    }
     
     /**
      * Check if a player has permission to use a specific command
@@ -87,71 +79,6 @@ public interface PermissionManager {
         return hasPermission(player, "remorphed.type." + entityKey);
     }
     
-    /**
-     * Get the kill requirement override for a player and entity type
-     * @param player The player to check
-     * @param entityType The entity type
-     * @param defaultKills The default kill requirement
-     * @return The overridden kill requirement or default if no override
-     */
-    default int getKillRequirement(@NotNull ServerPlayer player, @NotNull EntityType<?> entityType, int defaultKills) {
-        // Check for specific overrides from permissions
-        for (int i = 0; i <= 20; i++) { // Check reasonable range
-            if (hasPermission(player, "remorphed.unlockKills." + i)) {
-                return i;
-            }
-        }
-        return defaultKills;
-    }
-    
-    /**
-     * Get the player kill requirement override for a player
-     * @param player The player to check
-     * @param defaultKills The default player kill requirement
-     * @return The overridden player kill requirement or default if no override
-     */
-    default int getPlayerKillRequirement(@NotNull ServerPlayer player, int defaultKills) {
-        // Check for specific overrides from permissions
-        for (int i = 0; i <= 20; i++) { // Check reasonable range
-            if (hasPermission(player, "remorphed.playerUnlockKills." + i)) {
-                return i;
-            }
-        }
-        return defaultKills;
-    }
-    
-    /**
-     * Get the kill value override for a player and entity type
-     * @param player The player to check
-     * @param entityType The entity type
-     * @param defaultValue The default kill value
-     * @return The overridden kill value or default if no override
-     */
-    default int getKillValue(@NotNull ServerPlayer player, @NotNull EntityType<?> entityType, int defaultValue) {
-        // Check for specific overrides from permissions
-        for (int i = 0; i <= 20; i++) { // Check reasonable range
-            if (hasPermission(player, "remorphed.killValue." + i)) {
-                return i;
-            }
-        }
-        return defaultValue;
-    }
-    
-    /**
-     * Get the player kill value override for a player
-     * @param player The player to check
-     * @param defaultValue The default player kill value
-     * @return The overridden player kill value or default if no override
-     */
-    default int getPlayerKillValue(@NotNull ServerPlayer player, int defaultValue) {
-        // Check for specific overrides from permissions
-        for (int i = 0; i <= 20; i++) { // Check reasonable range
-            if (hasPermission(player, "remorphed.playerKillValue." + i)) {
-                return i;
-            }
-        }
-        return defaultValue;
-    }
     
     /**
      * Check if a player can bypass creative mode restrictions

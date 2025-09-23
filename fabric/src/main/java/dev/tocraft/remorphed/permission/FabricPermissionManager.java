@@ -39,7 +39,6 @@ public class FabricPermissionManager implements PermissionManager {
                 Set<String> permissions = new HashSet<>();
                 
                 // Core permissions
-                permissions.add("remorphed.menu");
                 permissions.add("remorphed.morph");
                 permissions.add("remorphed.creative");
                 permissions.add("remorphed.bypass.lock");
@@ -62,13 +61,6 @@ public class FabricPermissionManager implements PermissionManager {
                     }
                 });
                 
-                // Dynamic configuration permissions (0-20 range for common use cases)
-                for (int i = 0; i <= 20; i++) {
-                    permissions.add("remorphed.unlockKills." + i);
-                    permissions.add("remorphed.playerUnlockKills." + i);
-                    permissions.add("remorphed.killValue." + i);
-                    permissions.add("remorphed.playerKillValue." + i);
-                }
                 
                 // For Fabric, permissions are automatically registered when first checked
                 // We'll just add them to our registered set for logging

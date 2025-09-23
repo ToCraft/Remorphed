@@ -12,15 +12,8 @@ ReMorphed supports permission plugins like LuckPerms and PermissionsEx for both 
 ### ✅ **Fully Working**
 - **Unlock/Morph Permissions**: Players can only unlock and morph into entities they have permission for
 - **Command Permissions**: Granular `.self` vs `.others` command permissions work correctly
-- **Menu Access**: `remorphed.menu` permission controls access to the ReMorphed menu
 - **Autocomplete**: Player name autocomplete works with `minecraft.selector.*` permission
 
-### 🚧 **Partially Working**
-- **Kill Count Requirements**: Dynamic `remorphed.unlockKills.<number>` permissions are registered but not fully integrated
-- **Reset Permissions**: Dynamic `remorphed.killValue.<number>` permissions are registered but not fully integrated
-
-### 📝 **Note**
-The kill count and reset permission features will be fully implemented in a future update. Currently, the core unlock/morph and command permission systems are fully functional.
 
 ## Quick Start
 
@@ -66,7 +59,6 @@ Commands use `EntityArgument.players()` which requires the `minecraft.selector.*
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| `remorphed.menu` | Access to the morph selection menu | Operator (level 2+) |
 | `remorphed.morph` | Basic morphing functionality | Operator (level 2+) |
 | `remorphed.creative` | Bypass creative mode restrictions | Operator (level 2+) |
 | `remorphed.bypass.lock` | Bypass transform lock when enabled | Operator (level 2+) |
@@ -117,20 +109,6 @@ Control access to specific mob types for both unlocking and morphing:
 - `remorphed.type.minecraft:enderman` - Endermen
 - `remorphed.type.minecraft:ender_dragon` - Ender Dragon
 
-### Configuration Overrides
-
-Override config values for specific players:
-
-| Permission | Description | Example |
-|------------|-------------|---------|
-| `remorphed.unlockKills.<number>` | Kill requirement for unlocking mobs | `remorphed.unlockKills.1` (only need 1 kill) |
-| `remorphed.playerUnlockKills.<number>` | Kill requirement for player skins | `remorphed.playerUnlockKills.2` (need 2 player kills) |
-| `remorphed.killValue.<number>` | Morphs before losing unlock | `remorphed.killValue.10` (lose after 10 morphs) |
-| `remorphed.playerKillValue.<number>` | Player skin morph usage count | `remorphed.playerKillValue.5` (lose after 5 morphs) |
-
-**Special Values:**
-- `remorphed.unlockKills.0` - Instant unlock (no kills needed)
-- `remorphed.killValue.0` - Never lose unlocks
 
 ## Commands
 
@@ -150,7 +128,6 @@ Lists all available permissions with copy-paste LuckPerms commands.
 **Example 1: Regular Player (Self-Only)**
 ```bash
 # Basic permissions
-/lp user <player> permission set remorphed.menu true
 /lp user <player> permission set remorphed.morph true
 /lp user <player> permission set remorphed.type.minecraft:zombie true
 
@@ -165,7 +142,6 @@ Lists all available permissions with copy-paste LuckPerms commands.
 **Example 2: Helper (Others-Only)**
 ```bash
 # Basic permissions
-/lp user <helper> permission set remorphed.menu true
 /lp user <helper> permission set remorphed.morph true
 /lp user <helper> permission set remorphed.type.* true
 
@@ -180,7 +156,6 @@ Lists all available permissions with copy-paste LuckPerms commands.
 **Example 3: Moderator (Both Self and Others)**
 ```bash
 # Basic permissions
-/lp user <mod> permission set remorphed.menu true
 /lp user <mod> permission set remorphed.morph true
 /lp user <mod> permission set remorphed.type.* true
 
@@ -214,7 +189,6 @@ Lists all available permissions with copy-paste LuckPerms commands.
 
 ### Common Issues
 
-1. **Menu won't open**: Check `remorphed.menu` permission
 2. **Can't morph**: Check `remorphed.morph` permission  
 3. **Can't unlock specific mob**: Check `remorphed.type.<entity_id>` permission
 4. **Can't morph into specific mob**: Check `remorphed.type.<entity_id>` permission
@@ -238,9 +212,3 @@ Lists all available permissions with copy-paste LuckPerms commands.
 ## Default Behavior
 
 If no permission plugin is installed, ReMorphed falls back to operator permissions (level 2+). All permission checks return `true` for operators and `false` for regular players.
-
-## Migration from Config-Only
-
-Config values serve as defaults. Permissions can override them for specific players or groups. For example:
-- Config: `killToUnlock = 5`
-- Permission: `remorphed.unlockKills.1` (overrides to 1 kill for that player/group)

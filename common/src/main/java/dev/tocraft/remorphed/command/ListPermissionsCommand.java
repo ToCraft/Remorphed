@@ -41,7 +41,6 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
         source.sendSuccess(() -> Component.literal(""), false);
         
         source.sendSuccess(() -> Component.literal("§a§lCore Permissions:"), false);
-        source.sendSuccess(() -> Component.literal("§f/lp group default permission set remorphed.menu true"), false);
         source.sendSuccess(() -> Component.literal("§f/lp group default permission set remorphed.morph true"), false);
         source.sendSuccess(() -> Component.literal("§f/lp group admin permission set remorphed.creative true"), false);
         source.sendSuccess(() -> Component.literal("§f/lp group admin permission set remorphed.bypass.lock true"), false);
@@ -62,10 +61,6 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
         source.sendSuccess(() -> Component.literal("§f/lp group admin permission set remorphed.type.minecraft:ender_dragon true"), false);
         
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§a§lExample Configuration Overrides:"), false);
-        source.sendSuccess(() -> Component.literal("§f/lp group vip permission set remorphed.unlockKills.1 true §7# Only need 1 kill"), false);
-        source.sendSuccess(() -> Component.literal("§f/lp group vip permission set remorphed.unlockKills.0 true §7# Instant unlock"), false);
-        source.sendSuccess(() -> Component.literal("§f/lp group premium permission set remorphed.killValue.10 true §7# Keep unlocks longer"), false);
         
         source.sendSuccess(() -> Component.literal(""), false);
         source.sendSuccess(() -> Component.literal("§a§lWildcard Permissions:"), false);
@@ -82,7 +77,6 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
         List<String> permissions = new ArrayList<>();
         
         // Core permissions
-        permissions.add("remorphed.menu");
         permissions.add("remorphed.morph");
         permissions.add("remorphed.creative");
         permissions.add("remorphed.bypass.lock");
@@ -105,13 +99,6 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
             }
         });
         
-        // Dynamic configuration permissions (0-20 range)
-        for (int i = 0; i <= 20; i++) {
-            permissions.add("remorphed.unlockKills." + i);
-            permissions.add("remorphed.playerUnlockKills." + i);
-            permissions.add("remorphed.killValue." + i);
-            permissions.add("remorphed.playerKillValue." + i);
-        }
         
         Collections.sort(permissions);
         return permissions;

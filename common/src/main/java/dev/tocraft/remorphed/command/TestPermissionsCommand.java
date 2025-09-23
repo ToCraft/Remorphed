@@ -35,13 +35,11 @@ public class TestPermissionsCommand implements CommandEvents.CommandRegistration
         source.sendSuccess(() -> Component.literal(""), false);
         
         // Test core permissions
-        boolean menuPerm = manager.hasPermission(player, "remorphed.menu");
         boolean morphPerm = manager.hasPermission(player, "remorphed.morph");
         boolean creativePerm = manager.hasPermission(player, "remorphed.creative");
         boolean bypassPerm = manager.hasPermission(player, "remorphed.bypass.lock");
         
         source.sendSuccess(() -> Component.literal("§a§lCore Permissions:"), false);
-        source.sendSuccess(() -> Component.literal("§fremorphed.menu: " + (menuPerm ? "§a✓" : "§c✗")), false);
         source.sendSuccess(() -> Component.literal("§fremorphed.morph: " + (morphPerm ? "§a✓" : "§c✗")), false);
         source.sendSuccess(() -> Component.literal("§fremorphed.creative: " + (creativePerm ? "§a✓" : "§c✗")), false);
         source.sendSuccess(() -> Component.literal("§fremorphed.bypass.lock: " + (bypassPerm ? "§a✓" : "§c✗")), false);
@@ -59,13 +57,11 @@ public class TestPermissionsCommand implements CommandEvents.CommandRegistration
         
         // Test method calls
         boolean canMorph = manager.canMorph(player);
-        boolean canAccessMenu = manager.canAccessMenu(player);
         boolean canUseCreative = manager.canUseCreativeMode(player);
         
         source.sendSuccess(() -> Component.literal(""), false);
         source.sendSuccess(() -> Component.literal("§a§lMethod Results:"), false);
         source.sendSuccess(() -> Component.literal("§fcanMorph(): " + (canMorph ? "§a✓" : "§c✗")), false);
-        source.sendSuccess(() -> Component.literal("§fcanAccessMenu(): " + (canAccessMenu ? "§a✓" : "§c✗")), false);
         source.sendSuccess(() -> Component.literal("§fcanUseCreativeMode(): " + (canUseCreative ? "§a✓" : "§c✗")), false);
         
         // Test player's actual permissions

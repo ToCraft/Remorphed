@@ -35,15 +35,5 @@ public class PermissionCheckPacket {
         // Store the permission result for client-side use
         ClientPermissionCache.setPermission(permission, hasPermission);
         
-        // If this was a menu permission check and player has permission, open the menu
-        if ("remorphed.menu".equals(permission) && hasPermission) {
-            net.minecraft.client.Minecraft.getInstance().setScreen(new dev.tocraft.remorphed.screen.RemorphedMenu());
-        } else if ("remorphed.menu".equals(permission) && !hasPermission) {
-            // Show error message
-            if (net.minecraft.client.Minecraft.getInstance().player != null) {
-                net.minecraft.client.Minecraft.getInstance().player.displayClientMessage(
-                    Component.translatable("remorphed.permission.menu.denied"), true);
-            }
-        }
     }
 }

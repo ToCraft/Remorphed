@@ -89,7 +89,6 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         Set<String> permissions = new HashSet<>();
         
         // Core permissions
-        permissions.add("remorphed.menu");
         permissions.add("remorphed.morph");
         permissions.add("remorphed.creative");
         permissions.add("remorphed.bypass.lock");
@@ -132,13 +131,6 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
             }
         });
         
-        // Dynamic configuration permissions (0-20 range for common use cases)
-        for (int i = 0; i <= 20; i++) {
-            permissions.add("remorphed.unlockKills." + i);
-            permissions.add("remorphed.playerUnlockKills." + i);
-            permissions.add("remorphed.killValue." + i);
-            permissions.add("remorphed.playerKillValue." + i);
-        }
         
         return permissions;
     }

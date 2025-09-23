@@ -27,7 +27,6 @@ public class NeoForgePermissionManager implements PermissionManager {
     
     private void registerAllPermissionNodes() {
         // Core permissions
-        registerPermissionNode("remorphed.menu");
         registerPermissionNode("remorphed.morph");
         registerPermissionNode("remorphed.creative");
         registerPermissionNode("remorphed.bypass.lock");
@@ -50,13 +49,6 @@ public class NeoForgePermissionManager implements PermissionManager {
             }
         });
         
-        // Dynamic configuration permissions (0-20 range for common use cases)
-        for (int i = 0; i <= 20; i++) {
-            registerPermissionNode("remorphed.unlockKills." + i);
-            registerPermissionNode("remorphed.playerUnlockKills." + i);
-            registerPermissionNode("remorphed.killValue." + i);
-            registerPermissionNode("remorphed.playerKillValue." + i);
-        }
     }
     
     private void registerPermissionNode(String permission) {
