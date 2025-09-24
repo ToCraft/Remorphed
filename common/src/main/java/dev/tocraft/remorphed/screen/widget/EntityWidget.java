@@ -16,9 +16,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -32,13 +34,20 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     private final T entity;
     private final int size;
     private final int id;
+    private final EntityRenderState cachedRenderState;
 
-    public EntityWidget(int id, int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability) {
+    public EntityWidget(int id, int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability, @Nullable EntityRenderState cachedRenderState) {
         super(x, y, width, height, parent, isFavorite, current, availability); // int x, int y, int width, int height, message
-        this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
+        // Calculate size with cap for small entities like slimes and magma cubes
+        float entitySize = Math.max(entity.getBbHeight(), entity.getBbWidth());
+        float scaleFactor = 1 / entitySize;
+        // Cap the scale factor to prevent slimes/magma cubes from being too big
+        scaleFactor = Math.min(scaleFactor, 2.0f);
+        this.size = (int) (Remorphed.CONFIG.entity_size * scaleFactor);
         this.type = type;
         this.entity = entity;
         this.id = id;
+        this.cachedRenderState = cachedRenderState; // Use cached render state with proper scale
         entity.setGlowingTag(true);
         setTooltip(Tooltip.create(ShapeType.createTooltipText(entity)));
     }
@@ -93,7 +102,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
             int l = topPos - 25;
             int m = leftPos + 20;
             int n = topPos + 35;
-            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity, cachedRenderState);
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();
