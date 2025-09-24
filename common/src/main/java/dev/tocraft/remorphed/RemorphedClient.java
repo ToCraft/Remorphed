@@ -49,12 +49,21 @@ public class RemorphedClient {
             Vector3f translation,
             Quaternionf rotation,
             @Nullable Quaternionf overrideCameraAngle,
-            LivingEntity entity
+            LivingEntity entity,
+            @Nullable EntityRenderState cachedRenderState
     ) {
-        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderDispatcher.getRenderer(entity);
-        EntityRenderState entityRenderState = entityRenderer.createRenderState(entity, 1.0F);
-        entityRenderState.hitboxesRenderState = null;
+        EntityRenderState entityRenderState;
+        
+        if (cachedRenderState != null) {
+            // Use cached render state to avoid texture/model reloading
+            entityRenderState = cachedRenderState;
+        } else {
+            // Fallback: create new render state (shouldn't happen with proper caching)
+            EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+            EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderDispatcher.getRenderer(entity);
+            entityRenderState = entityRenderer.createRenderState(entity, 1.0F);
+            entityRenderState.hitboxesRenderState = null;
+        }
 
         GuiGraphicsAccessor accessor = ((GuiGraphicsAccessor) guiGraphics);
         accessor.getGuiRenderState().submitPicturesInPictureState(new GuiShapeRenderState(id, entityRenderState, translation, rotation, overrideCameraAngle, x1, y1, x2, y2, scale, accessor.getScissorStack().peek()));
