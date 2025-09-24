@@ -42,7 +42,6 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
         
         source.sendSuccess(() -> Component.literal("§a§lCore Permissions:"), false);
         source.sendSuccess(() -> Component.literal("§f/lp group default permission set remorphed.morph true"), false);
-        source.sendSuccess(() -> Component.literal("§f/lp group admin permission set remorphed.creative true"), false);
         source.sendSuccess(() -> Component.literal("§f/lp group admin permission set remorphed.bypass.lock true"), false);
         
         source.sendSuccess(() -> Component.literal(""), false);
@@ -78,7 +77,6 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
         
         // Core permissions
         permissions.add("remorphed.morph");
-        permissions.add("remorphed.creative");
         permissions.add("remorphed.bypass.lock");
         
         // Command permissions

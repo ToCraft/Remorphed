@@ -40,7 +40,6 @@ public class FabricPermissionManager implements PermissionManager {
                 
                 // Core permissions
                 permissions.add("remorphed.morph");
-                permissions.add("remorphed.creative");
                 permissions.add("remorphed.bypass.lock");
                 
                 // Command permissions

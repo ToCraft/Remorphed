@@ -16,8 +16,8 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
     @Override
     public InteractionResult unlock(ServerPlayer player, ShapeType<?> type) {
         if (type != null) {
-            // Check if player has permission to unlock this entity type
-            if (!PermissionRegistry.getInstance().canMorphIntoType(player, type.getEntityType())) {
+            // Check if player has permission to unlock this entity type (only if permissions are enabled)
+            if (Remorphed.CONFIG.usePermissions && !PermissionRegistry.getInstance().canMorphIntoType(player, type.getEntityType())) {
                 return InteractionResult.FAIL;
             }
             

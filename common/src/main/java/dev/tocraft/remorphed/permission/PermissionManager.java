@@ -80,14 +80,6 @@ public interface PermissionManager {
     }
     
     
-    /**
-     * Check if a player can bypass creative mode restrictions
-     * @param player The player to check
-     * @return true if the player can use creative permissions
-     */
-    default boolean canUseCreativeMode(@NotNull ServerPlayer player) {
-        return hasPermission(player, "remorphed.creative");
-    }
     
     /**
      * Check if a player can bypass transform lock

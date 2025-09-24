@@ -5,28 +5,53 @@ ReMorphed supports permission plugins like LuckPerms and PermissionsEx for both 
 ## Platform Support
 
 - **NeoForge**: Uses built-in PermissionAPI (works automatically)
-- **Fabric**: Uses Fabric Permissions API (requires manual registration command)
+- **Fabric**: Uses Fabric Permissions API (**requires separate mod installation**)
+
+### ⚠️ **IMPORTANT FOR FABRIC SERVERS**
+
+**Fabric servers MUST install the [Fabric Permissions API](https://modrinth.com/mod/fabric-permissions-api) mod separately!**
+
+- Download from: https://modrinth.com/mod/fabric-permissions-api
+- Place `fabric-permissions-api.jar` in your server's `mods/` folder
+- **Without this mod, permissions will not work on Fabric servers**
+- NeoForge servers do not need this - permissions work automatically
 
 ## Implementation Status
 
 ### ✅ **Fully Working**
 - **Unlock/Morph Permissions**: Players can only unlock and morph into entities they have permission for
 - **Command Permissions**: Granular `.self` vs `.others` command permissions work correctly
-- **Autocomplete**: Player name autocomplete works with `minecraft.selector.*` permission
 
 
 ## Quick Start
 
+### Enable Permission System
+**IMPORTANT**: Permissions are disabled by default. To enable the permission system:
+
+1. **For Fabric servers**: Install [Fabric Permissions API](https://modrinth.com/mod/fabric-permissions-api) mod first!
+2. Set `usePermissions = true` in your ReMorphed config file
+3. Restart your server
+4. Configure permissions using your permission plugin (LuckPerms, etc.)
+
 ### For NeoForge Servers
-Permissions should work automatically. If not, run `/remorphed-register-permissions` once as an admin.
+Permissions work automatically once enabled. If not, run `/remorphed-register-permissions` once as an admin.
 
 ### For Fabric Servers
-After installing/updating the mod, run `/remorphed-register-permissions` as an admin to make permissions visible in LuckPerms GUI.
+**REQUIRED**: Install [Fabric Permissions API](https://modrinth.com/mod/fabric-permissions-api) mod first!
+
+After installing the API mod and enabling permissions, run `/remorphed-register-permissions` as an admin to make permissions visible in LuckPerms GUI.
 
 ### How Permissions Work
+
+#### When `usePermissions = true` (Permission System Enabled):
 - **Unlocking**: Players can only unlock entities they have permission for
 - **Morphing**: Players can only morph into entities they have permission for
-- **Synced**: What you can unlock is the same as what you can morph into
+- **Command Access**: `/remorphed` commands (addShape, clearShapes, etc.) require `.self` and `.others` permissions
+
+#### When `usePermissions = false` (Default Behavior):
+- Uses original server config behavior
+- No permission checks are performed
+- All players follow the same rules based on server config
 
 ### Important: Selector Permission + Granular Control
 Commands use `EntityArgument.players()` which requires the `minecraft.selector.*` permission for player name targeting. This provides proper autocomplete functionality.
@@ -60,7 +85,6 @@ Commands use `EntityArgument.players()` which requires the `minecraft.selector.*
 | Permission | Description | Default |
 |------------|-------------|---------|
 | `remorphed.morph` | Basic morphing functionality | Operator (level 2+) |
-| `remorphed.creative` | Bypass creative mode restrictions | Operator (level 2+) |
 | `remorphed.bypass.lock` | Bypass transform lock when enabled | Operator (level 2+) |
 
 ### Commands
@@ -115,11 +139,12 @@ Control access to specific mob types for both unlocking and morphing:
 ### `/remorphed-register-permissions`
 Manually registers all permissions with LuckPerms. **Required for Fabric servers** to make permissions visible in the GUI.
 
-### `/remorphed-test-permissions`
-Tests all permission checks for the current player. Useful for debugging permission issues.
+**Note**: Only server operators (OP level 2+) can run this command.
 
 ### `/remorphed-list-permissions`
 Lists all available permissions with copy-paste LuckPerms commands.
+
+**Note**: Only server operators (OP level 2+) can run this command.
 
 ## Configuration Examples
 
@@ -189,6 +214,7 @@ Lists all available permissions with copy-paste LuckPerms commands.
 
 ### Common Issues
 
+1. **Permissions not working on Fabric**: **Install [Fabric Permissions API](https://modrinth.com/mod/fabric-permissions-api) mod first!**
 2. **Can't morph**: Check `remorphed.morph` permission  
 3. **Can't unlock specific mob**: Check `remorphed.type.<entity_id>` permission
 4. **Can't morph into specific mob**: Check `remorphed.type.<entity_id>` permission
@@ -197,11 +223,10 @@ Lists all available permissions with copy-paste LuckPerms commands.
 7. **Can't use command on others**: Check `remorphed.command.<command>.others` permission
 8. **"Selector not allowed" error**: Grant `minecraft.selector.*` permission (works with Vanilla Permissions mod)
 9. **Permissions not showing in LuckPerms GUI**: Run `/remorphed-register-permissions`
-10. **Can't transform despite permissions**: Run `/remorphed-test-permissions` to debug
+10. **Can't transform despite permissions**: Check if you have the required entity type permissions
 
 ### Debug Commands
 
-- `/remorphed-test-permissions` - Shows which permissions are working
 - `/remorphed-list-permissions` - Lists all permissions with copy-paste commands
 
 ### Platform Differences

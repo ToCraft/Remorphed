@@ -11,7 +11,6 @@ import dev.tocraft.craftedcore.platform.VersionChecker;
 import dev.tocraft.remorphed.command.RemorphedCommand;
 import dev.tocraft.remorphed.command.ListPermissionsCommand;
 import dev.tocraft.remorphed.command.RegisterPermissionsCommand;
-import dev.tocraft.remorphed.command.TestPermissionsCommand;
 import dev.tocraft.remorphed.config.RemorphedConfig;
 import dev.tocraft.remorphed.handler.LivingDeathHandler;
 import dev.tocraft.remorphed.handler.PlayerRespawnHandler;
@@ -74,7 +73,6 @@ public class Remorphed {
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
         CommandEvents.REGISTRATION.register(new ListPermissionsCommand());
         CommandEvents.REGISTRATION.register(new RegisterPermissionsCommand());
-        CommandEvents.REGISTRATION.register(new TestPermissionsCommand());
         EntityEvents.LIVING_DEATH.register(new LivingDeathHandler());
         PlayerEvents.PLAYER_RESPAWN.register(new PlayerRespawnHandler());
 
@@ -87,23 +85,19 @@ public class Remorphed {
     }
 
     public static boolean canUseEveryShape(@NotNull Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
-            // Check permission-based creative override
-            if (PermissionRegistry.getInstance().canUseCreativeMode(serverPlayer)) {
-                return true;
-            }
-        }
+        // Always use config-based creative logic (creative permission removed)
         return player.isCreative() && CONFIG.creativeUnlockAll;
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        // If permissions are enabled, use permission-based logic
+        if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
             // Check basic morph permission
             if (!PermissionRegistry.getInstance().canMorph(serverPlayer)) {
                 return false;
             }
             
-            // Check entity type specific permission
+            // Check entity type specific permission - this takes precedence over creative permissions
             if (type != null && !PermissionRegistry.getInstance().canMorphIntoType(serverPlayer, type.getEntityType())) {
                 return false;
             }
@@ -112,19 +106,29 @@ public class Remorphed {
             if (Remorphed.CONFIG.lockTransform && !PermissionRegistry.getInstance().canBypassTransformLock(serverPlayer)) {
                 return false;
             }
+            
+            // Check if player can use all shapes (config-based creative logic)
+            if (canUseEveryShape(player)) {
+                return true;
+            }
+            
+            // For permission-enabled players without creative permission, check kill requirements
+            return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
         }
         
+        // If permissions are disabled, use original config-based behavior
         return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
     }
 
     public static boolean canUseShape(Player player, EntityType<?> type) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        // If permissions are enabled, use permission-based logic
+        if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
             // Check basic morph permission
             if (!PermissionRegistry.getInstance().canMorph(serverPlayer)) {
                 return false;
             }
             
-            // Check entity type specific permission
+            // Check entity type specific permission - this takes precedence over creative permissions
             if (type != null && !PermissionRegistry.getInstance().canMorphIntoType(serverPlayer, type)) {
                 return false;
             }
@@ -133,23 +137,29 @@ public class Remorphed {
             if (Remorphed.CONFIG.lockTransform && !PermissionRegistry.getInstance().canBypassTransformLock(serverPlayer)) {
                 return false;
             }
+            
+            // Check if player can use all shapes (config-based creative logic)
+            if (canUseEveryShape(player)) {
+                return true;
+            }
+            
+            // For permission-enabled players without creative permission, check kill requirements
+            return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
         }
         
+        // If permissions are disabled, use original config-based behavior
         return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
     }
 
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
-        if (canUseEveryShape(player)) {
-            return ShapeType.getAllTypes(player.level());
-        } else if (Walkers.CONFIG.unlockEveryVariant) {
-            List<ShapeType<?>> unlocked = new ArrayList<>();
-            for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
-                if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) unlocked.add(shapeType);
+        // Always filter by canUseShape to respect entity type permissions
+        List<ShapeType<?>> unlocked = new ArrayList<>();
+        for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
+            if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) {
+                unlocked.add(shapeType);
             }
-            return unlocked;
-        } else {
-            return new ArrayList<>(PlayerMorph.getUnlockedShapes(player).keySet().stream().filter(type -> canUseShape(player, type)).toList());
         }
+        return unlocked;
     }
 
     @Contract("_ -> new")

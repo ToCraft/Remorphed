@@ -90,7 +90,6 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         
         // Core permissions
         permissions.add("remorphed.morph");
-        permissions.add("remorphed.creative");
         permissions.add("remorphed.bypass.lock");
         
         // Command permissions (basic)

@@ -20,8 +20,9 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
         if (!(entity instanceof Player) && source.getEntity() instanceof ServerPlayer killer) {
             ShapeType<?> type = ShapeType.from(entity);
             if (type != null && (!Walkers.CONFIG.blacklistPreventsUnlocking || !Walkers.isPlayerBlacklisted(killer.getUUID()))) {
-                // Check if player has permission to unlock this entity type
-                if (PermissionRegistry.getInstance().canMorphIntoType(killer, type.getEntityType())) {
+                // Check if player has permission to unlock this entity type (only if permissions are enabled)
+                boolean canUnlock = !Remorphed.CONFIG.usePermissions || PermissionRegistry.getInstance().canMorphIntoType(killer, type.getEntityType());
+                if (canUnlock) {
                     PlayerMorph.addKill(killer, type);
 
                     if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
@@ -35,8 +36,11 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
             if (Remorphed.foundSkinShifter) {
                 // For now, we'll allow player kills if the player has any skin-related permission
                 // This could be made more specific in the future if needed
-                if (PermissionRegistry.getInstance().hasPermission(killer, "remorphed.command.addSkin") || 
-                    PermissionRegistry.getInstance().hasPermission(killer, "remorphed.*")) {
+                // Only check permissions if permissions are enabled
+                boolean canUnlockPlayer = !Remorphed.CONFIG.usePermissions || 
+                    PermissionRegistry.getInstance().hasPermission(killer, "remorphed.command.addSkin") || 
+                    PermissionRegistry.getInstance().hasPermission(killer, "remorphed.*");
+                if (canUnlockPlayer) {
                     PlayerMorph.addPlayerKill(killer, entity.getUUID());
                 }
             } else {

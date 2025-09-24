@@ -28,7 +28,6 @@ public class NeoForgePermissionManager implements PermissionManager {
     private void registerAllPermissionNodes() {
         // Core permissions
         registerPermissionNode("remorphed.morph");
-        registerPermissionNode("remorphed.creative");
         registerPermissionNode("remorphed.bypass.lock");
         
         // Command permissions

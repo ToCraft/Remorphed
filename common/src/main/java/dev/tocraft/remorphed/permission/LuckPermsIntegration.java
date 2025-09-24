@@ -113,10 +113,9 @@ public class LuckPermsIntegration {
     private static Set<String> getAllPermissions() {
         Set<String> permissions = new HashSet<>();
         
-        // Core permissions
-        permissions.add("remorphed.morph");
-        permissions.add("remorphed.creative");
-        permissions.add("remorphed.bypass.lock");
+                // Core permissions
+                permissions.add("remorphed.morph");
+                permissions.add("remorphed.bypass.lock");
         
         // Command permissions
         permissions.add("remorphed.command.addShape");

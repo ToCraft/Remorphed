@@ -10,7 +10,9 @@ import java.util.Map;
 
 @SuppressWarnings("CanBeFinal")
 public class RemorphedConfig implements Config {
-    @Comment("<<< General >>>")
+    @Comment("<<< General >>>\nEnable permission system. When true, permissions override server config. When false, uses original server config behavior.")
+    @Synchronize
+    public boolean usePermissions = false;
     @Synchronize
     public boolean creativeUnlockAll = true;
     @Synchronize

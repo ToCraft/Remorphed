@@ -57,6 +57,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
+                        // If permissions are disabled, allow command usage for all players
+                        if (!Remorphed.CONFIG.usePermissions) {
+                            return true;
+                        }
                         return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "removeShape") ||
                                PermissionRegistry.getInstance().canUseCommandOnOthers(player, "removeShape");
                     }
@@ -92,6 +96,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
+                        // If permissions are disabled, allow command usage for all players
+                        if (!Remorphed.CONFIG.usePermissions) {
+                            return true;
+                        }
                         return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "addShape") ||
                                PermissionRegistry.getInstance().canUseCommandOnOthers(player, "addShape");
                     }
@@ -128,6 +136,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
+                        // If permissions are disabled, allow command usage for all players
+                        if (!Remorphed.CONFIG.usePermissions) {
+                            return true;
+                        }
                         return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "clearShapes") ||
                                PermissionRegistry.getInstance().canUseCommandOnOthers(player, "clearShapes");
                     }
@@ -149,6 +161,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
+                        // If permissions are disabled, allow command usage for all players
+                        if (!Remorphed.CONFIG.usePermissions) {
+                            return true;
+                        }
                         return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "hasShape") ||
                                PermissionRegistry.getInstance().canUseCommandOnOthers(player, "hasShape");
                     }
@@ -186,6 +202,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
+                            // If permissions are disabled, allow command usage based on permission level
+                            if (!Remorphed.CONFIG.usePermissions) {
+                                return player.hasPermissions(2);
+                            }
                             return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "removeSkin") ||
                                    PermissionRegistry.getInstance().canUseCommandOnOthers(player, "removeSkin");
                         }
@@ -227,6 +247,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
+                            // If permissions are disabled, allow command usage based on permission level
+                            if (!Remorphed.CONFIG.usePermissions) {
+                                return player.hasPermissions(2);
+                            }
                             return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "addSkin") ||
                                    PermissionRegistry.getInstance().canUseCommandOnOthers(player, "addSkin");
                         }
@@ -268,6 +292,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
+                            // If permissions are disabled, allow command usage based on permission level
+                            if (!Remorphed.CONFIG.usePermissions) {
+                                return player.hasPermissions(2);
+                            }
                             return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "clearSkins") ||
                                    PermissionRegistry.getInstance().canUseCommandOnOthers(player, "clearSkins");
                         }
@@ -290,6 +318,10 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
+                            // If permissions are disabled, allow command usage based on permission level
+                            if (!Remorphed.CONFIG.usePermissions) {
+                                return player.hasPermissions(2);
+                            }
                             return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "hasSkin") ||
                                    PermissionRegistry.getInstance().canUseCommandOnOthers(player, "hasSkin");
                         }
@@ -337,9 +369,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static int hasShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasShape")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return 0;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasShape")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return 0;
+                }
             }
         }
         
@@ -360,9 +397,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void removeShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeShape")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeShape")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
@@ -377,9 +419,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void addShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addShape")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addShape")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
@@ -394,9 +441,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void clearShapes(@NotNull CommandSourceStack source, ServerPlayer player) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearShapes")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearShapes")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
@@ -426,9 +478,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void hasSkin(CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasSkin")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasSkin")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
@@ -444,9 +501,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void removeSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeSkin")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeSkin")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
@@ -458,9 +520,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void addSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addSkin")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addSkin")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
@@ -472,9 +539,14 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     private static void clearSkins(@NotNull CommandSourceStack source, ServerPlayer player) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
-            if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearSkins")) {
-                source.sendFailure(Component.translatable("commands.generic.permission"));
-                return;
+            // If permissions are disabled, allow all players to use commands
+            if (!Remorphed.CONFIG.usePermissions) {
+                // Allow all players when permissions are disabled
+            } else {
+                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearSkins")) {
+                    source.sendFailure(Component.translatable("commands.generic.permission"));
+                    return;
+                }
             }
         }
         
