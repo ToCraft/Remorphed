@@ -63,6 +63,10 @@ public class Remorphed {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         //noinspection UnstableApiUsage
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
+        
+        // add LugFong (FugLong) to devs (for adding permisisons and updating menu rendering)
+        //noinspection UnstableApiUsage
+        Walkers.devs.add(UUID.fromString("d014c6c7-1c15-46b7-94e1-a5dd28f9425e"));
 
         VersionChecker.registerModrinthChecker(MODID, "remorphed", Component.literal("Remorphed"));
 

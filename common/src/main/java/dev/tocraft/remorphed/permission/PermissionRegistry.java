@@ -1,6 +1,5 @@
 package dev.tocraft.remorphed.permission;
 
-import dev.tocraft.craftedcore.platform.PlatformData;
 import dev.tocraft.remorphed.Remorphed;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Central registry for permission management across platforms
+ * Uses platform-specific implementations with cleaner reflection
  */
 public class PermissionRegistry {
     

@@ -52,18 +52,8 @@ public class LuckPermsIntegration {
             Method getApiMethod = luckPermsProviderClass.getMethod("get");
             Object luckPermsApi = getApiMethod.invoke(null);
             
-            Remorphed.LOGGER.info("Found LuckPerms API, attempting to register permissions...");
-            
             // Try to get the registry or manager
             Class<?> luckPermsClass = luckPermsApi.getClass();
-            
-            // Log available methods for debugging
-            Remorphed.LOGGER.info("Available LuckPerms API methods:");
-            for (Method method : luckPermsClass.getMethods()) {
-                if (method.getName().contains("Permission") || method.getName().contains("Registry")) {
-                    Remorphed.LOGGER.info("  - {}", method.getName());
-                }
-            }
             
             // For now, just log that we found LuckPerms
             // The actual registration might need a different approach
@@ -91,12 +81,7 @@ public class LuckPermsIntegration {
                     Thread.sleep(10000); // Wait 10 seconds for server to fully load
                     
                     Set<String> permissions = getAllPermissions();
-                    Remorphed.LOGGER.info("Attempting to make {} permissions discoverable by LuckPerms...", permissions.size());
-                    
-                    // The key insight: LuckPerms discovers permissions when they're actually USED
-                    // So we need to make them "known" to the server's permission system
-                    
-                    Remorphed.LOGGER.info("Permissions are now available for assignment in LuckPerms");
+                    Remorphed.LOGGER.info("Making {} permissions discoverable by LuckPerms - permissions are now available for assignment", permissions.size());
                     
                 } catch (Exception e) {
                     Remorphed.LOGGER.warn("Failed to make permissions discoverable: {}", e.getMessage());

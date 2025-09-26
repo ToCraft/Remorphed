@@ -32,5 +32,5 @@ dependencies {
     }
     
     // Fabric Permissions API
-    modApi("me.lucko:fabric-permissions-api:0.3.1")
+    modApi("me.lucko:fabric-permissions-api:${rootProject.properties["fabric_permissions_api_version"]}")
 }
