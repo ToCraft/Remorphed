@@ -1,5 +1,6 @@
 package dev.tocraft.remorphed.permission;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,12 @@ import org.jetbrains.annotations.NotNull;
  * Cross-platform permission manager interface for ReMorphed mod.
  * Implementations handle platform-specific permission checks.
  */
-public interface PermissionManager {
+public class PermissionManager {
+    @ExpectPlatform
+    public static void initialize() {
+        throw new AssertionError();
+    }
+
     
     /**
      * Check if a player has a specific permission node
@@ -16,7 +22,10 @@ public interface PermissionManager {
      * @param permission The permission node to check
      * @return true if the player has the permission
      */
-    boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission);
+    @ExpectPlatform
+    public static boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
+        throw new AssertionError();
+    };
     
     
     /**
@@ -25,7 +34,7 @@ public interface PermissionManager {
      * @param command The command name (e.g., "addShape", "removeShape")
      * @return true if the player can use the command
      */
-    default boolean canUseCommand(@NotNull ServerPlayer player, @NotNull String command) {
+    public static boolean canUseCommand(@NotNull ServerPlayer player, @NotNull String command) {
         return hasPermission(player, "remorphed.command." + command);
     }
     
@@ -35,7 +44,7 @@ public interface PermissionManager {
      * @param command The command name (e.g., "addShape", "removeShape")
      * @return true if the player can use the command on themselves
      */
-    default boolean canUseCommandOnSelf(@NotNull ServerPlayer player, @NotNull String command) {
+    public static boolean canUseCommandOnSelf(@NotNull ServerPlayer player, @NotNull String command) {
         return hasPermission(player, "remorphed.command." + command + ".self") || 
                hasPermission(player, "remorphed.command." + command);
     }
@@ -46,7 +55,7 @@ public interface PermissionManager {
      * @param command The command name (e.g., "addShape", "removeShape")
      * @return true if the player can use the command on others
      */
-    default boolean canUseCommandOnOthers(@NotNull ServerPlayer player, @NotNull String command) {
+    public static boolean canUseCommandOnOthers(@NotNull ServerPlayer player, @NotNull String command) {
         return hasPermission(player, "remorphed.command." + command + ".others") || 
                hasPermission(player, "remorphed.command." + command);
     }
@@ -58,7 +67,7 @@ public interface PermissionManager {
      * @param command The command name (e.g., "addShape", "removeShape")
      * @return true if the player can use the command on the target
      */
-    default boolean canUseCommandOnTarget(@NotNull ServerPlayer executor, @NotNull ServerPlayer target, @NotNull String command) {
+    public static boolean canUseCommandOnTarget(@NotNull ServerPlayer executor, @NotNull ServerPlayer target, @NotNull String command) {
         if (executor.getUUID().equals(target.getUUID())) {
             // Using command on self
             return canUseCommandOnSelf(executor, command);
@@ -74,7 +83,7 @@ public interface PermissionManager {
      * @param entityType The entity type to check
      * @return true if the player can morph into this entity type
      */
-    default boolean canMorphIntoType(@NotNull ServerPlayer player, @NotNull EntityType<?> entityType) {
+    public static boolean canMorphIntoType(@NotNull ServerPlayer player, @NotNull EntityType<?> entityType) {
         String entityKey = EntityType.getKey(entityType).toString();
         return hasPermission(player, "remorphed.type." + entityKey);
     }
@@ -86,7 +95,7 @@ public interface PermissionManager {
      * @param player The player to check
      * @return true if the player can bypass transform lock
      */
-    default boolean canBypassTransformLock(@NotNull ServerPlayer player) {
+    public static boolean canBypassTransformLock(@NotNull ServerPlayer player) {
         return hasPermission(player, "remorphed.bypass.lock");
     }
     
@@ -95,7 +104,7 @@ public interface PermissionManager {
      * @param player The player to check
      * @return true if the player can morph
      */
-    default boolean canMorph(@NotNull ServerPlayer player) {
+    public static boolean canMorph(@NotNull ServerPlayer player) {
         return hasPermission(player, "remorphed.morph");
     }
 }

@@ -3,10 +3,9 @@ package dev.tocraft.remorphed.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.tocraft.craftedcore.event.common.CommandEvents;
-import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.permission.PermissionManager;
-import dev.tocraft.remorphed.permission.PermissionRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -14,6 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,14 +35,11 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayerOrException();
         
-        source.sendSuccess(() -> Component.literal("§6[ReMorphed] §7Triggering permission registration..."), false);
+        source.sendSuccess(() -> Component.literal("§7Triggering permission registration..."), false);
         
         // Run permission registration in a separate thread to avoid blocking
         Thread registrationThread = new Thread(() -> {
             try {
-                // Trigger permission checks to ensure they're registered
-                PermissionManager manager = PermissionRegistry.getInstance();
-                
                 // Check ALL permissions to ensure they're all registered
                 // This is the most comprehensive approach
                 Set<String> allPermissions = getAllPermissions();
@@ -51,7 +48,7 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
                 
                 for (String permission : allPermissions) {
                     try {
-                        manager.hasPermission(player, permission);
+                        PermissionManager.hasPermission(player, permission);
                         checked++;
                         Thread.sleep(10); // Small delay between checks
                         
@@ -59,7 +56,7 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
                         if (checked % 100 == 0 && checked > 0) {
                             final int currentChecked = checked;
                             source.getServer().execute(() -> {
-                                source.sendSuccess(() -> Component.literal("§6[ReMorphed] §7Checked " + currentChecked + "/" + totalPermissions + " permissions..."), false);
+                                source.sendSuccess(() -> Component.literal("§7Checked " + currentChecked + "/" + totalPermissions + " permissions..."), false);
                             });
                         }
                     } catch (Exception e) {
@@ -69,12 +66,12 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
                 
                 // Send success message
                 source.getServer().execute(() -> {
-                    source.sendSuccess(() -> Component.literal("§6[ReMorphed] §aPermission registration completed! Check your LuckPerms GUI."), false);
+                    source.sendSuccess(() -> Component.literal("§aPermission registration completed! Check your LuckPerms GUI."), false);
                 });
                 
             } catch (Exception e) {
                 source.getServer().execute(() -> {
-                    source.sendFailure(Component.literal("§6[ReMorphed] §cPermission registration failed: " + e.getMessage()));
+                    source.sendFailure(Component.literal("§cPermission registration failed: " + e.getMessage()));
                 });
             }
         });
@@ -84,14 +81,14 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         
         return 1;
     }
-    
-    private Set<String> getAllPermissions() {
+
+    private static @NotNull Set<String> getAllPermissions() {
         Set<String> permissions = new HashSet<>();
         
         // Core permissions
         permissions.add("remorphed.morph");
         permissions.add("remorphed.bypass.lock");
-        
+
         // Command permissions (basic)
         permissions.add("remorphed.command.addShape");
         permissions.add("remorphed.command.removeShape");
@@ -101,7 +98,7 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         permissions.add("remorphed.command.removeSkin");
         permissions.add("remorphed.command.clearSkins");
         permissions.add("remorphed.command.hasSkin");
-        
+
         // Command permissions (.self variants)
         permissions.add("remorphed.command.addShape.self");
         permissions.add("remorphed.command.removeShape.self");
@@ -111,7 +108,7 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         permissions.add("remorphed.command.removeSkin.self");
         permissions.add("remorphed.command.clearSkins.self");
         permissions.add("remorphed.command.hasSkin.self");
-        
+
         // Command permissions (.others variants)
         permissions.add("remorphed.command.addShape.others");
         permissions.add("remorphed.command.removeShape.others");
@@ -125,9 +122,7 @@ public class RegisterPermissionsCommand implements CommandEvents.CommandRegistra
         // Entity type permissions for all registered entities
         BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
             ResourceLocation key = EntityType.getKey(entityType);
-            if (key != null) {
-                permissions.add("remorphed.type." + key.toString());
-            }
+            permissions.add("remorphed.type." + key);
         });
         
         

@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import dev.tocraft.craftedcore.network.ModernNetworking;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
-import dev.tocraft.remorphed.permission.PermissionRegistry;
+import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
@@ -54,12 +54,13 @@ public class NetworkHandler {
         }
     }
 
-    private static void handlePermissionCheckPacket(ModernNetworking.Context context, CompoundTag tag) {
+    @SuppressWarnings("ConstantValue")
+    private static void handlePermissionCheckPacket(ModernNetworking.@NotNull Context context, @NotNull CompoundTag tag) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         String permission = tag.getString("permission").orElse("");
         
         // Only check permissions if permissions are enabled
-        boolean hasPermission = !Remorphed.CONFIG.usePermissions || PermissionRegistry.getInstance().hasPermission(player, permission);
+        boolean hasPermission = !Remorphed.CONFIG.usePermissions || PermissionManager.hasPermission(player, permission);
         
         // Send response back to client
         CompoundTag response = new CompoundTag();

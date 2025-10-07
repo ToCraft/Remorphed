@@ -11,6 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,13 +30,11 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
                     listAllPermissions(context.getSource());
                     return 1;
                 }).build();
-        
-        dispatcher.getRoot().addChild(listPermissions);
     }
     
-    private void listAllPermissions(CommandSourceStack source) {
-        List<String> permissions = getAllPermissions();
-        
+    private static void listAllPermissions(@NotNull CommandSourceStack source) {
+        int size = countPermissions();
+
         source.sendSuccess(() -> Component.literal("§6=== ReMorphed Permissions List ==="), false);
         source.sendSuccess(() -> Component.literal("§eCopy and paste these into LuckPerms:"), false);
         source.sendSuccess(() -> Component.literal(""), false);
@@ -68,37 +67,30 @@ public class ListPermissionsCommand implements CommandEvents.CommandRegistration
         source.sendSuccess(() -> Component.literal("§f/lp group admin permission set remorphed.command.* true §7# All commands"), false);
         
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§e§lTotal: " + permissions.size() + " permissions available"), false);
+        source.sendSuccess(() -> Component.literal("§e§lTotal: " + size + " permissions available"), false);
         source.sendSuccess(() -> Component.literal("§7Use these exact commands in your server console or LuckPerms web editor"), false);
     }
     
-    private List<String> getAllPermissions() {
-        List<String> permissions = new ArrayList<>();
+    private static int countPermissions() {
+        int i = 0;
         
         // Core permissions
-        permissions.add("remorphed.morph");
-        permissions.add("remorphed.bypass.lock");
+        i++;   // remorphed.morph
+        i++;   // remorphed.bypass.lock
         
         // Command permissions
-        permissions.add("remorphed.command.addShape");
-        permissions.add("remorphed.command.removeShape");
-        permissions.add("remorphed.command.clearShapes");
-        permissions.add("remorphed.command.hasShape");
-        permissions.add("remorphed.command.addSkin");
-        permissions.add("remorphed.command.removeSkin");
-        permissions.add("remorphed.command.clearSkins");
-        permissions.add("remorphed.command.hasSkin");
+        i++;   // remorphed.command.addShape
+        i++;   // remorphed.command.removeShape
+        i++;   // remorphed.command.clearShapes
+        i++;   // remorphed.command.hasShape
+        i++;   // remorphed.command.addSkin
+        i++;   // remorphed.command.removeSkin
+        i++;   // remorphed.command.clearSkins
+        i++;   // remorphed.command.hasSkin
         
         // Entity type permissions for all registered entities
-        BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
-            ResourceLocation key = EntityType.getKey(entityType);
-            if (key != null) {
-                permissions.add("remorphed.type." + key.toString());
-            }
-        });
+        i += BuiltInRegistries.ENTITY_TYPE.size();
         
-        
-        Collections.sort(permissions);
-        return permissions;
+        return i;
     }
 }

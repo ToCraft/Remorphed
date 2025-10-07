@@ -18,7 +18,7 @@ import dev.tocraft.remorphed.handler.SwapShapeCallback;
 import dev.tocraft.remorphed.handler.UnlockShapeCallback;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
-import dev.tocraft.remorphed.permission.PermissionRegistry;
+import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
@@ -52,7 +52,7 @@ public class Remorphed {
 
     public void initialize() {
         // Initialize permission system
-        PermissionRegistry.initialize();
+        PermissionManager.initialize();
         
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         ShapeEvents.SWAP_SHAPE.register(new SwapShapeCallback());
@@ -97,17 +97,17 @@ public class Remorphed {
         // If permissions are enabled, use permission-based logic
         if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
             // Check basic morph permission
-            if (!PermissionRegistry.getInstance().canMorph(serverPlayer)) {
+            if (!PermissionManager.canMorph(serverPlayer)) {
                 return false;
             }
             
             // Check entity type specific permission - this takes precedence over creative permissions
-            if (type != null && !PermissionRegistry.getInstance().canMorphIntoType(serverPlayer, type.getEntityType())) {
+            if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type.getEntityType())) {
                 return false;
             }
             
             // Check bypass transform lock permission
-            if (Remorphed.CONFIG.lockTransform && !PermissionRegistry.getInstance().canBypassTransformLock(serverPlayer)) {
+            if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
                 return false;
             }
             
@@ -128,17 +128,17 @@ public class Remorphed {
         // If permissions are enabled, use permission-based logic
         if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
             // Check basic morph permission
-            if (!PermissionRegistry.getInstance().canMorph(serverPlayer)) {
+            if (!PermissionManager.canMorph(serverPlayer)) {
                 return false;
             }
             
             // Check entity type specific permission - this takes precedence over creative permissions
-            if (type != null && !PermissionRegistry.getInstance().canMorphIntoType(serverPlayer, type)) {
+            if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type)) {
                 return false;
             }
             
             // Check bypass transform lock permission
-            if (Remorphed.CONFIG.lockTransform && !PermissionRegistry.getInstance().canBypassTransformLock(serverPlayer)) {
+            if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
                 return false;
             }
             

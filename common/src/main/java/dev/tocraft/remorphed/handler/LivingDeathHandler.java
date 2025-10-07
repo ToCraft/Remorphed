@@ -3,7 +3,7 @@ package dev.tocraft.remorphed.handler;
 import dev.tocraft.craftedcore.event.common.EntityEvents;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
-import dev.tocraft.remorphed.permission.PermissionRegistry;
+import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
@@ -15,13 +15,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 public class LivingDeathHandler implements EntityEvents.LivingDeath {
+    @SuppressWarnings("ConstantValue")
     @Override
     public InteractionResult die(LivingEntity entity, DamageSource source) {
         if (!(entity instanceof Player) && source.getEntity() instanceof ServerPlayer killer) {
             ShapeType<?> type = ShapeType.from(entity);
             if (type != null && (!Walkers.CONFIG.blacklistPreventsUnlocking || !Walkers.isPlayerBlacklisted(killer.getUUID()))) {
                 // Check if player has permission to unlock this entity type (only if permissions are enabled)
-                boolean canUnlock = !Remorphed.CONFIG.usePermissions || PermissionRegistry.getInstance().canMorphIntoType(killer, type.getEntityType());
+                boolean canUnlock = !Remorphed.CONFIG.usePermissions || PermissionManager.canMorphIntoType(killer, type.getEntityType());
                 if (canUnlock) {
                     PlayerMorph.addKill(killer, type);
 
@@ -37,9 +38,9 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
                 // For now, we'll allow player kills if the player has any skin-related permission
                 // This could be made more specific in the future if needed
                 // Only check permissions if permissions are enabled
-                boolean canUnlockPlayer = !Remorphed.CONFIG.usePermissions || 
-                    PermissionRegistry.getInstance().hasPermission(killer, "remorphed.command.addSkin") || 
-                    PermissionRegistry.getInstance().hasPermission(killer, "remorphed.*");
+                boolean canUnlockPlayer = !Remorphed.CONFIG.usePermissions ||
+                    PermissionManager.hasPermission(killer, "remorphed.command.addSkin") ||
+                    PermissionManager.hasPermission(killer, "remorphed.*");
                 if (canUnlockPlayer) {
                     PlayerMorph.addPlayerKill(killer, entity.getUUID());
                 }

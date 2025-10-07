@@ -6,7 +6,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.tocraft.craftedcore.event.common.CommandEvents;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
-import dev.tocraft.remorphed.permission.PermissionRegistry;
 import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
@@ -38,6 +37,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 // TODO: Throw when no Player can be found
+@SuppressWarnings("UnstableApiUsage")
 public class RemorphedCommand implements CommandEvents.CommandRegistration {
     
     @Override
@@ -61,8 +61,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         if (!Remorphed.CONFIG.usePermissions) {
                             return true;
                         }
-                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "removeShape") ||
-                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "removeShape");
+                        return PermissionManager.canUseCommandOnSelf(player, "removeShape") ||
+                               PermissionManager.canUseCommandOnOthers(player, "removeShape");
                     }
                     return false;
                 })
@@ -100,8 +100,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         if (!Remorphed.CONFIG.usePermissions) {
                             return true;
                         }
-                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "addShape") ||
-                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "addShape");
+                        return PermissionManager.canUseCommandOnSelf(player, "addShape") ||
+                               PermissionManager.canUseCommandOnOthers(player, "addShape");
                     }
                     return false;
                 })
@@ -140,8 +140,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         if (!Remorphed.CONFIG.usePermissions) {
                             return true;
                         }
-                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "clearShapes") ||
-                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "clearShapes");
+                        return PermissionManager.canUseCommandOnSelf(player, "clearShapes") ||
+                               PermissionManager.canUseCommandOnOthers(player, "clearShapes");
                     }
                     return false;
                 })
@@ -165,18 +165,16 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                         if (!Remorphed.CONFIG.usePermissions) {
                             return true;
                         }
-                        return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "hasShape") ||
-                               PermissionRegistry.getInstance().canUseCommandOnOthers(player, "hasShape");
+                        return PermissionManager.canUseCommandOnSelf(player, "hasShape") ||
+                               PermissionManager.canUseCommandOnOthers(player, "hasShape");
                     }
                     return false;
                 })
                 .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("shape", ResourceArgument.resource(registry, Registries.ENTITY_TYPE))
-                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> {
-                                    return hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
-                                        EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
-                                        null);
-                                }).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+                                .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES)).executes(context -> hasShape(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                    EntityType.getKey(ResourceArgument.getSummonableEntityType(context, "shape").value()),
+                                    null)).then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
                                         .executes(context -> {
                                             CompoundTag nbt = CompoundTagArgument.getCompoundTag(context, "nbt");
 
@@ -206,8 +204,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                             if (!Remorphed.CONFIG.usePermissions) {
                                 return player.hasPermissions(2);
                             }
-                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "removeSkin") ||
-                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "removeSkin");
+                            return PermissionManager.canUseCommandOnSelf(player, "removeSkin") ||
+                                   PermissionManager.canUseCommandOnOthers(player, "removeSkin");
                         }
                         return false;
                     })
@@ -251,8 +249,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                             if (!Remorphed.CONFIG.usePermissions) {
                                 return player.hasPermissions(2);
                             }
-                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "addSkin") ||
-                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "addSkin");
+                            return PermissionManager.canUseCommandOnSelf(player, "addSkin") ||
+                                   PermissionManager.canUseCommandOnOthers(player, "addSkin");
                         }
                         return false;
                     })
@@ -296,8 +294,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                             if (!Remorphed.CONFIG.usePermissions) {
                                 return player.hasPermissions(2);
                             }
-                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "clearSkins") ||
-                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "clearSkins");
+                            return PermissionManager.canUseCommandOnSelf(player, "clearSkins") ||
+                                   PermissionManager.canUseCommandOnOthers(player, "clearSkins");
                         }
                         return false;
                     })
@@ -322,8 +320,8 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                             if (!Remorphed.CONFIG.usePermissions) {
                                 return player.hasPermissions(2);
                             }
-                            return PermissionRegistry.getInstance().canUseCommandOnSelf(player, "hasSkin") ||
-                                   PermissionRegistry.getInstance().canUseCommandOnOthers(player, "hasSkin");
+                            return PermissionManager.canUseCommandOnSelf(player, "hasSkin") ||
+                                   PermissionManager.canUseCommandOnOthers(player, "hasSkin");
                         }
                         return false;
                     })
@@ -373,7 +371,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasShape")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "hasShape")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return 0;
                 }
@@ -401,7 +399,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeShape")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "removeShape")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
@@ -423,7 +421,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addShape")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "addShape")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
@@ -445,7 +443,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearShapes")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "clearShapes")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
@@ -482,7 +480,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "hasSkin")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "hasSkin")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
@@ -505,7 +503,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "removeSkin")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "removeSkin")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
@@ -524,7 +522,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "addSkin")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "addSkin")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
@@ -543,7 +541,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             if (!Remorphed.CONFIG.usePermissions) {
                 // Allow all players when permissions are disabled
             } else {
-                if (!PermissionRegistry.getInstance().canUseCommandOnTarget(executor, player, "clearSkins")) {
+                if (!PermissionManager.canUseCommandOnTarget(executor, player, "clearSkins")) {
                     source.sendFailure(Component.translatable("commands.generic.permission"));
                     return;
                 }
