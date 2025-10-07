@@ -10,9 +10,6 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("unused")
 public class PermissionManagerImpl {
-    public static void initialize() {
-    }
-    
     public static boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
         if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
             // Use Fabric Permissions API

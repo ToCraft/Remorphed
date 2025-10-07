@@ -20,7 +20,7 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
             if (Remorphed.CONFIG.usePermissions && !PermissionManager.canMorphIntoType(player, type.getEntityType())) {
                 return InteractionResult.FAIL;
             }
-            
+
             // check if the walkers unlock mechanic should be used
             if (!Remorphed.CONFIG.lockTransform && Remorphed.CONFIG.unlockFriendlyNormal) {
                 LivingEntity entityToBeUnlocked = type.create(player.level(), player);

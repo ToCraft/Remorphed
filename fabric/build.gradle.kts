@@ -1,5 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
     id("dev.tocraft.modmaster.fabric")
 }
@@ -30,7 +28,7 @@ dependencies {
     modApi("dev.tocraft:skinshifter-fabric:${rootProject.properties["skinshifter_version"]}") {
         exclude("dev.tocraft", "craftedcore")
     }
-    
+
     // Fabric Permissions API
     modApi("me.lucko:fabric-permissions-api:${rootProject.properties["fabric_permissions_api_version"]}")
 }

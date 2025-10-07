@@ -9,8 +9,6 @@ import dev.tocraft.craftedcore.network.ModernNetworking;
 import dev.tocraft.craftedcore.platform.PlatformData;
 import dev.tocraft.craftedcore.platform.VersionChecker;
 import dev.tocraft.remorphed.command.RemorphedCommand;
-import dev.tocraft.remorphed.command.ListPermissionsCommand;
-import dev.tocraft.remorphed.command.RegisterPermissionsCommand;
 import dev.tocraft.remorphed.config.RemorphedConfig;
 import dev.tocraft.remorphed.handler.LivingDeathHandler;
 import dev.tocraft.remorphed.handler.PlayerRespawnHandler;
@@ -51,9 +49,7 @@ public class Remorphed {
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {
-        // Initialize permission system
-        PermissionManager.initialize();
-        
+
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         ShapeEvents.SWAP_SHAPE.register(new SwapShapeCallback());
         if (!CONFIG.unlockFriendlyNormal) {
@@ -63,7 +59,7 @@ public class Remorphed {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         //noinspection UnstableApiUsage
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
-        
+
         // add LugFong (FugLong) to devs (for adding permisisons and updating menu rendering)
         //noinspection UnstableApiUsage
         Walkers.devs.add(UUID.fromString("d014c6c7-1c15-46b7-94e1-a5dd28f9425e"));
@@ -98,26 +94,26 @@ public class Remorphed {
             if (!PermissionManager.canMorph(serverPlayer)) {
                 return false;
             }
-            
+
             // Check entity type specific permission - this takes precedence over creative permissions
             if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type.getEntityType())) {
                 return false;
             }
-            
+
             // Check bypass transform lock permission
             if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
                 return false;
             }
-            
+
             // Check if player can use all shapes (config-based creative logic)
             if (canUseEveryShape(player)) {
                 return true;
             }
-            
+
             // For permission-enabled players without creative permission, check kill requirements
             return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
         }
-        
+
         // If permissions are disabled, use original config-based behavior
         return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
     }
@@ -129,26 +125,26 @@ public class Remorphed {
             if (!PermissionManager.canMorph(serverPlayer)) {
                 return false;
             }
-            
+
             // Check entity type specific permission - this takes precedence over creative permissions
             if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type)) {
                 return false;
             }
-            
+
             // Check bypass transform lock permission
             if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
                 return false;
             }
-            
+
             // Check if player can use all shapes (config-based creative logic)
             if (canUseEveryShape(player)) {
                 return true;
             }
-            
+
             // For permission-enabled players without creative permission, check kill requirements
             return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
         }
-        
+
         // If permissions are disabled, use original config-based behavior
         return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
     }
@@ -173,7 +169,7 @@ public class Remorphed {
     public static int getKillToUnlock(EntityType<?> type) {
         return Remorphed.CONFIG.killToUnlockByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killToUnlock);
     }
-    
+
     public static int getKillToUnlock(Player player, EntityType<?> type) {
         return getKillToUnlock(type);
     }
@@ -181,15 +177,15 @@ public class Remorphed {
     public static int getKillValue(EntityType<?> type) {
         return Remorphed.CONFIG.killValueByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killValue);
     }
-    
+
     public static int getKillValue(Player player, EntityType<?> type) {
         return getKillValue(type);
     }
-    
+
     public static int getPlayerKillRequirement(Player player) {
         return CONFIG.killToUnlockPlayers;
     }
-    
+
     public static int getPlayerKillValue(Player player) {
         return CONFIG.playerKillValue;
     }

@@ -346,7 +346,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             }
 
             // check and remove 2nd Shape if necessary
-            //noinspection ConstantValue
             if ((Object) this instanceof ServerPlayer serverPlayer && !Remorphed.canUseShape(serverPlayer, type)) {
                 PlayerShapeChanger.change2ndShape(serverPlayer, null);
             }

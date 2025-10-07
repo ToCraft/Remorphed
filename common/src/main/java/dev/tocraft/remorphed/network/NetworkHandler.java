@@ -58,10 +58,10 @@ public class NetworkHandler {
     private static void handlePermissionCheckPacket(ModernNetworking.@NotNull Context context, @NotNull CompoundTag tag) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         String permission = tag.getString("permission").orElse("");
-        
+
         // Only check permissions if permissions are enabled
         boolean hasPermission = !Remorphed.CONFIG.usePermissions || PermissionManager.hasPermission(player, permission);
-        
+
         // Send response back to client
         CompoundTag response = new CompoundTag();
         response.putString("permission", permission);

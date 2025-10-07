@@ -20,10 +20,10 @@ public class PermissionManagerImpl {
 
     public static boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
         // Get or create permission node
-        PermissionNode<Boolean> node = PERMISSION_NODES.computeIfAbsent(permission, 
-            key -> new PermissionNode<>("remorphed", key, PermissionTypes.BOOLEAN, 
-                (player1, playerUUID, context) -> player1 != null && player1.hasPermissions(2)));
-        
+        PermissionNode<Boolean> node = PERMISSION_NODES.computeIfAbsent(permission,
+                key -> new PermissionNode<>("remorphed", key, PermissionTypes.BOOLEAN,
+                        (player1, playerUUID, context) -> player1 != null && player1.hasPermissions(2)));
+
         // Check permission using NeoForge PermissionAPI
         return PermissionAPI.getPermission(player, node);
     }
