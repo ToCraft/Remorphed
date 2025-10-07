@@ -46,6 +46,9 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(Remorphed.MODID)
                 .requires(source -> source.hasPermission(0)).build();
 
+        rootNode.addChild(ListPermissionsCommand.createNode());
+        rootNode.addChild(RegisterPermissionsCommand.createNode());
+
         /*
          * Used to remove an unlocked shape of the specified Player.
          */

@@ -22,16 +22,16 @@ import java.util.Set;
  * Command to manually trigger permission registration
  * This is useful for admins to ensure permissions are visible in LuckPerms GUI
  */
-public class RegisterPermissionsCommand implements CommandEvents.CommandRegistration {
-    
-    @Override
-    public void register(CommandDispatcher<CommandSourceStack> dispatcher, net.minecraft.commands.CommandBuildContext registry, Commands.CommandSelection selection) {
-        dispatcher.register(Commands.literal("remorphed-register-permissions")
-            .requires(source -> source.hasPermission(2))
-            .executes(this::execute));
+public class RegisterPermissionsCommand {
+
+    public static LiteralCommandNode<CommandSourceStack> createNode() {
+        return Commands.literal("register-permissions")
+                .requires(source -> source.hasPermission(2))
+                .executes(RegisterPermissionsCommand::execute)
+                .build();
     }
-    
-    private int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+
+    private static int execute(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayerOrException();
         

@@ -75,8 +75,6 @@ public class Remorphed {
         NetworkHandler.registerPacketReceiver();
 
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
-        CommandEvents.REGISTRATION.register(new ListPermissionsCommand());
-        CommandEvents.REGISTRATION.register(new RegisterPermissionsCommand());
         EntityEvents.LIVING_DEATH.register(new LivingDeathHandler());
         PlayerEvents.PLAYER_RESPAWN.register(new PlayerRespawnHandler());
 

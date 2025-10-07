@@ -20,11 +20,10 @@ import java.util.List;
 /**
  * Simple command to list all ReMorphed permissions for easy copy-paste into LuckPerms
  */
-public class ListPermissionsCommand implements CommandEvents.CommandRegistration {
+public class ListPermissionsCommand {
     
-    @Override
-    public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registry, Commands.CommandSelection selection) {
-        LiteralCommandNode<CommandSourceStack> listPermissions = Commands.literal("remorphed-list-permissions")
+    public static LiteralCommandNode<CommandSourceStack> createNode() {
+        return Commands.literal("list-permissions")
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> {
                     listAllPermissions(context.getSource());
