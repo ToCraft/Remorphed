@@ -37,15 +37,13 @@ separately!**
 4. Configure permissions using your permission plugin (LuckPerms, etc.)
 
 ### For NeoForge Servers
-
-Permissions work automatically once enabled. If not, run `/remorphed register-permissions` once as an admin.
+Permissions work automatically once enabled.
 
 ### For Fabric Servers
 
 **REQUIRED**: Install [Fabric Permissions API](https://modrinth.com/mod/fabric-permissions-api) mod first!
 
-After installing the API mod and enabling permissions, run `/remorphed register-permissions` as an admin to make
-permissions visible in LuckPerms GUI.
+After installing the API mod and enabling permissions, permissions will be automatically discovered by LuckPerms when first used. No manual registration needed!
 
 ### How Permissions Work
 
@@ -148,15 +146,7 @@ Control access to specific mob types for both unlocking and morphing:
 
 ## Commands
 
-### `/remorphed register-permissions`
-
-Manually registers all permissions with LuckPerms. **Required for Fabric servers** to make permissions visible in the
-GUI.
-
-**Note**: Only server operators (OP level 2+) can run this command.
-
-### `/remorphed list-permissions`
-
+### `/remorphed-list-permissions`
 Lists all available permissions with copy-paste LuckPerms commands.
 
 **Note**: Only server operators (OP level 2+) can run this command.
@@ -242,7 +232,7 @@ Lists all available permissions with copy-paste LuckPerms commands.
 6. **Can't use command on self**: Check `remorphed.command.<command>.self` permission
 7. **Can't use command on others**: Check `remorphed.command.<command>.others` permission
 8. **"Selector not allowed" error**: Grant `minecraft.selector.*` permission (works with Vanilla Permissions mod)
-9. **Permissions not showing in LuckPerms GUI**: Run `/remorphed register-permissions`
+9. **Permissions not showing in LuckPerms GUI**: Permissions are automatically discovered when first used. If they don't appear, ensure Fabric Permissions API is installed and restart the server.
 10. **Can't transform despite permissions**: Check if you have the required entity type permissions
 
 ### Debug Commands
@@ -252,7 +242,7 @@ Lists all available permissions with copy-paste LuckPerms commands.
 ### Platform Differences
 
 - **NeoForge**: Permissions work automatically with built-in PermissionAPI
-- **Fabric**: Requires `/remorphed register-permissions` command for GUI visibility
+- **Fabric**: Permissions are automatically discovered when first used (requires Fabric Permissions API mod)
 
 ## Default Behavior
 

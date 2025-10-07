@@ -9,6 +9,7 @@ import dev.tocraft.craftedcore.network.ModernNetworking;
 import dev.tocraft.craftedcore.platform.PlatformData;
 import dev.tocraft.craftedcore.platform.VersionChecker;
 import dev.tocraft.remorphed.command.RemorphedCommand;
+import dev.tocraft.remorphed.command.ListPermissionsCommand;
 import dev.tocraft.remorphed.config.RemorphedConfig;
 import dev.tocraft.remorphed.handler.LivingDeathHandler;
 import dev.tocraft.remorphed.handler.PlayerRespawnHandler;
@@ -71,6 +72,7 @@ public class Remorphed {
         NetworkHandler.registerPacketReceiver();
 
         CommandEvents.REGISTRATION.register(new RemorphedCommand());
+        CommandEvents.REGISTRATION.register(new ListPermissionsCommand());
         EntityEvents.LIVING_DEATH.register(new LivingDeathHandler());
         PlayerEvents.PLAYER_RESPAWN.register(new PlayerRespawnHandler());
 
