@@ -146,7 +146,7 @@ Control access to specific mob types for both unlocking and morphing:
 
 ## Commands
 
-### `/remorphed-list-permissions`
+### `/remorphed list-permissions`
 Lists all available permissions with copy-paste LuckPerms commands.
 
 **Note**: Only server operators (OP level 2+) can run this command.

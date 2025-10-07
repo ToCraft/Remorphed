@@ -8,14 +8,9 @@ import org.jetbrains.annotations.NotNull;
  * Clean Fabric implementation of the PermissionManager using Fabric Permissions API
  * Based on the clean approach used in OldSchoolJail
  */
-public class FabricPermissionManager implements PermissionManager {
+public class FabricPermissionManager {
     
-    public FabricPermissionManager() {
-        // No initialization needed - permissions are discovered naturally when first checked
-    }
-    
-    @Override
-    public boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
+    public static boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
         // Try to use Fabric Permissions API if available
         try {
             return Permissions.check(player, permission, 2);

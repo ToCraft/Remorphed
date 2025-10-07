@@ -47,7 +47,6 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .requires(source -> source.hasPermission(0)).build();
 
         rootNode.addChild(ListPermissionsCommand.createNode());
-        rootNode.addChild(RegisterPermissionsCommand.createNode());
 
         /*
          * Used to remove an unlocked shape of the specified Player.
