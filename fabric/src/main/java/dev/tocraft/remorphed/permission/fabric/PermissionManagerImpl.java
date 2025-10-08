@@ -6,17 +6,17 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Fabric implementation of the PermissionManager using Fabric Permissions API
+ * Clean Fabric implementation of the PermissionManager using Fabric Permissions API
+ * Based on the clean approach used in OldSchoolJail
  */
 @SuppressWarnings("unused")
 public class PermissionManagerImpl {
     public static boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
-        if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
-            // Use Fabric Permissions API
-            // Default to false (no permission) if no permission plugin is handling it
-            return Permissions.check(player, permission, false);
-        } else {
-            // Fallback: check if player has operator permissions (level 2+)
+        // Try to use Fabric Permissions API if available
+        try {
+            return Permissions.check(player, permission, 2);
+        } catch (Throwable e) {
+            // Permissions API not available, fall back to OP level 2
             return player.hasPermissions(2);
         }
     }
