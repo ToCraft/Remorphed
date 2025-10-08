@@ -2,6 +2,7 @@ remorphed 7.1
 ================
 
 - **add permission support** by FugLong
+- fix broken counter in menu
 
 remorphed 7.0
 ================

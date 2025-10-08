@@ -58,7 +58,6 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
         if (Remorphed.displayDataInMenu) {
             final int iconS = 16; // traits are always 16x16 (since that's the item size)
 
-
             // Render Trait Icons first
             int row = 0;
             int column = 0;

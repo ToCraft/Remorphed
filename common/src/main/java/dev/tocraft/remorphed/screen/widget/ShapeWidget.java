@@ -17,7 +17,7 @@ public abstract class ShapeWidget extends AbstractButton {
     private final int availability;
 
     public ShapeWidget(float x, float y, float width, float height, Screen parent, boolean isFavorite, boolean isCurrent, int availability) {
-        super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty(""));
+        super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty("WOLF"));
         this.parent = parent;
         this.isFavorite = isFavorite;
         this.isCurrent = isCurrent;
@@ -53,10 +53,11 @@ public abstract class ShapeWidget extends AbstractButton {
                 guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/focused.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
 
+            // render availability counter
             if (Remorphed.displayDataInMenu && availability != -1) {
                 String s = String.valueOf(availability);
                 int w = parent.getFont().width(s);
-                guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), 0xFFFFFF, false);
+                guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), -1, false);
             }
 
             renderShape(guiGraphics);
