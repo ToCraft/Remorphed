@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * Cross-platform permission manager interface for ReMorphed mod.
  * Implementations handle platform-specific permission checks.
  */
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class PermissionManager {
 
     /**
@@ -44,7 +45,7 @@ public class PermissionManager {
      */
     public static boolean canUseCommandOnSelf(@NotNull ServerPlayer player, @NotNull String command) {
         return hasPermission(player, "command." + command + ".self") ||
-                hasPermission(player, "command." + command);
+                canUseCommand(player, command);
     }
 
     /**
@@ -56,7 +57,7 @@ public class PermissionManager {
      */
     public static boolean canUseCommandOnOthers(@NotNull ServerPlayer player, @NotNull String command) {
         return hasPermission(player, "command." + command + ".others") ||
-                hasPermission(player, "command." + command);
+                canUseCommand(player, command);
     }
 
     /**
