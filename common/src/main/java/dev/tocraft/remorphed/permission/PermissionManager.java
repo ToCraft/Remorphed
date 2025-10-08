@@ -32,7 +32,7 @@ public class PermissionManager {
      * @return true if the player can use the command
      */
     public static boolean canUseCommand(@NotNull ServerPlayer player, @NotNull String command) {
-        return hasPermission(player, "remorphed.command." + command);
+        return hasPermission(player, "command." + command);
     }
 
     /**
@@ -43,8 +43,8 @@ public class PermissionManager {
      * @return true if the player can use the command on themselves
      */
     public static boolean canUseCommandOnSelf(@NotNull ServerPlayer player, @NotNull String command) {
-        return hasPermission(player, "remorphed.command." + command + ".self") ||
-                hasPermission(player, "remorphed.command." + command);
+        return hasPermission(player, "command." + command + ".self") ||
+                hasPermission(player, "command." + command);
     }
 
     /**
@@ -55,8 +55,8 @@ public class PermissionManager {
      * @return true if the player can use the command on others
      */
     public static boolean canUseCommandOnOthers(@NotNull ServerPlayer player, @NotNull String command) {
-        return hasPermission(player, "remorphed.command." + command + ".others") ||
-                hasPermission(player, "remorphed.command." + command);
+        return hasPermission(player, "command." + command + ".others") ||
+                hasPermission(player, "command." + command);
     }
 
     /**
@@ -86,7 +86,7 @@ public class PermissionManager {
      */
     public static boolean canMorphIntoType(@NotNull ServerPlayer player, @NotNull EntityType<?> entityType) {
         String entityKey = EntityType.getKey(entityType).toString();
-        return hasPermission(player, "remorphed.type." + entityKey);
+        return hasPermission(player, "type." + entityKey);
     }
 
 
@@ -97,7 +97,7 @@ public class PermissionManager {
      * @return true if the player can bypass transform lock
      */
     public static boolean canBypassTransformLock(@NotNull ServerPlayer player) {
-        return hasPermission(player, "remorphed.bypass.lock");
+        return hasPermission(player, "bypass.lock");
     }
 
     /**
@@ -107,6 +107,6 @@ public class PermissionManager {
      * @return true if the player can morph
      */
     public static boolean canMorph(@NotNull ServerPlayer player) {
-        return hasPermission(player, "remorphed.morph");
+        return hasPermission(player, "morph");
     }
 }

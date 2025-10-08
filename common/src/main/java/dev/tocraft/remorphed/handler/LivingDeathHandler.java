@@ -39,8 +39,8 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
                 // This could be made more specific in the future if needed
                 // Only check permissions if permissions are enabled
                 boolean canUnlockPlayer = !Remorphed.CONFIG.usePermissions ||
-                        PermissionManager.hasPermission(killer, "remorphed.command.addSkin") ||
-                        PermissionManager.hasPermission(killer, "remorphed.*");
+                        PermissionManager.hasPermission(killer, "command.addSkin") ||
+                        PermissionManager.hasPermission(killer, "*");
                 if (canUnlockPlayer) {
                     PlayerMorph.addPlayerKill(killer, entity.getUUID());
                 }
