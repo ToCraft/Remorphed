@@ -16,6 +16,7 @@ import dev.tocraft.remorphed.handler.SwapShapeCallback;
 import dev.tocraft.remorphed.handler.UnlockShapeCallback;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
+import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
@@ -48,6 +49,7 @@ public class Remorphed {
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {
+
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         ShapeEvents.SWAP_SHAPE.register(new SwapShapeCallback());
         if (!CONFIG.unlockFriendlyNormal) {
@@ -57,6 +59,10 @@ public class Remorphed {
         // add DarkShadow_2k to devs (for creating the special shape icon and concepts)
         //noinspection UnstableApiUsage
         Walkers.devs.add(UUID.fromString("74b6d9b3-c8c1-40db-ab82-ccc290d1aa03"));
+
+        // add LugFong (FugLong) to devs (for adding permisisons and updating menu rendering)
+        //noinspection UnstableApiUsage
+        Walkers.devs.add(UUID.fromString("d014c6c7-1c15-46b7-94e1-a5dd28f9425e"));
 
         VersionChecker.registerModrinthChecker(MODID, "remorphed", Component.literal("Remorphed"));
 
@@ -77,43 +83,111 @@ public class Remorphed {
     }
 
     public static boolean canUseEveryShape(@NotNull Player player) {
+        // Always use config-based creative logic (creative permission removed)
         return player.isCreative() && CONFIG.creativeUnlockAll;
     }
 
     public static boolean canUseShape(Player player, ShapeType<?> type) {
-        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type.getEntityType()));
+        // If permissions are enabled, use permission-based logic
+        if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
+            // Check basic morph permission
+            if (!PermissionManager.canMorph(serverPlayer)) {
+                return false;
+            }
+
+            // Check entity type specific permission - this takes precedence over creative permissions
+            if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type.getEntityType())) {
+                return false;
+            }
+
+            // Check bypass transform lock permission
+            if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
+                return false;
+            }
+
+            // Check if player can use all shapes (config-based creative logic)
+            if (canUseEveryShape(player)) {
+                return true;
+            }
+
+            // For permission-enabled players without creative permission, check kill requirements
+            return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
+        }
+
+        // If permissions are disabled, use original config-based behavior
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
     }
 
     public static boolean canUseShape(Player player, EntityType<?> type) {
-        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(type));
+        // If permissions are enabled, use permission-based logic
+        if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
+            // Check basic morph permission
+            if (!PermissionManager.canMorph(serverPlayer)) {
+                return false;
+            }
+
+            // Check entity type specific permission - this takes precedence over creative permissions
+            if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type)) {
+                return false;
+            }
+
+            // Check bypass transform lock permission
+            if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
+                return false;
+            }
+
+            // Check if player can use all shapes (config-based creative logic)
+            if (canUseEveryShape(player)) {
+                return true;
+            }
+
+            // For permission-enabled players without creative permission, check kill requirements
+            return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
+        }
+
+        // If permissions are disabled, use original config-based behavior
+        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
     }
 
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
-        if (canUseEveryShape(player)) {
-            return ShapeType.getAllTypes(player.level());
-        } else if (Walkers.CONFIG.unlockEveryVariant) {
-            List<ShapeType<?>> unlocked = new ArrayList<>();
-            for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
-                if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) unlocked.add(shapeType);
+        // Always filter by canUseShape to respect entity type permissions
+        List<ShapeType<?>> unlocked = new ArrayList<>();
+        for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
+            if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) {
+                unlocked.add(shapeType);
             }
-            return unlocked;
-        } else {
-            return new ArrayList<>(PlayerMorph.getUnlockedShapes(player).keySet().stream().filter(type -> canUseShape(player, type)).toList());
         }
+        return unlocked;
     }
 
     @Contract("_ -> new")
     public static @NotNull List<GameProfile> getUnlockedSkins(Player player) {
-        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= CONFIG.killToUnlockPlayers || CONFIG.killToUnlockPlayers == 0) && CONFIG.killToUnlockPlayers != -1).map(id -> SkinPlayerData.getSkinProfile(id).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).toList());
+        int killRequirement = getPlayerKillRequirement(player);
+        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= killRequirement || killRequirement == 0) && killRequirement != -1).map(id -> SkinPlayerData.getSkinProfile(id).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).toList());
     }
 
     public static int getKillToUnlock(EntityType<?> type) {
         return Remorphed.CONFIG.killToUnlockByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killToUnlock);
+    }
 
+    public static int getKillToUnlock(Player player, EntityType<?> type) {
+        return getKillToUnlock(type);
     }
 
     public static int getKillValue(EntityType<?> type) {
         return Remorphed.CONFIG.killValueByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killValue);
+    }
+
+    public static int getKillValue(Player player, EntityType<?> type) {
+        return getKillValue(type);
+    }
+
+    public static int getPlayerKillRequirement(Player player) {
+        return CONFIG.killToUnlockPlayers;
+    }
+
+    public static int getPlayerKillValue(Player player) {
+        return CONFIG.playerKillValue;
     }
 
     public static void sync(ServerPlayer player) {

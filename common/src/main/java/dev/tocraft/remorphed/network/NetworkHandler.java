@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import dev.tocraft.craftedcore.network.ModernNetworking;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
+import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
@@ -33,20 +34,39 @@ public class NetworkHandler {
     public static final ResourceLocation FAVORITE_SYNC = Remorphed.id("favorite_sync");
     public static final ResourceLocation FAVORITE_UPDATE = Remorphed.id("favorite_update");
     public static final ResourceLocation RESET_SKIN = Remorphed.id("reset_skin");
+    public static final ResourceLocation PERMISSION_CHECK = Remorphed.id("permission_check");
+    public static final ResourceLocation PERMISSION_RESPONSE = Remorphed.id("permission_response");
 
     public static void registerPacketReceiver() {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.MORPH_REQUEST, NetworkHandler::handleMorphRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, FAVORITE_UPDATE, NetworkHandler::handleFavoriteRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.RESET_SKIN, NetworkHandler::handleResetSkinPacket);
+        ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, PERMISSION_CHECK, NetworkHandler::handlePermissionCheckPacket);
 
         ModernNetworking.registerType(UNLOCKED_SYNC);
         ModernNetworking.registerType(FAVORITE_SYNC);
+        ModernNetworking.registerType(PERMISSION_RESPONSE);
     }
 
     private static void handleResetSkinPacket(ModernNetworking.Context context, CompoundTag data) {
         if (Remorphed.foundSkinShifter) {
             SkinShifter.setSkin((ServerPlayer) context.getPlayer(), null);
         }
+    }
+
+    @SuppressWarnings("ConstantValue")
+    private static void handlePermissionCheckPacket(ModernNetworking.@NotNull Context context, @NotNull CompoundTag tag) {
+        ServerPlayer player = (ServerPlayer) context.getPlayer();
+        String permission = tag.getString("permission").orElse("");
+
+        // Only check permissions if permissions are enabled
+        boolean hasPermission = !Remorphed.CONFIG.usePermissions || PermissionManager.hasPermission(player, permission);
+
+        // Send response back to client
+        CompoundTag response = new CompoundTag();
+        response.putString("permission", permission);
+        response.putBoolean("hasPermission", hasPermission);
+        ModernNetworking.sendToPlayer(player, PERMISSION_RESPONSE, response);
     }
 
     public static void sendResetSkinPacket() {

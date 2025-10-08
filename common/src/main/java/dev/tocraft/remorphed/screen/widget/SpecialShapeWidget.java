@@ -37,6 +37,7 @@ public class SpecialShapeWidget extends AbstractButton {
         this.parent = parent;
 
         // check if current shape is the special shape
+        assert Minecraft.getInstance().level != null;
         TagValueOutput out = TagValueOutput.createWithContext(Walkers.PROBLEM_REPORTER, Minecraft.getInstance().level.registryAccess());
         if (Minecraft.getInstance().player != null && PlayerShape.getCurrentShape(Minecraft.getInstance().player) instanceof Wolf wolf) {
             wolf.saveWithoutId(out);

@@ -14,6 +14,8 @@ public class KeyPressHandler implements ClientTickEvents.Client {
         assert client.player != null;
 
         if (RemorphedClient.MENU_KEY.consumeClick()) {
+            // Open menu directly - menu access is not restricted by permissions
+            // as it can be easily bypassed client-side
             Minecraft.getInstance().setScreen(new RemorphedMenu());
         }
     }

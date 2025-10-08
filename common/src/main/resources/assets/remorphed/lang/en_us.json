@@ -33,5 +33,8 @@
   "remorphed.traits": "Display Traits & Morphs",
   "remorphed.player_icon": "Transform back into a player",
   "remorphed.special_shape_available": "Congratulations on your special shape!",
-  "remorphed.special_shape_unavailable": "Unlock a wolf first!"
+  "remorphed.special_shape_unavailable": "Unlock a wolf first!",
+  "remorphed.permission.morph.denied": "You don't have permission to morph.",
+  "remorphed.permission.entity.denied": "You don't have permission to morph into this entity type.",
+  "remorphed.permission.command.denied": "You don't have permission to use this command."
 }
