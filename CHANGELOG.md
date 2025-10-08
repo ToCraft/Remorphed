@@ -1,3 +1,8 @@
+remorphed 7.1
+================
+
+- **add permission support** by FugLong
+
 remorphed 7.0
 ================
 
@@ -5,10 +10,6 @@ remorphed 7.0
 - improve trait rendering
 - fix menu - removed "variants" button
 - **use variants menu now** for selecting mob variants (see help page in the menu)
-
-remorphed 6.3
-================
-
 - remove debug logging
 - sync important config values
 
