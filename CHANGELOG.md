@@ -3,6 +3,7 @@ remorphed 7.1
 
 - **add permission support** by FugLong
 - fix broken counter in menu
+- optimize menu rendering by FugLong
 
 remorphed 7.0
 ================
