@@ -59,4 +59,9 @@ public class SkinWidget extends ShapeWidget {
             InventoryScreen.renderEntityInInventory(guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer);
         }
     }
+
+    @Override
+    void sendDeleteShapePacket() {
+        NetworkHandler.sendDeleteShapePacket(skin.getId());
+    }
 }

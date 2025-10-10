@@ -1,8 +1,9 @@
-remorphed 7.1
+remorphed 7.1.0
 ================
 
 - **add permission support** by FugLong
 - fix broken counter in menu
+- add delete functionality to Menu - press "X" or mouse-scroll-wheel to delete
 
 remorphed 7.0
 ================

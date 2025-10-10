@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -162,6 +163,7 @@ public class RemorphedMenu extends Screen {
                     .toList();
 
             populateShapeWidgets(filteredShapes, filteredSkins);
+            Remorphed.LOGGER.info("Loaded {} entities and {} skins for rendering", filteredShapes.size(), filteredSkins.size());
 
             lastSearchContents = text;
         });
@@ -259,8 +261,6 @@ public class RemorphedMenu extends Screen {
                 renderEntities.put(type, living);
             }
         }
-
-        Remorphed.LOGGER.info("Loaded {} entities for rendering", unlockedShapes.size());
     }
 
     public synchronized void populateUnlockedRenderPlayers(Player player) {
@@ -277,8 +277,6 @@ public class RemorphedMenu extends Screen {
                 renderPlayers.put(profile, entity);
             }
         }
-
-        Remorphed.LOGGER.info("Loaded {} players for rendering", unlockedSkins.size());
     }
 
     protected void addFooter() {
@@ -341,5 +339,15 @@ public class RemorphedMenu extends Screen {
 
     private @NotNull Window getWindow() {
         return Minecraft.getInstance().getWindow();
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (GuiEventListener child : children()) {
+            if (child.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

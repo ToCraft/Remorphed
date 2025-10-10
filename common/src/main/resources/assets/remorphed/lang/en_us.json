@@ -19,6 +19,8 @@
   "remorphed.help.credits_label": "Credits",
   "remorphed.help.credits_general": "General: To_Craft, Chronos_Sacaria, Draylar, x64architecture, Pyrofab, AllanChain, James103, lawleagle",
   "remorphed.help.credits_translators": "Translators: To_Craft, yichifauzi, shap-po and Feitan_Portor.",
+  "remorphed.help.deleting_shapes_label": "Deleting Shapes in the Menu",
+  "remorphed.help.deleting_shapes_description": "There are two ways for a player to delete their shapes within the ReMorphed Menu: They can press 'X' on their keyboard or the third mouse button (press the scroll wheel). It will remove one point from the shape.",
   "remorphed.help.return": "Press any key to close this menu.",
   "remorphed.hasShape_success": "%s has unlocked %s.",
   "remorphed.hasShape_fail": "%s didn't unlocked %s.",

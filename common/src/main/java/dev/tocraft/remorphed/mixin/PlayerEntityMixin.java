@@ -326,7 +326,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
             // remove one kill
             if (k <= 1) {
-                int k2 = remorphed$unlockedShapes.remove(killType);
+                int k2 = remorphed$unlockedShapes.containsKey(killType) ? remorphed$unlockedShapes.remove(killType) : 0;
             } else {
                 remorphed$unlockedShapes.put(killType, k - 1);
             }
