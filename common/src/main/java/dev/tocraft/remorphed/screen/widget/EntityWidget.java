@@ -114,4 +114,8 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
         }
     }
 
+    @Override
+    void sendDeleteShapePacket() {
+        NetworkHandler.sendDeleteShapePacket(type);
+    }
 }

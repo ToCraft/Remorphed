@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -51,11 +52,11 @@ public class RemorphedMenu extends Screen {
     private final List<GameProfile> unlockedSkins = new CopyOnWriteArrayList<>();
     private final Map<ShapeType<?>, Mob> renderEntities = new ConcurrentHashMap<>();
     private final Map<GameProfile, FakeClientPlayer> renderPlayers = new ConcurrentHashMap<>();
-    
+
     // Cache for EntityRenderState with proper scale - this is what prevents visual reloading
     private static final Map<ShapeType<?>, EntityRenderState> CACHED_ENTITY_RENDER_STATES = new ConcurrentHashMap<>();
     private static final Map<GameProfile, EntityRenderState> CACHED_PLAYER_RENDER_STATES = new ConcurrentHashMap<>();
-    
+
 
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -171,6 +172,7 @@ public class RemorphedMenu extends Screen {
                     .toList();
 
             populateShapeWidgets(filteredShapes, filteredSkins);
+            Remorphed.LOGGER.info("Loaded {} entities and {} skins for rendering", filteredShapes.size(), filteredSkins.size());
 
             lastSearchContents = text;
         });
@@ -265,9 +267,7 @@ public class RemorphedMenu extends Screen {
         unlockedShapes.clear();
         renderEntities.clear();
         List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
-        
-        
-        
+
         // Create new entities and render states only for newly unlocked shapes
         for (ShapeType<?> type : validUnlocked) {
             if (!CACHED_ENTITY_RENDER_STATES.containsKey(type)) {
@@ -278,11 +278,11 @@ public class RemorphedMenu extends Screen {
                         if (living instanceof Slime slime) {
                             slime.setSize(1, true);
                         }
-                        
+
                         // Disable animations for consistent rendering
                         living.setNoAi(true);
                         living.setInvulnerable(true);
-                        
+
                         // Create and cache the EntityRenderState with 1.0F scale (like original)
                         // The actual scaling is handled by the widget's size calculation
                         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -290,7 +290,7 @@ public class RemorphedMenu extends Screen {
                         EntityRenderState entityRenderState = entityRenderer.createRenderState(living, 1.0F);
                         entityRenderState.hitboxesRenderState = null;
                         CACHED_ENTITY_RENDER_STATES.put(type, entityRenderState);
-                        
+
                         // Don't cache the entity - create fresh each time to avoid state issues
                         renderEntities.put(type, living);
                     }
@@ -305,44 +305,41 @@ public class RemorphedMenu extends Screen {
                     if (living instanceof Slime slime) {
                         slime.setSize(1, true);
                     }
-                    
+
                     // Disable animations for consistent rendering
                     living.setNoAi(true);
                     living.setInvulnerable(true);
-                    
+
                     renderEntities.put(type, living);
                 }
             }
         }
-        
+
         // Add all valid unlocked shapes
         for (ShapeType<?> type : validUnlocked) {
             if (CACHED_ENTITY_RENDER_STATES.containsKey(type)) {
                 unlockedShapes.add(type);
             }
         }
-        
-
-        Remorphed.LOGGER.info("Loaded {} entities for rendering", unlockedShapes.size());
     }
 
     public synchronized void populateUnlockedRenderPlayers(Player player) {
         unlockedSkins.clear();
         renderPlayers.clear();
         List<GameProfile> validUnlocked = Remorphed.getUnlockedSkins(player);
-        
+
         // Filter out the player's own skin
         List<GameProfile> filteredUnlocked = validUnlocked.stream()
             .filter(profile -> profile.getId() != player.getUUID())
             .toList();
-        
+
         // Create new fake players and render states only for newly unlocked skins
         for (GameProfile profile : filteredUnlocked) {
             if (!CACHED_PLAYER_RENDER_STATES.containsKey(profile)) {
                 try {
                     if (minecraft != null) {
                         FakeClientPlayer entity = new FakeClientPlayer(minecraft.level, profile);
-                        
+
                         // Create and cache the EntityRenderState with 1.0F scale (like original)
                         // The actual scaling is handled by the widget's size calculation
                         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -350,7 +347,7 @@ public class RemorphedMenu extends Screen {
                         EntityRenderState entityRenderState = entityRenderer.createRenderState(entity, 1.0F);
                         entityRenderState.hitboxesRenderState = null;
                         CACHED_PLAYER_RENDER_STATES.put(profile, entityRenderState);
-                        
+
                         // Don't cache the player - create fresh each time to avoid state issues
                         renderPlayers.put(profile, entity);
                     }
@@ -365,18 +362,15 @@ public class RemorphedMenu extends Screen {
                 }
             }
         }
-        
+
         // Add all valid unlocked skins
         for (GameProfile profile : filteredUnlocked) {
             if (CACHED_PLAYER_RENDER_STATES.containsKey(profile)) {
                 unlockedSkins.add(profile);
             }
         }
-        
-
-        Remorphed.LOGGER.info("Loaded {} players for rendering", unlockedSkins.size());
     }
-    
+
     /**
      * Clears the entity and player caches. Call this when the player logs out
      * or when you want to force a complete refresh of all entities.
@@ -386,7 +380,7 @@ public class RemorphedMenu extends Screen {
         CACHED_PLAYER_RENDER_STATES.clear();
         Remorphed.LOGGER.info("Cleared render state caches");
     }
-    
+
 
     protected void addFooter() {
         this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, (button) -> this.onClose()).width(200).build());
@@ -449,5 +443,14 @@ public class RemorphedMenu extends Screen {
     private @NotNull Window getWindow() {
         return Minecraft.getInstance().getWindow();
     }
-}
 
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (GuiEventListener child : children()) {
+            if (child.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+}

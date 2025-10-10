@@ -70,4 +70,9 @@ public class SkinWidget extends ShapeWidget {
             RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer, cachedRenderState);
         }
     }
+
+    @Override
+    void sendDeleteShapePacket() {
+        NetworkHandler.sendDeleteShapePacket(skin.getId());
+    }
 }

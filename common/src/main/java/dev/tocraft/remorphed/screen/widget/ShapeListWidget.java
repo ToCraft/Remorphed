@@ -66,6 +66,16 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
         public @NotNull List<? extends NarratableEntry> narratables() {
             return List.of(widgets);
         }
+
+        @Override
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            for (GuiEventListener child : children()) {
+                if (child.keyPressed(keyCode, scanCode, modifiers)) {
+                    return true;
+                }
+            }
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
     }
 
     @Override
@@ -75,5 +85,15 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
 
     @Override
     protected void renderListBackground(GuiGraphics guiGraphics) {
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (ShapeRow child : children()) {
+            if (child.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

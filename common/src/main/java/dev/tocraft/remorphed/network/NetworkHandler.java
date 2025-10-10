@@ -36,16 +36,48 @@ public class NetworkHandler {
     public static final ResourceLocation RESET_SKIN = Remorphed.id("reset_skin");
     public static final ResourceLocation PERMISSION_CHECK = Remorphed.id("permission_check");
     public static final ResourceLocation PERMISSION_RESPONSE = Remorphed.id("permission_response");
+    public static final ResourceLocation DELETE_SHAPE = Remorphed.id("delete_shape");
 
     public static void registerPacketReceiver() {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.MORPH_REQUEST, NetworkHandler::handleMorphRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, FAVORITE_UPDATE, NetworkHandler::handleFavoriteRequestPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.RESET_SKIN, NetworkHandler::handleResetSkinPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, PERMISSION_CHECK, NetworkHandler::handlePermissionCheckPacket);
+        ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, DELETE_SHAPE, NetworkHandler::handleDeleteShapePacket);
 
         ModernNetworking.registerType(UNLOCKED_SYNC);
         ModernNetworking.registerType(FAVORITE_SYNC);
         ModernNetworking.registerType(PERMISSION_RESPONSE);
+    }
+
+    private static void handleDeleteShapePacket(ModernNetworking.Context context, CompoundTag data) {
+        boolean is_entity = data.getBoolean("is_entity").orElse(true);
+        if (is_entity) {
+            String id = data.getString("id").orElseThrow();
+            int v = data.getIntOr("variant", -1);
+            @SuppressWarnings("unchecked") EntityType<LivingEntity> type = (EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(ResourceLocation.parse(id));
+            PlayerMorph.handleSwap(context.getPlayer(), ShapeType.from(type, v));
+        } else {
+            String uuid = data.getString("uuid").orElseThrow();
+            PlayerMorph.handleSwap(context.getPlayer(), UUID.fromString(uuid));
+        }
+    }
+
+    public static void sendDeleteShapePacket(ShapeType<?> type) {
+        CompoundTag compound = new CompoundTag();
+        compound.putBoolean("is_entity", true);
+        compound.putString("id", EntityType.getKey(type.getEntityType()).toString());
+        compound.putInt("variant", type.getVariantData());
+
+        ModernNetworking.sendToServer(NetworkHandler.DELETE_SHAPE, compound);
+    }
+
+    public static void sendDeleteShapePacket(UUID uuid) {
+        CompoundTag compound = new CompoundTag();
+        compound.putBoolean("is_entity", true);
+        compound.putString("uuid", uuid.toString());
+
+        ModernNetworking.sendToServer(NetworkHandler.DELETE_SHAPE, compound);
     }
 
     private static void handleResetSkinPacket(ModernNetworking.Context context, CompoundTag data) {
@@ -72,6 +104,7 @@ public class NetworkHandler {
     public static void sendResetSkinPacket() {
         ModernNetworking.sendToServer(RESET_SKIN, new CompoundTag());
     }
+
 
     public static <T extends LivingEntity> void sendSwap2ndShapeRequest(@NotNull ShapeType<T> type) {
         CompoundTag compound = new CompoundTag();

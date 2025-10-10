@@ -1,6 +1,7 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -8,13 +9,14 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 public abstract class ShapeWidget extends AbstractButton {
     private final Screen parent;
     private boolean crashed = false;
     private boolean isFavorite;
     private final boolean isCurrent;
-    private final int availability;
+    private int availability;
 
     public ShapeWidget(float x, float y, float width, float height, Screen parent, boolean isFavorite, boolean isCurrent, int availability) {
         super((int) x, (int) y, (int) width, (int) height, Component.nullToEmpty("WOLF"));
@@ -34,12 +36,30 @@ public abstract class ShapeWidget extends AbstractButton {
         this.crashed = true;
     }
 
+    private void deletePoint() {
+        this.playDownSound(Minecraft.getInstance().getSoundManager());
+        if (this.availability > 0) {
+            this.availability--;
+            sendDeleteShapePacket();
+        } else {
+            // reopen screen to avoid negative shape availability. Do so after half a second so the server can process the loss
+            if (isCurrent) {
+                SwapPackets.sendSwapRequest();
+            }
+        }
+    }
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // Add to favorites
-        if (isHovered() && Minecraft.getInstance().player != null && button == 1) {
-            isFavorite = !isFavorite;
-            sendFavoriteRequest(isFavorite);
+        if (active && visible && isHovered() && Minecraft.getInstance().player != null) {
+            if (button == 1) {
+                isFavorite = !isFavorite;
+                sendFavoriteRequest(isFavorite);
+                this.playDownSound(Minecraft.getInstance().getSoundManager());
+            } else if (button == 2 && availability != -1) {
+                deletePoint();
+            }
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
@@ -54,10 +74,13 @@ public abstract class ShapeWidget extends AbstractButton {
             }
 
             // render availability counter
-            if (Remorphed.displayDataInMenu && availability != -1) {
+            if (Remorphed.displayDataInMenu && availability > 0) {
                 String s = String.valueOf(availability);
                 int w = parent.getFont().width(s);
                 guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), -1, false);
+            }
+            else if (availability == 0) {
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/deleted.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
 
             renderShape(guiGraphics);
@@ -79,10 +102,22 @@ public abstract class ShapeWidget extends AbstractButton {
         if (!isCurrent) {
             // Update 2nd Shape
             sendSwap2ndShapeRequest();
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
             // close active screen handler
             parent.onClose();
         }
     }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.active && this.visible && isHovered() && keyCode == GLFW.GLFW_KEY_X && availability != -1) {
+            deletePoint();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    abstract void sendDeleteShapePacket();
 
     @Override
     public void updateWidgetNarration(NarrationElementOutput builder) {
