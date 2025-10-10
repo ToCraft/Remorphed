@@ -31,7 +31,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Contract;
@@ -282,8 +281,6 @@ public class RemorphedMenu extends Screen {
                         // Fix slimes and magma cubes - set size to 1 (smallest)
                         if (living instanceof Slime slime) {
                             slime.setSize(1, true);
-                        } else if (living instanceof MagmaCube magmaCube) {
-                            magmaCube.setSize(1, true);
                         }
 
                         // Disable animations for consistent rendering
@@ -311,8 +308,6 @@ public class RemorphedMenu extends Screen {
                     // Fix slimes and magma cubes - set size to 1 (smallest)
                     if (living instanceof Slime slime) {
                         slime.setSize(1, true);
-                    } else if (living instanceof MagmaCube magmaCube) {
-                        magmaCube.setSize(1, true);
                     }
 
                     // Disable animations for consistent rendering
