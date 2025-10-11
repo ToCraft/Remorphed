@@ -44,6 +44,9 @@ public class RemorphedHelpScreen extends Screen {
         this.list.addText(Component.translatable("remorphed.help.welcome"));
         this.list.addText(Component.translatable("remorphed.help.credits").append("\n"));
 
+        this.list.addText(Component.translatable("remorphed.help.deleting_shapes_label").withStyle(ChatFormatting.BOLD));
+        this.list.addText(Component.translatable("remorphed.help.deleting_shapes_description").append("\n"));
+
         this.list.addText(Component.translatable("remorphed.help.variants_label").withStyle(ChatFormatting.BOLD));
         Component keyStr = WalkersClient.VARIANTS_MENU_KEY.getTranslatedKeyMessage();
         this.list.addText(Component.translatable("remorphed.help.variants_description", keyStr, keyStr).append("\n"));

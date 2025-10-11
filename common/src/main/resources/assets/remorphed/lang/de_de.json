@@ -18,6 +18,8 @@
   "remorphed.help.config_description": "Öffne die Config-Datei /config/walkers.json bzw. /config/remorphed.json um die Elemente des Mods zu kontrollieren.",
   "remorphed.help.credits_label": "Credits",
   "remorphed.help.credits_general": "General: To_Craft, Chronos_Sacaria, Draylar, x64architecture, Pyrofab, AllanChain, James103, lawleagle",
+  "remorphed.help.deleting_shapes_label": "Gestalten aus dem Menü löschen",
+  "remorphed.help.deleting_shapes_description": "Es gibt für Spieler zwei Wege Gestalten aus dem Menü heraus zu löschen: Sie können 'X' drücken oder die 3. Maustaste bzw. das Scrollrad drücken.",
   "remorphed.help.credits_translators": "Übersetzer: To_Craft, yichifauzi, shap-po und Feitan_Portor.",
   "remorphed.help.return": "Drücke eine beliebige Taste.",
   "remorphed.hasShape_success": "%s hat %s freigeschaltet.",
