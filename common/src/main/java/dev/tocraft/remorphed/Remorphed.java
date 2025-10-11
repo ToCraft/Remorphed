@@ -150,13 +150,38 @@ public class Remorphed {
     }
 
     public static List<ShapeType<?>> getUnlockedShapes(Player player) {
-        // Always filter by canUseShape to respect entity type permissions
         List<ShapeType<?>> unlocked = new ArrayList<>();
-        for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
-            if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) {
-                unlocked.add(shapeType);
+        
+        // If player can use every shape (e.g., creative mode), return all types from level
+        if (canUseEveryShape(player)) {
+            // Deduplicate by entity type - only keep one variant per entity type
+            // Prefer base variants (variant data <= 0)
+            Map<EntityType<?>, ShapeType<?>> uniqueTypes = new HashMap<>();
+            
+            for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
+                if (canUseShape(player, shapeType)) {
+                    EntityType<?> entityType = shapeType.getEntityType();
+                    
+                    // If we haven't seen this entity type, or this is a base variant, use it
+                    if (!uniqueTypes.containsKey(entityType) || shapeType.getVariantData() <= 0) {
+                        uniqueTypes.put(entityType, shapeType);
+                    }
+                }
+            }
+            
+            unlocked.addAll(uniqueTypes.values());
+            
+            // Sort alphabetically by entity name
+            unlocked.sort(Comparator.comparing(type -> type.getEntityType().getDescriptionId()));
+        } else {
+            // Return the actual ShapeTypes the player unlocked (with their specific variants)
+            for (ShapeType<?> shapeType : PlayerMorph.getUnlockedShapes(player).keySet()) {
+                if (shapeType != null && canUseShape(player, shapeType)) {
+                    unlocked.add(shapeType);
+                }
             }
         }
+        
         return unlocked;
     }
 

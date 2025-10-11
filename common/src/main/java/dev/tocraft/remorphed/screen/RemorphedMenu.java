@@ -53,8 +53,11 @@ public class RemorphedMenu extends Screen {
     private final Map<GameProfile, FakeClientPlayer> renderPlayers = new ConcurrentHashMap<>();
     
     // Cache for EntityRenderState with proper scale - this is what prevents visual reloading
+    // Also cache the entities to ensure entity and render state always match
     private static final Map<ShapeType<?>, EntityRenderState> CACHED_ENTITY_RENDER_STATES = new ConcurrentHashMap<>();
+    private static final Map<ShapeType<?>, Mob> CACHED_ENTITIES = new ConcurrentHashMap<>();
     private static final Map<GameProfile, EntityRenderState> CACHED_PLAYER_RENDER_STATES = new ConcurrentHashMap<>();
+    private static final Map<GameProfile, FakeClientPlayer> CACHED_PLAYERS = new ConcurrentHashMap<>();
     
 
     private final SearchWidget searchBar = createSearchBar();
@@ -266,8 +269,6 @@ public class RemorphedMenu extends Screen {
         renderEntities.clear();
         List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
         
-        
-        
         // Create new entities and render states only for newly unlocked shapes
         for (ShapeType<?> type : validUnlocked) {
             if (!CACHED_ENTITY_RENDER_STATES.containsKey(type)) {
@@ -283,41 +284,36 @@ public class RemorphedMenu extends Screen {
                         living.setNoAi(true);
                         living.setInvulnerable(true);
                         
+                        // Set consistent rotation to prevent camera flipping
+                        living.setYRot(0.0F);
+                        living.setXRot(0.0F);
+                        living.yRotO = 0.0F;
+                        living.xRotO = 0.0F;
+                        living.yBodyRot = 0.0F;
+                        living.yBodyRotO = 0.0F;
+                        living.yHeadRot = 0.0F;
+                        living.yHeadRotO = 0.0F;
+                        
                         // Create and cache the EntityRenderState with 1.0F scale (like original)
                         // The actual scaling is handled by the widget's size calculation
                         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
                         EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderDispatcher.getRenderer(living);
                         EntityRenderState entityRenderState = entityRenderer.createRenderState(living, 1.0F);
                         entityRenderState.hitboxesRenderState = null;
-                        CACHED_ENTITY_RENDER_STATES.put(type, entityRenderState);
                         
-                        // Don't cache the entity - create fresh each time to avoid state issues
-                        renderEntities.put(type, living);
+                        // Cache both the entity and its render state to ensure they always match
+                        CACHED_ENTITY_RENDER_STATES.put(type, entityRenderState);
+                        CACHED_ENTITIES.put(type, living);
                     }
                 } catch (Exception e) {
                     Remorphed.LOGGER.warn("Failed to create entity for type {}: {}", type.getEntityType(), e.getMessage());
                 }
-            } else {
-                // Create fresh entity but use cached render state
-                Entity entity = type.create(Minecraft.getInstance().level, player);
-                if (entity instanceof Mob living) {
-                    // Fix slimes and magma cubes - set size to 1 (smallest)
-                    if (living instanceof Slime slime) {
-                        slime.setSize(1, true);
-                    }
-                    
-                    // Disable animations for consistent rendering
-                    living.setNoAi(true);
-                    living.setInvulnerable(true);
-                    
-                    renderEntities.put(type, living);
-                }
             }
-        }
-        
-        // Add all valid unlocked shapes
-        for (ShapeType<?> type : validUnlocked) {
-            if (CACHED_ENTITY_RENDER_STATES.containsKey(type)) {
+            
+            // Use cached entity for rendering
+            Mob cachedEntity = CACHED_ENTITIES.get(type);
+            if (cachedEntity != null) {
+                renderEntities.put(type, cachedEntity);
                 unlockedShapes.add(type);
             }
         }
@@ -349,26 +345,20 @@ public class RemorphedMenu extends Screen {
                         EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderDispatcher.getRenderer(entity);
                         EntityRenderState entityRenderState = entityRenderer.createRenderState(entity, 1.0F);
                         entityRenderState.hitboxesRenderState = null;
-                        CACHED_PLAYER_RENDER_STATES.put(profile, entityRenderState);
                         
-                        // Don't cache the player - create fresh each time to avoid state issues
-                        renderPlayers.put(profile, entity);
+                        // Cache both the player and its render state to ensure they always match
+                        CACHED_PLAYER_RENDER_STATES.put(profile, entityRenderState);
+                        CACHED_PLAYERS.put(profile, entity);
                     }
                 } catch (Exception e) {
                     Remorphed.LOGGER.warn("Failed to create fake player for profile {}: {}", profile.getName(), e.getMessage());
                 }
-            } else {
-                // Create fresh player but use cached render state
-                if (minecraft != null) {
-                    FakeClientPlayer entity = new FakeClientPlayer(minecraft.level, profile);
-                    renderPlayers.put(profile, entity);
-                }
             }
-        }
-        
-        // Add all valid unlocked skins
-        for (GameProfile profile : filteredUnlocked) {
-            if (CACHED_PLAYER_RENDER_STATES.containsKey(profile)) {
+            
+            // Use cached player for rendering
+            FakeClientPlayer cachedPlayer = CACHED_PLAYERS.get(profile);
+            if (cachedPlayer != null) {
+                renderPlayers.put(profile, cachedPlayer);
                 unlockedSkins.add(profile);
             }
         }
@@ -383,8 +373,10 @@ public class RemorphedMenu extends Screen {
      */
     public static void clearCache() {
         CACHED_ENTITY_RENDER_STATES.clear();
+        CACHED_ENTITIES.clear();
         CACHED_PLAYER_RENDER_STATES.clear();
-        Remorphed.LOGGER.info("Cleared render state caches");
+        CACHED_PLAYERS.clear();
+        Remorphed.LOGGER.info("Cleared render state and entity caches");
     }
     
 
