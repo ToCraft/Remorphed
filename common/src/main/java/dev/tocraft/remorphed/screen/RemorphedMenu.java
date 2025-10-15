@@ -315,6 +315,8 @@ public class RemorphedMenu extends Screen {
             // Use cached entity for rendering
             Mob cachedEntity = CACHED_ENTITIES.get(type);
             if (cachedEntity != null) {
+                // Reset rotation to ensure consistent rendering regardless of player's current form
+                resetEntityRotation(cachedEntity);
                 renderEntities.put(type, cachedEntity);
                 unlockedShapes.add(type);
             }
@@ -357,10 +359,42 @@ public class RemorphedMenu extends Screen {
             // Use cached player for rendering
             FakeClientPlayer cachedPlayer = CACHED_PLAYERS.get(profile);
             if (cachedPlayer != null) {
+                // Reset rotation to ensure consistent rendering
+                resetPlayerRotation(cachedPlayer);
                 renderPlayers.put(profile, cachedPlayer);
                 unlockedSkins.add(profile);
             }
         }
+    }
+
+    /**
+     * Resets entity rotation to ensure consistent rendering regardless of player's current form.
+     * This prevents the camera angle issue when reopening the menu after morphing.
+     */
+    private static void resetEntityRotation(Mob entity) {
+        entity.setYRot(0.0F);
+        entity.setXRot(0.0F);
+        entity.yRotO = 0.0F;
+        entity.xRotO = 0.0F;
+        entity.yBodyRot = 0.0F;
+        entity.yBodyRotO = 0.0F;
+        entity.yHeadRot = 0.0F;
+        entity.yHeadRotO = 0.0F;
+    }
+
+    /**
+     * Resets player rotation to ensure consistent rendering regardless of player's current form.
+     * This prevents the camera angle issue when reopening the menu after morphing.
+     */
+    private static void resetPlayerRotation(FakeClientPlayer player) {
+        player.setYRot(0.0F);
+        player.setXRot(0.0F);
+        player.yRotO = 0.0F;
+        player.xRotO = 0.0F;
+        player.yBodyRot = 0.0F;
+        player.yBodyRotO = 0.0F;
+        player.yHeadRot = 0.0F;
+        player.yHeadRotO = 0.0F;
     }
 
     /**
