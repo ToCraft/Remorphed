@@ -115,8 +115,10 @@ public class RemorphedMenu extends Screen {
             // filter unlocked
             List<ShapeType<?>> newUnlocked = new ArrayList<>();
             for (ShapeType<?> shapeType : unlockedShapes) {
-                if (shapeType.equals(currentShape) || !newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
-                    newUnlocked.add(shapeType);
+                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                    if (currentShape == null || shapeType.equals(currentShape) || shapeType.getEntityType() != currentShape.getEntityType() || shapeType.getVariantData() == currentShape.getVariantData()) { // only add the current variant, NOT the default one (additionally)
+                        newUnlocked.add(shapeType);
+                    }
                 }
             }
 

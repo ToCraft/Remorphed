@@ -4,6 +4,7 @@ remorphed 7.1.0
 - **add permission support** by FugLong
 - fix broken counter in menu
 - add delete functionality to Menu - press "X" or mouse-scroll-wheel to delete
+- fix duplicate entities in menu
 
 remorphed 7.0
 ================
