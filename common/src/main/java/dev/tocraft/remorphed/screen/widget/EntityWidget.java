@@ -16,7 +16,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
@@ -34,20 +33,13 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     private final T entity;
     private final int size;
     private final int id;
-    private final EntityRenderState cachedRenderState;
 
-    public EntityWidget(int id, int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability, @Nullable EntityRenderState cachedRenderState) {
-        super(x, y, width, height, parent, isFavorite, current, availability); // int x, int y, int width, int height, message
-        // Calculate size with cap for small entities like slimes and magma cubes
-        float entitySize = Math.max(entity.getBbHeight(), entity.getBbWidth());
-        float scaleFactor = 1 / entitySize;
-        // Cap the scale factor to prevent slimes/magma cubes from being too big
-        scaleFactor = Math.min(scaleFactor, 2.0f);
-        this.size = (int) (Remorphed.CONFIG.entity_size * scaleFactor);
+    public EntityWidget(int id, int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability) {
+        super(x, y, width, height, parent, isFavorite, current, availability);
+        this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         this.type = type;
         this.entity = entity;
         this.id = id;
-        this.cachedRenderState = cachedRenderState; // Use cached render state with proper scale
         entity.setGlowingTag(true);
         setTooltip(Tooltip.create(ShapeType.createTooltipText(entity)));
     }
@@ -95,14 +87,15 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
         // Some entities (namely Aether mobs) crash when rendered in a GUI.
         // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
         try {
-            // ARGH
             int leftPos = (int) (getX() + (float) this.getWidth() / 2);
             int topPos = (int) (getY() + this.getHeight() * .75f);
             int k = leftPos - 20;
             int l = topPos - 25;
             int m = leftPos + 20;
             int n = topPos + 35;
-            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity, cachedRenderState);
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, (float) size,
+                    new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI),
+                    null, entity);
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();

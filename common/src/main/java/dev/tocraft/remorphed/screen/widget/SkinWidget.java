@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,19 +25,12 @@ public class SkinWidget extends ShapeWidget {
     private final GameProfile skin;
     private final FakeClientPlayer fakePlayer;
     private final int size;
-    private final EntityRenderState cachedRenderState;
 
-    public SkinWidget(int x, int y, int width, int height, @NotNull GameProfile skin, @NotNull FakeClientPlayer fakePlayer, Screen parent, boolean isFavorite, boolean isCurrent, int availability, @Nullable EntityRenderState cachedRenderState) {
+    public SkinWidget(int x, int y, int width, int height, @NotNull GameProfile skin, @NotNull FakeClientPlayer fakePlayer, Screen parent, boolean isFavorite, boolean isCurrent, int availability) {
         super(x, y, width, height, parent, isFavorite, isCurrent, availability);
-        // Calculate size with cap for small entities like slimes and magma cubes
-        float entitySize = Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth());
-        float scaleFactor = 1 / entitySize;
-        // Cap the scale factor to prevent slimes/magma cubes from being too big
-        scaleFactor = Math.min(scaleFactor, 2.0f);
-        this.size = (int) (Remorphed.CONFIG.entity_size * scaleFactor);
+        this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(fakePlayer.getBbHeight(), fakePlayer.getBbWidth()))));
         this.skin = skin;
         this.fakePlayer = fakePlayer;
-        this.cachedRenderState = cachedRenderState; // Use cached render state with proper scale
         setTooltip(Tooltip.create(Component.literal(skin.getName())));
     }
 
@@ -67,7 +59,9 @@ public class SkinWidget extends ShapeWidget {
             int n = topPos + 35;
             // Use a unique ID for each skin widget (based on skin UUID hash)
             int id = skin.getId().hashCode();
-            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer, cachedRenderState);
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, (float) size,
+                    new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI),
+                    null, fakePlayer);
         }
     }
 
