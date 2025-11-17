@@ -117,10 +117,12 @@ public class RemorphedMenu extends Screen {
 
             // filter unlocked
             List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            Set<EntityType<?>> seenTypes = new HashSet<>();
             for (ShapeType<?> shapeType : unlockedShapes) {
-                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                if (!seenTypes.contains(shapeType.getEntityType())) {
                     if (currentShape == null || shapeType.equals(currentShape) || shapeType.getEntityType() != currentShape.getEntityType() || shapeType.getVariantData() == currentShape.getVariantData()) { // only add the current variant, NOT the default one (additionally)
                         newUnlocked.add(shapeType);
+                        seenTypes.add(shapeType.getEntityType());
                     }
                 }
             }
@@ -168,7 +170,6 @@ public class RemorphedMenu extends Screen {
                     .toList();
 
             populateShapeWidgets(filteredShapes, filteredSkins);
-            Remorphed.LOGGER.info("Loaded {} entities and {} skins for rendering", filteredShapes.size(), filteredSkins.size());
 
             lastSearchContents = text;
         });

@@ -47,10 +47,10 @@ public class EntityRenderCache {
     }
 
     /**
-     * Pre-loads all unlocked entity shapes for the given player.
-     * This should be called when the player joins a world.
+     * Pre-loads ALL possible entity shapes for the given player.
+     * This caches all entities regardless of unlock status to support creative mode switching.
      *
-     * @param player The player whose unlocked shapes to cache
+     * @param player The player context
      */
     public static void preloadEntities(Player player) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -58,10 +58,12 @@ public class EntityRenderCache {
             return;
         }
 
-        List<ShapeType<?>> unlockedShapes = Remorphed.getUnlockedShapes(player);
+        // Cache ALL possible shapes, not just unlocked ones
+        // This ensures entities are ready when switching to creative mode
+        List<ShapeType<?>> allShapes = ShapeType.getAllTypes(player.level());
 
-        for (ShapeType<?> type : unlockedShapes) {
-            // Skip if already cached
+        for (ShapeType<?> type : allShapes) {
+            // Skip if already cached (thread-safe check)
             if (ENTITY_CACHE.containsKey(type)) {
                 continue;
             }
@@ -75,7 +77,8 @@ public class EntityRenderCache {
                     prepareStaticEntity(mob);
 
                     // Cache the ENTITY itself (not render state!)
-                    ENTITY_CACHE.put(type, new CachedEntityData(mob));
+                    // Use putIfAbsent to avoid race conditions
+                    ENTITY_CACHE.putIfAbsent(type, new CachedEntityData(mob));
                 }
             } catch (Exception e) {
                 Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load entity for type {}: {}",
@@ -104,7 +107,7 @@ public class EntityRenderCache {
                 continue;
             }
 
-            // Skip if already cached
+            // Skip if already cached (thread-safe check)
             if (PLAYER_CACHE.containsKey(profile)) {
                 continue;
             }
@@ -117,7 +120,8 @@ public class EntityRenderCache {
                 fakePlayer.setInvulnerable(true);
 
                 // Cache the ENTITY itself (not render state!)
-                PLAYER_CACHE.put(profile, new CachedEntityData(fakePlayer));
+                // Use putIfAbsent to avoid race conditions
+                PLAYER_CACHE.putIfAbsent(profile, new CachedEntityData(fakePlayer));
             } catch (Exception e) {
                 Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load player skin for profile {}: {}",
                     profile.getName(), e.getMessage());
@@ -192,8 +196,8 @@ public class EntityRenderCache {
 
             if (entity instanceof Mob mob) {
                 prepareStaticEntity(mob);
-                ENTITY_CACHE.put(type, new CachedEntityData(mob));
-                Remorphed.LOGGER.debug("[Remorphed] Cached entity on-demand: {}", type.getEntityType().getDescriptionId());
+                // Use putIfAbsent to avoid race conditions
+                ENTITY_CACHE.putIfAbsent(type, new CachedEntityData(mob));
             }
         } catch (Exception e) {
             Remorphed.LOGGER.warn("[Remorphed] Failed to cache entity on-demand: {}", type.getEntityType().getDescriptionId(), e);
@@ -220,8 +224,8 @@ public class EntityRenderCache {
             FakeClientPlayer fakePlayer = new FakeClientPlayer(minecraft.level, profile);
             fakePlayer.setInvulnerable(true);
 
-            PLAYER_CACHE.put(profile, new CachedEntityData(fakePlayer));
-            Remorphed.LOGGER.debug("[Remorphed] Cached player skin on-demand: {}", profile.getName());
+            // Use putIfAbsent to avoid race conditions
+            PLAYER_CACHE.putIfAbsent(profile, new CachedEntityData(fakePlayer));
         } catch (Exception e) {
             Remorphed.LOGGER.warn("[Remorphed] Failed to cache player skin on-demand: {}", profile.getName(), e);
         }
