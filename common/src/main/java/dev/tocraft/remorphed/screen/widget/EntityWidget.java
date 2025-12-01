@@ -34,7 +34,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
     private final int id;
 
     public EntityWidget(int id, int x, int y, int width, int height, ShapeType<T> type, @NotNull T entity, Screen parent, boolean isFavorite, boolean current, int availability) {
-        super(x, y, width, height, parent, isFavorite, current, availability); // int x, int y, int width, int height, message
+        super(x, y, width, height, parent, isFavorite, current, availability);
         this.size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
         this.type = type;
         this.entity = entity;
@@ -86,14 +86,15 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
         // Some entities (namely Aether mobs) crash when rendered in a GUI.
         // Unsure as to the cause, but this try/catch should prevent the game from entirely dipping out.
         try {
-            // ARGH
             int leftPos = (int) (getX() + (float) this.getWidth() / 2);
             int topPos = (int) (getY() + this.getHeight() * .75f);
             int k = leftPos - 20;
             int l = topPos - 25;
             int m = leftPos + 20;
             int n = topPos + 35;
-            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, entity);
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, (float) size,
+                    new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI),
+                    null, entity);
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();

@@ -24,7 +24,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -48,6 +47,7 @@ public class RemorphedMenu extends Screen {
     private final List<GameProfile> unlockedSkins = new CopyOnWriteArrayList<>();
     private final Map<ShapeType<?>, Mob> renderEntities = new ConcurrentHashMap<>();
     private final Map<GameProfile, FakeClientPlayer> renderPlayers = new ConcurrentHashMap<>();
+
 
     private final SearchWidget searchBar = createSearchBar();
     private final Button helpButton = createHelpButton();
@@ -114,10 +114,12 @@ public class RemorphedMenu extends Screen {
 
             // filter unlocked
             List<ShapeType<?>> newUnlocked = new ArrayList<>();
+            Set<EntityType<?>> seenTypes = new HashSet<>();
             for (ShapeType<?> shapeType : unlockedShapes) {
-                if (!newUnlocked.stream().map(ShapeType::getEntityType).toList().contains(shapeType.getEntityType())) {
+                if (!seenTypes.contains(shapeType.getEntityType())) {
                     if (currentShape == null || shapeType.equals(currentShape) || shapeType.getEntityType() != currentShape.getEntityType() || shapeType.getVariantData() == currentShape.getVariantData()) { // only add the current variant, NOT the default one (additionally)
                         newUnlocked.add(shapeType);
+                        seenTypes.add(shapeType.getEntityType());
                     }
                 }
             }
@@ -165,7 +167,6 @@ public class RemorphedMenu extends Screen {
                     .toList();
 
             populateShapeWidgets(filteredShapes, filteredSkins);
-            Remorphed.LOGGER.info("Loaded {} entities and {} skins for rendering", filteredShapes.size(), filteredSkins.size());
 
             lastSearchContents = text;
         });
@@ -208,7 +209,7 @@ public class RemorphedMenu extends Screen {
                                     0,
                                     0,
                                     skinProfile,
-                                    new FakeClientPlayer(minecraft.level, skinProfile),
+                                    (FakeClientPlayer) fakePlayer,
                                     this,
                                     PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
                                     bl,
@@ -255,12 +256,27 @@ public class RemorphedMenu extends Screen {
     public synchronized void populateUnlockedRenderEntities(Player player) {
         unlockedShapes.clear();
         renderEntities.clear();
+
         List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
+
         for (ShapeType<?> type : validUnlocked) {
-            Entity entity = type.create(Minecraft.getInstance().level, player);
-            if (entity instanceof Mob living) {
+            // Try to get from global cache first
+            EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedEntity(type);
+
+            if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
+                // Cache hit! Use the pre-loaded entity
+                renderEntities.put(type, cachedMob);
                 unlockedShapes.add(type);
-                renderEntities.put(type, living);
+            } else {
+                // Cache miss - create, prepare, and cache entity on-demand
+                EntityRenderCache.cacheEntity(type, player);
+
+                // Now retrieve the prepared entity from cache
+                cachedData = EntityRenderCache.getCachedEntity(type);
+                if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
+                    renderEntities.put(type, cachedMob);
+                    unlockedShapes.add(type);
+                }
             }
         }
     }
@@ -268,18 +284,41 @@ public class RemorphedMenu extends Screen {
     public synchronized void populateUnlockedRenderPlayers(Player player) {
         unlockedSkins.clear();
         renderPlayers.clear();
+
         List<GameProfile> validUnlocked = Remorphed.getUnlockedSkins(player);
+
         for (GameProfile profile : validUnlocked) {
             if (profile.getId() != player.getUUID()) {
-                FakeClientPlayer entity = null;
-                if (minecraft != null) {
-                    entity = new FakeClientPlayer(minecraft.level, profile);
+                // Try to get from global cache first
+                EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
+
+                if (cachedData != null && cachedData.entity() instanceof FakeClientPlayer cachedPlayer) {
+                    // Cache hit! Use the pre-loaded player
+                    renderPlayers.put(profile, cachedPlayer);
+                    unlockedSkins.add(profile);
+                } else {
+                    // Cache miss - create, prepare, and cache player on-demand
+                    EntityRenderCache.cachePlayerSkin(profile);
+
+                    // Now retrieve the prepared player from cache
+                    cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
+                    if (cachedData != null && cachedData.entity() instanceof FakeClientPlayer cachedPlayer) {
+                        renderPlayers.put(profile, cachedPlayer);
+                        unlockedSkins.add(profile);
+                    }
                 }
-                unlockedSkins.add(profile);
-                renderPlayers.put(profile, entity);
             }
         }
     }
+
+    /**
+     * Clears the entity and player caches. Call this when the player logs out
+     * or when you want to force a complete refresh of all entities.
+     */
+    public static void clearCache() {
+        EntityRenderCache.clearCache();
+    }
+
 
     protected void addFooter() {
         this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, (button) -> this.onClose()).width(200).build());

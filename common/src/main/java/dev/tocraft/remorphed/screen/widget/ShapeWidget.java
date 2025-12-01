@@ -78,8 +78,7 @@ public abstract class ShapeWidget extends AbstractButton {
                 String s = String.valueOf(availability);
                 int w = parent.getFont().width(s);
                 guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), -1, false);
-            }
-            else if (availability == 0) {
+            } else if (availability == 0) {
                 guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/deleted.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
 

@@ -362,6 +362,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             rootNode.addChild(hasSkin);
         }
 
+
         dispatcher.getRoot().addChild(rootNode);
 
     }

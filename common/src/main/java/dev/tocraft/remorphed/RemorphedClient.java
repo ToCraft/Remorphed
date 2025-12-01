@@ -4,7 +4,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.tocraft.craftedcore.event.client.ClientPlayerEvents;
 import dev.tocraft.craftedcore.event.client.ClientTickEvents;
 import dev.tocraft.craftedcore.registration.KeyBindingRegistry;
+import dev.tocraft.remorphed.handler.client.ClientDisconnectHandler;
 import dev.tocraft.remorphed.handler.client.ClientPlayerRespawnHandler;
+import dev.tocraft.remorphed.handler.client.EntityRenderCacheHandler;
 import dev.tocraft.remorphed.mixin.client.accessor.GuiGraphicsAccessor;
 import dev.tocraft.remorphed.network.ClientNetworking;
 import dev.tocraft.remorphed.screen.render.GuiShapeRenderState;
@@ -33,6 +35,8 @@ public class RemorphedClient {
 
         // Register event handlers
         ClientTickEvents.CLIENT_PRE.register(new KeyPressHandler());
+        ClientTickEvents.CLIENT_PRE.register(new ClientDisconnectHandler());
+        ClientTickEvents.CLIENT_PRE.register(new EntityRenderCacheHandler());
         ClientNetworking.registerPacketHandlers();
 
         ClientPlayerEvents.CLIENT_PLAYER_RESPAWN.register(new ClientPlayerRespawnHandler());

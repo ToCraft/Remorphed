@@ -2,6 +2,7 @@ package dev.tocraft.remorphed.screen.widget;
 
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.RemorphedClient;
 import dev.tocraft.remorphed.impl.FakeClientPlayer;
 import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.walkers.api.PlayerShape;
@@ -12,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +56,11 @@ public class SkinWidget extends ShapeWidget {
             int l = topPos - 25;
             int m = leftPos + 20;
             int n = topPos + 35;
-            InventoryScreen.renderEntityInInventory(guiGraphics, k, l, m, n, size, new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI), null, fakePlayer);
+            // Use a unique ID for each skin widget (based on skin UUID hash)
+            int id = skin.getId().hashCode();
+            RemorphedClient.renderEntityInInventory(id, guiGraphics, k, l, m, n, (float) size,
+                    new Vector3f(), new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI),
+                    null, fakePlayer);
         }
     }
 

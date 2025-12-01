@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 /**
  * Network packet for checking permissions - client-side methods only
  */
+@SuppressWarnings("unused")
 public class PermissionCheckPacket {
 
     /**

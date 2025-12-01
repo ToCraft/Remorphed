@@ -5,6 +5,7 @@ remorphed 7.1.0
 - fix broken counter in menu
 - add delete functionality to Menu - press "X" or mouse-scroll-wheel to delete
 - fix duplicate entities in menu
+- optimize menu rendering by FugLong
 
 remorphed 7.0
 ================

@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Client-side cache for permission results to avoid repeated server requests
  */
+@SuppressWarnings("unused")
 @Environment(EnvType.CLIENT)
 public class ClientPermissionCache {
 
