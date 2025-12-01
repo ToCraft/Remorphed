@@ -89,22 +89,19 @@ public class EntityRenderCacheHandler implements ClientTickEvents.Client {
 
         // Gather entities for the current filtered list (for correct ID mapping)
         List<Mob> entitiesToRender = new ArrayList<>();
-        List<ShapeType<?>> shapesInOrder = new ArrayList<>();
 
         for (ShapeType<?> type : currentFilteredShapes) {
             EntityRenderCache.CachedEntityData cached = EntityRenderCache.getCachedEntity(type);
-            if (cached != null && cached.entity instanceof Mob mob) {
+            if (cached != null && cached.entity() instanceof Mob mob) {
                 entitiesToRender.add(mob);
-                shapesInOrder.add(type);
             }
         }
 
         if (!entitiesToRender.isEmpty()) {
             // Open invisible pre-render screen with shape types for ID calculation
             Minecraft.getInstance().setScreen(new EntityPreloadScreen(
-                entitiesToRender,
-                shapesInOrder,
-                unlockedSkins
+                    entitiesToRender,
+                    unlockedSkins
             ));
         }
     }

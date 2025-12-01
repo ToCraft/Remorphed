@@ -3,7 +3,6 @@ package dev.tocraft.remorphed.screen;
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.RemorphedClient;
-import dev.tocraft.walkers.api.variant.ShapeType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -24,17 +23,15 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class EntityPreloadScreen extends Screen {
     private final List<Mob> entitiesToRender;
-    private final List<ShapeType<?>> shapesInOrder;
     private final List<GameProfile> skinsToRender;
     private int currentIndex = 0;
     private int finishedTicks = 0; // Ticks since finishing rendering
     private static final int ENTITIES_PER_FRAME = 10; // Render 10 entities per frame
     private static final int WAIT_AFTER_RENDER = 5; // Wait 5 ticks after rendering for textures to load
 
-    public EntityPreloadScreen(List<Mob> entities, List<ShapeType<?>> shapes, List<GameProfile> skins) {
+    public EntityPreloadScreen(List<Mob> entities, List<GameProfile> skins) {
         super(Component.literal("Preloading"));
         this.entitiesToRender = entities;
-        this.shapesInOrder = shapes;
         this.skinsToRender = skins;
     }
 
@@ -68,15 +65,15 @@ public class EntityPreloadScreen extends Screen {
                 int size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
 
                 RemorphedClient.renderEntityInInventory(
-                    id,  // Use calculated grid ID
-                    guiGraphics,
-                    -10000, -10000,  // Off-screen
-                    -9900, -9900,
-                    size,
-                    new Vector3f(),
-                    new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI),
-                    null,
-                    entity
+                        id,  // Use calculated grid ID
+                        guiGraphics,
+                        -10000, -10000,  // Off-screen
+                        -9900, -9900,
+                        size,
+                        new Vector3f(),
+                        new Quaternionf().rotationXYZ(0.43633232F, (float) Math.PI, (float) Math.PI),
+                        null,
+                        entity
                 );
             } catch (Exception e) {
                 // Silent - entity will load on-demand if pre-render fails
@@ -90,7 +87,7 @@ public class EntityPreloadScreen extends Screen {
         if (currentIndex >= entitiesToRender.size()) {
             finishedTicks++;
             if (finishedTicks >= WAIT_AFTER_RENDER) {
-                Minecraft.getInstance().setScreen(null);
+                Minecraft.getInstance().setScreen(new RemorphedMenu());
             }
         }
     }
