@@ -1,7 +1,6 @@
 package dev.tocraft.remorphed.handler.client;
 
 import dev.tocraft.craftedcore.event.client.ClientTickEvents;
-import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.screen.EntityRenderCache;
 import net.minecraft.client.Minecraft;
 

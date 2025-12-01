@@ -7,7 +7,6 @@ import dev.tocraft.remorphed.impl.FakeClientPlayer;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.mixin.client.accessor.ScreenAccessor;
 import dev.tocraft.remorphed.screen.widget.*;
-import dev.tocraft.remorphed.screen.EntityRenderCache;
 import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
@@ -25,11 +24,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -266,7 +263,7 @@ public class RemorphedMenu extends Screen {
             // Try to get from global cache first
             EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedEntity(type);
 
-            if (cachedData != null && cachedData.entity instanceof Mob cachedMob) {
+            if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
                 // Cache hit! Use the pre-loaded entity
                 renderEntities.put(type, cachedMob);
                 unlockedShapes.add(type);
@@ -276,7 +273,7 @@ public class RemorphedMenu extends Screen {
 
                 // Now retrieve the prepared entity from cache
                 cachedData = EntityRenderCache.getCachedEntity(type);
-                if (cachedData != null && cachedData.entity instanceof Mob cachedMob) {
+                if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
                     renderEntities.put(type, cachedMob);
                     unlockedShapes.add(type);
                 }
@@ -295,7 +292,7 @@ public class RemorphedMenu extends Screen {
                 // Try to get from global cache first
                 EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
 
-                if (cachedData != null && cachedData.entity instanceof FakeClientPlayer cachedPlayer) {
+                if (cachedData != null && cachedData.entity() instanceof FakeClientPlayer cachedPlayer) {
                     // Cache hit! Use the pre-loaded player
                     renderPlayers.put(profile, cachedPlayer);
                     unlockedSkins.add(profile);
@@ -305,7 +302,7 @@ public class RemorphedMenu extends Screen {
 
                     // Now retrieve the prepared player from cache
                     cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
-                    if (cachedData != null && cachedData.entity instanceof FakeClientPlayer cachedPlayer) {
+                    if (cachedData != null && cachedData.entity() instanceof FakeClientPlayer cachedPlayer) {
                         renderPlayers.put(profile, cachedPlayer);
                         unlockedSkins.add(profile);
                     }

@@ -22,10 +22,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Manages pre-loading and caching of entity render states for the Remorphed menu.
  * This prevents the visual loading delay when opening the menu for the first time.
- *
  * The cache creates isolated, static snapshots of entity render states that won't be
  * affected by real-world entities near the player.
  */
+@SuppressWarnings("unused")
 @Environment(EnvType.CLIENT)
 public class EntityRenderCache {
 
@@ -38,12 +38,7 @@ public class EntityRenderCache {
      * NOTE: We store the actual entity, NOT the EntityRenderState, because
      * EntityRenderState objects are mutable and get updated by the rendering system.
      */
-    public static class CachedEntityData {
-        public final LivingEntity entity;
-
-        public CachedEntityData(LivingEntity entity) {
-            this.entity = entity;
-        }
+    public record CachedEntityData(LivingEntity entity) {
     }
 
     /**
@@ -82,7 +77,7 @@ public class EntityRenderCache {
                 }
             } catch (Exception e) {
                 Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load entity for type {}: {}",
-                    type.getEntityType().getDescriptionId(), e.getMessage());
+                        type.getEntityType().getDescriptionId(), e.getMessage());
             }
         }
     }
@@ -124,7 +119,7 @@ public class EntityRenderCache {
                 PLAYER_CACHE.putIfAbsent(profile, new CachedEntityData(fakePlayer));
             } catch (Exception e) {
                 Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load player skin for profile {}: {}",
-                    profile.getName(), e.getMessage());
+                        profile.getName(), e.getMessage());
             }
         }
     }
@@ -178,7 +173,7 @@ public class EntityRenderCache {
      * Caches a single entity type on-demand.
      * Used when a player unlocks a new shape while in-world.
      *
-     * @param type The shape type to cache
+     * @param type   The shape type to cache
      * @param player The player context
      */
     public static void cacheEntity(ShapeType<?> type, Player player) {

@@ -9,7 +9,6 @@ import dev.tocraft.remorphed.handler.client.ClientPlayerRespawnHandler;
 import dev.tocraft.remorphed.handler.client.EntityRenderCacheHandler;
 import dev.tocraft.remorphed.mixin.client.accessor.GuiGraphicsAccessor;
 import dev.tocraft.remorphed.network.ClientNetworking;
-import dev.tocraft.remorphed.screen.RemorphedMenu;
 import dev.tocraft.remorphed.screen.render.GuiShapeRenderState;
 import dev.tocraft.remorphed.tick.KeyPressHandler;
 import net.fabricmc.api.EnvType;
