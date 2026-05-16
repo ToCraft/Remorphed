@@ -58,7 +58,7 @@ public class NetworkHandler {
         boolean is_entity = data.getBoolean("is_entity").orElse(true);
         if (is_entity) {
             String id = data.getString("id").orElseThrow();
-            @SuppressWarnings("unchecked") EntityType<LivingEntity> type = (EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
+            @SuppressWarnings("unchecked") EntityType<@NotNull LivingEntity> type = (EntityType<@NotNull LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
             PlayerMorph.handleSwap(context.getPlayer(), type);
         } else {
             String uuid = data.getString("uuid").orElseThrow();
@@ -88,7 +88,6 @@ public class NetworkHandler {
         }
     }
 
-    @SuppressWarnings("ConstantValue")
     private static void handlePermissionCheckPacket(ModernNetworking.@NotNull Context context, @NotNull CompoundTag tag) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         String permission = tag.getString("permission").orElse("");
@@ -123,7 +122,7 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(NetworkHandler.MORPH_REQUEST, compound);
     }
 
-    @SuppressWarnings({"DataFlowIssue", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     private static void handleMorphRequestPacket(ModernNetworking.@NotNull Context context, CompoundTag compound) {
         ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {
             // check if player is blacklisted
@@ -143,7 +142,7 @@ public class NetworkHandler {
                 Identifier typeId = Identifier.parse(compound.getString("id").orElseThrow());
                 int typeVariant = compound.getIntOr("variant", -1);
 
-                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null);
+                EntityType<? extends @NotNull LivingEntity> eType = (EntityType<? extends @NotNull LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null);
 
                 // make the default ShapeType null, doing it this way, it's ensured that invalid 2ndShapes won't cause crashes.
                 @Nullable
@@ -175,7 +174,7 @@ public class NetworkHandler {
         ModernNetworking.sendToPlayer(player, NetworkHandler.FAVORITE_SYNC, tag);
     }
 
-    public static void sendFavoriteRequest(@NotNull EntityType<? extends LivingEntity> type, boolean favorite) {
+    public static void sendFavoriteRequest(@NotNull EntityType<? extends @NotNull LivingEntity> type, boolean favorite) {
         CompoundTag packet = new CompoundTag();
         packet.putString("id", EntityType.getKey(type).toString());
         packet.putBoolean("favorite", favorite);
@@ -189,7 +188,7 @@ public class NetworkHandler {
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
 
-    @SuppressWarnings({"unchecked", "DataFlowIssue"})
+    @SuppressWarnings({"unchecked"})
     private static void handleFavoriteRequestPacket(ModernNetworking.Context context, @NotNull CompoundTag packet) {
         boolean favorite = packet.getBooleanOr("favorite", false);
 
@@ -206,7 +205,7 @@ public class NetworkHandler {
                 sendFavoriteSync((ServerPlayer) context.getPlayer());
             });
         } else {
-            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(packet.getString("id").orElseThrow())).map(Holder::value).orElse(null);
+            EntityType<? extends @NotNull LivingEntity> entityType = (EntityType<? extends @NotNull LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(packet.getString("id").orElseThrow())).map(Holder::value).orElse(null);
 
             if (entityType != null) {
                 ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {

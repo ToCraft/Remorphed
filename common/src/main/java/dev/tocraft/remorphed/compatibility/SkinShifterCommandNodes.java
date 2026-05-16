@@ -21,6 +21,7 @@ import java.util.UUID;
  * Builds and registers all SkinShifter-specific command nodes onto the root
  * {@code /remorphed} node. Only called when SkinShifter is present.
  */
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public final class SkinShifterCommandNodes {
 
     private SkinShifterCommandNodes() {}

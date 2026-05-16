@@ -23,7 +23,7 @@ public class RemorphedNeoForge {
     }
 
     public static void registerNodesEvent(PermissionGatherEvent.@NotNull Nodes event) {
-        List<PermissionNode<Boolean>> nodes = new ArrayList<>();
+        List<PermissionNode<@NotNull Boolean>> nodes = new ArrayList<>();
 
         // Core permissions
         nodes.add(PermissionCheckerImpl.createNode("remorphed", "morph"));

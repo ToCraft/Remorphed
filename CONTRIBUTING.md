@@ -55,9 +55,9 @@ Copy `en_us.json` as a starting point, rename it to your locale code (e.g. `de_d
 ### Prerequisites
 
 | Tool | Minimum version |
-|------|----------------|
-| JDK  | 25             |
-| Git  | any recent     |
+|------|-----------------|
+| JDK  | 25              |
+| Git  | any recent      |
 
 IntelliJ IDEA with Gradle support is recommended.
 
@@ -75,15 +75,15 @@ The build is powered by the [ModMaster](https://github.com/ToCraft/ModMaster) Gr
 
 ### Key `gradle.properties` values
 
-| Property | Purpose |
-|----------|---------|
-| `minecraft` | Target Minecraft version |
-| `mod_version` | Mod version to publish |
-| `craftedcore_version` | Required CraftedCore version |
-| `woodwalkers_version` | Required Woodwalkers (Walkers) version |
-| `skinshifter_version` | Optional SkinShifter integration version |
-| `fabric_loader` / `fabric` / `neoforge` | Loader and platform versions |
-| `java` | Java toolchain version |
+| Property                                | Purpose                                  |
+|-----------------------------------------|------------------------------------------|
+| `minecraft`                             | Target Minecraft version                 |
+| `mod_version`                           | Mod version to publish                   |
+| `craftedcore_version`                   | Required CraftedCore version             |
+| `woodwalkers_version`                   | Required Woodwalkers (Walkers) version   |
+| `skinshifter_version`                   | Optional SkinShifter integration version |
+| `fabric_loader` / `fabric` / `neoforge` | Loader and platform versions             |
+| `java`                                  | Java toolchain version                   |
 
 ---
 
@@ -159,9 +159,9 @@ Then fix any compilation errors caused by Mojang or Woodwalkers API changes, run
 
 ReMorphed uses two reusable composite actions maintained in the ToCraft organisation:
 
-| Action | Purpose |
-|--------|---------|
-| [`modmaster-build-action`](https://github.com/ToCraft/modmaster-build-action) | Triggered on every push/PR — sets up JDK & Gradle, runs `./gradlew check build`, uploads compiled jars as an artifact |
+| Action                                                                            | Purpose                                                                                                                                                                                |
+|-----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`modmaster-build-action`](https://github.com/ToCraft/modmaster-build-action)     | Triggered on every push/PR — sets up JDK & Gradle, runs `./gradlew check build`, uploads compiled jars as an artifact                                                                  |
 | [`modmaster-release-action`](https://github.com/ToCraft/modmaster-release-action) | Triggered on releases — runs `./gradlew check build release`, publishing to CurseForge, Modrinth, and the ToCraft Maven, sending a Discord notification, and creating a GitHub Release |
 
 You do not need to modify the workflow files for normal contributions. For CI failures on your PR, check the [Actions tab](https://github.com/ToCraft/Remorphed/actions) for the full build log.

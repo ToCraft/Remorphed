@@ -77,7 +77,7 @@ public class SpecialShapeWidget extends AbstractButton {
     }
 
     @Override
-    public void updateWidgetNarration(NarrationElementOutput builder) {
+    public void updateWidgetNarration(@NotNull NarrationElementOutput builder) {
 
     }
 }

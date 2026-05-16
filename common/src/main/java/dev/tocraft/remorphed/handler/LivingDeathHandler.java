@@ -11,7 +11,6 @@ import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +26,7 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
                 // Check if player has permission to unlock this entity type (only if permissions are enabled)
                 boolean canUnlock = !Remorphed.CONFIG.usePermissions || PermissionManager.canMorphIntoType(killer, type);
                 if (canUnlock) {
-                    PlayerMorph.addKill(killer, (EntityType<? extends LivingEntity>) type);
+                    PlayerMorph.addKill(killer, type);
 
                     if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type)) {
                         PlayerShapeChanger.change2ndShape(killer, shapeType);

@@ -1,5 +1,3 @@
-import java.util.*
-
 plugins {
     id("dev.tocraft.modmaster.neoforge")
 }

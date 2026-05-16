@@ -2,8 +2,6 @@ package dev.tocraft.remorphed.tick;
 
 import dev.tocraft.craftedcore.event.client.ClientTickEvents;
 import dev.tocraft.remorphed.RemorphedClient;
-import dev.tocraft.remorphed.network.ClientNetworking;
-import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.remorphed.screen.RemorphedMenu;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

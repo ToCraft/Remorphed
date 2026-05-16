@@ -31,7 +31,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
-import net.minecraft.world.level.storage.ValueInput;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +40,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@SuppressWarnings("unchecked")
 @Environment(EnvType.CLIENT)
 public class RemorphedMenu extends Screen {
     @Nullable
@@ -166,7 +166,7 @@ public class RemorphedMenu extends Screen {
                                 populateUnlockedRenderPlayers(minecraft.player);
                                 // Re-trigger the search responder to rebuild the widget list
                                 searchBar.setValue(searchBar.getValue());
-                            }, Minecraft.getInstance()::execute); // marshal back to main thread
+                            }, Minecraft.getInstance()); // marshal back to main thread
                 }
             }
         }
@@ -194,12 +194,12 @@ public class RemorphedMenu extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractRenderState(graphics, mouseX, mouseY, a);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractTransparentBackground(graphics);
     }
 
@@ -244,7 +244,7 @@ public class RemorphedMenu extends Screen {
                         }
                     } else if (listIndex < skinProfiles.size() + rendered.size()) {
                         ShapeType<?> type = rendered.get(listIndex - skinProfiles.size());
-                        EntityType<?> eType = type.getEntityType();
+                        EntityType<? extends @NotNull LivingEntity> eType = type.getEntityType();
                         Mob entity = renderEntities.get(type);
                         if (entity != null) {
                             boolean bl = type.equals(currentType);
@@ -259,7 +259,7 @@ public class RemorphedMenu extends Screen {
                                     this,
                                     PlayerMorph.getFavoriteShapes(minecraft.player).contains(type.getEntityType()),
                                     bl,
-                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * (PlayerMorph.getKills(minecraft.player, eType) / Remorphed.CONFIG.killToUnlock) - PlayerMorph.getCounter(minecraft.player, (EntityType<? extends LivingEntity>) eType)
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * (PlayerMorph.getKills(minecraft.player, eType) / Remorphed.CONFIG.killToUnlock) - PlayerMorph.getCounter(minecraft.player, eType)
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());
@@ -286,7 +286,7 @@ public class RemorphedMenu extends Screen {
         for (EntityType<?> type : validUnlocked) {
             // Try to get from global cache first
             ShapeType<?> shapeType = PlayerMorph.getDefaultVariants(player).get(type);
-            if (shapeType == null) shapeType = ShapeType.from((EntityType<? extends LivingEntity>) type);
+            if (shapeType == null) shapeType = ShapeType.from((EntityType<? extends @NotNull LivingEntity>) type);
             EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedEntity(shapeType);
 
             if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
@@ -394,7 +394,7 @@ public class RemorphedMenu extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         for (GuiEventListener child : children()) {
             if (child.keyPressed(event)) {
                 return true;

@@ -22,7 +22,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class RemorphedCommand implements CommandEvents.CommandRegistration {
@@ -144,7 +143,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                  Identifier id) {
         if (!checkTargetPermission(source, player, "addShape")) return;
         EntityType<?> type = resolveType(id);
-        PlayerMorph.getUnlockedShapes(player).put((EntityType<? extends LivingEntity>) type, Remorphed.getKillToUnlock(type));
+        PlayerMorph.getUnlockedShapes(player).put(type, Remorphed.getKillToUnlock(type));
         source.sendSuccess(() -> Component.translatable(
                 Remorphed.MODID + ".addShape",
                 player.getName(),
@@ -183,6 +182,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     /** Per-execution check against a specific target. Sends failure and returns false if denied. */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean checkTargetPermission(CommandSourceStack source, ServerPlayer target, String command) {
         if (source.getEntity() instanceof ServerPlayer executor && Remorphed.CONFIG.usePermissions) {
             if (!PermissionManager.canUseCommandOnTarget(executor, target, command)) {

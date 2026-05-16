@@ -39,7 +39,7 @@ public class PlayerWidget extends AbstractButton {
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractContents(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         if (skinId != null) {
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED, skinId, getX(), getY(), 8.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED, skinId, getX(), getY(), 40.0f, 8, getWidth(), getHeight(), 8, 8, 64, 64);
@@ -66,7 +66,7 @@ public class PlayerWidget extends AbstractButton {
     }
 
     @Override
-    public void updateWidgetNarration(NarrationElementOutput builder) {
+    public void updateWidgetNarration(@NotNull NarrationElementOutput builder) {
 
     }
 }

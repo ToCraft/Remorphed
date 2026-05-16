@@ -1,7 +1,6 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -55,7 +54,7 @@ public abstract class ShapeWidget extends AbstractButton {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         // Add to favorites
         if (active && visible && isHovered() && Minecraft.getInstance().player != null) {
             int button = event.button();
@@ -72,7 +71,7 @@ public abstract class ShapeWidget extends AbstractButton {
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractContents(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         if (!crashed) {
             // make the widget is even DARKER when hovered
             if (isHoveredOrFocused()) {
@@ -125,7 +124,7 @@ public abstract class ShapeWidget extends AbstractButton {
     abstract void sendDeleteShapePacket();
 
     @Override
-    public void updateWidgetNarration(NarrationElementOutput builder) {
+    public void updateWidgetNarration(@NotNull NarrationElementOutput builder) {
 
     }
 }

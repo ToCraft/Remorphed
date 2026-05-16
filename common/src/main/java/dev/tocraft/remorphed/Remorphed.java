@@ -102,37 +102,6 @@ public class Remorphed {
         return player.isCreative() && CONFIG.creativeUnlockAll;
     }
 
-    public static boolean canUseShape(Player player, ShapeType<?> type) {
-        // If permissions are enabled, use permission-based logic
-        if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {
-            // Check basic morph permission
-            if (!PermissionManager.canMorph(serverPlayer)) {
-                return false;
-            }
-
-            // Check entity type specific permission - this takes precedence over creative permissions
-            if (type != null && !PermissionManager.canMorphIntoType(serverPlayer, type.getEntityType())) {
-                return false;
-            }
-
-            // Check bypass transform lock permission
-            if (Remorphed.CONFIG.lockTransform && !PermissionManager.canBypassTransformLock(serverPlayer)) {
-                return false;
-            }
-
-            // Check if player can use all shapes (config-based creative logic)
-            if (canUseEveryShape(player)) {
-                return true;
-            }
-
-            // For permission-enabled players without creative permission, check kill requirements
-            return !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
-        }
-
-        // If permissions are disabled, use original config-based behavior
-        return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type.getEntityType()) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type.getEntityType()));
-    }
-
     public static boolean canUseShape(Player player, EntityType<?> type) {
         // If permissions are enabled, use permission-based logic
         if (CONFIG.usePermissions && player instanceof ServerPlayer serverPlayer) {

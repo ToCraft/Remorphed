@@ -14,11 +14,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -30,7 +28,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-@SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused"})
+@SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused", "unchecked"})
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin implements RemorphedPlayerDataProvider {
 
@@ -64,13 +62,13 @@ public abstract class PlayerEntityMixin implements RemorphedPlayerDataProvider {
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-    private void readNbt(ValueInput in, CallbackInfo ci) {
-        remorphed$readData(in.read(Remorphed.MODID, CompoundTag.CODEC).orElse(new CompoundTag()));
+    private void readNbt(ValueInput input, CallbackInfo ci) {
+        remorphed$readData(input.read(Remorphed.MODID, CompoundTag.CODEC).orElse(new CompoundTag()));
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-    private void writeNbt(ValueOutput out, CallbackInfo ci) {
-        out.store(Remorphed.MODID, CompoundTag.CODEC, remorphed$writeData());
+    private void writeNbt(ValueOutput output, CallbackInfo ci) {
+        output.store(Remorphed.MODID, CompoundTag.CODEC, remorphed$writeData());
     }
 
     // -------------------------------------------------------------------------
@@ -146,7 +144,7 @@ public abstract class PlayerEntityMixin implements RemorphedPlayerDataProvider {
 
         ListTag defaultVariantsList = new ListTag();
         remorphed$defaultVariants.forEach((type, shape) -> {
-            if (shape != null && !Objects.equals(ShapeType.from((EntityType<? extends LivingEntity>) type), shape)) {
+            if (shape != null && !Objects.equals(ShapeType.from((EntityType<? extends @NotNull LivingEntity>) type), shape)) {
                 CompoundTag e = new CompoundTag();
                 e.putString("entity_id", EntityType.getKey(type).toString());
                 e.putInt("variant", shape.getVariantData());
@@ -185,7 +183,7 @@ public abstract class PlayerEntityMixin implements RemorphedPlayerDataProvider {
                 int variant = e.getIntOr("variant", -1);
                 BuiltInRegistries.ENTITY_TYPE.get(typeId)
                         .map(Holder::value)
-                        .ifPresent(type -> remorphed$favoriteShapes.add(type));
+                        .ifPresent(remorphed$favoriteShapes::add);
             }
         });
 
@@ -229,7 +227,7 @@ public abstract class PlayerEntityMixin implements RemorphedPlayerDataProvider {
                 Optional<Integer> variant = e.getInt("variant");
                 if (type.isPresent() && variant.isPresent()) {
                     EntityType<?> eType = type.get().value();
-                    ShapeType<?> shape = ShapeType.from((EntityType<? extends LivingEntity>) eType, variant.get());
+                    ShapeType<?> shape = ShapeType.from((EntityType<? extends @NotNull LivingEntity>) eType, variant.get());
                     if (shape != null) {
                         remorphed$getDefaultVariants().put(eType, shape);
                     }

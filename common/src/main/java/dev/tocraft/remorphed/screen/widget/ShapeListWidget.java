@@ -36,7 +36,7 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
         super.clearEntries();
     }
 
-    public static class ShapeRow extends ContainerObjectSelectionList.Entry<ShapeRow> {
+    public static class ShapeRow extends ContainerObjectSelectionList.Entry<@NotNull ShapeRow> {
         private final ShapeWidget[] widgets;
 
         public ShapeRow(ShapeWidget[] widgets) {
@@ -44,7 +44,7 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
         }
 
         @Override
-        public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovering, float delta) {
+        public void extractContent(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovering, float delta) {
             for (int i = 0; i < widgets.length; i++) {
                 ShapeWidget widget = widgets[i];
 
@@ -85,7 +85,7 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
     }
 
     @Override
-    protected void extractListBackground(GuiGraphicsExtractor graphics) {
+    protected void extractListBackground(@NotNull GuiGraphicsExtractor graphics) {
     }
 
     @Override
