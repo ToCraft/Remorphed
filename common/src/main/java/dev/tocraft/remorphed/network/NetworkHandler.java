@@ -3,9 +3,9 @@ package dev.tocraft.remorphed.network;
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.craftedcore.network.ModernNetworking;
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.compatibility.SkinShifterCompat;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.permission.PermissionManager;
-import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
@@ -83,7 +83,7 @@ public class NetworkHandler {
 
     private static void handleResetSkinPacket(ModernNetworking.Context context, CompoundTag data) {
         if (Remorphed.foundSkinShifter) {
-            SkinShifter.setSkin((ServerPlayer) context.getPlayer(), null);
+            SkinShifterCompat.setSkin((ServerPlayer) context.getPlayer(), null);
         }
     }
 
@@ -133,10 +133,10 @@ public class NetworkHandler {
 
             if (compound.contains("playerUUID") && Remorphed.foundSkinShifter) {
                 UUID targetSkinUUID = UUIDUtil.uuidFromIntArray(compound.getIntArray("playerUUID").orElseThrow());
-                if (!Objects.equals(targetSkinUUID, SkinShifter.getCurrentSkin(context.getPlayer()))) {
+                if (!Objects.equals(targetSkinUUID, SkinShifterCompat.getCurrentSkin(context.getPlayer()))) {
                     Remorphed.spawnWalkersParticles(context.getPlayer());
                 }
-                SkinShifter.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
+                SkinShifterCompat.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
                 PlayerMorph.handleSwap(context.getPlayer(), targetSkinUUID);
             } else {
                 Identifier typeId = Identifier.parse(compound.getString("id").orElseThrow());

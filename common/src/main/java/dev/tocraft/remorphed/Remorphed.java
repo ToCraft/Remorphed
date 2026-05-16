@@ -32,6 +32,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ProfileResolver;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
@@ -51,10 +52,17 @@ public class Remorphed {
     public static final boolean foundSkinShifter = PlatformData.isModLoaded("skinshifter");
 
     public void initialize() {
+        Walkers.CONFIG.unlockEveryVariant = CONFIG.allow_variant_selection;
 
         ShapeEvents.UNLOCK_SHAPE.register(new UnlockShapeCallback());
         ShapeEvents.SWAP_SHAPE.register(new SwapShapeCallback());
         if (!CONFIG.unlockFriendlyNormal) {
+            if (CONFIG.allow_variant_selection) {
+                ApiLevel.setApiLevel(ApiLevel.MORPHING_AND_VARIANTS_MENU_ONLY);
+            } else {
+                ApiLevel.setApiLevel(ApiLevel.MORPHING_ONLY);
+            }
+        } else if (!CONFIG.allow_variant_selection) {
             ApiLevel.setApiLevel(ApiLevel.MORPHING_AND_VARIANTS_MENU_ONLY);
         }
 
@@ -192,13 +200,12 @@ public class Remorphed {
         CompoundTag compoundTag = new CompoundTag();
 
         // serialize current shape data to tag if it exists
-        Map<ShapeType<?>, Integer> unlockedShapes = PlayerMorph.getUnlockedShapes(changed);
+        Map<EntityType<? extends LivingEntity>, Integer> unlockedShapes = PlayerMorph.getUnlockedShapes(changed);
         ListTag shapesList = new ListTag();
         unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {
                 CompoundTag compound = new CompoundTag();
-                compound.putString("id", EntityType.getKey(shape.getEntityType()).toString());
-                compound.putInt("variant", shape.getVariantData());
+                compound.putString("id", EntityType.getKey(shape).toString());
                 compound.putInt("killAmount", killAmount);
                 shapesList.add(compound);
             }
@@ -222,8 +229,7 @@ public class Remorphed {
             if (count > 0 && type != null) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putBoolean("isSkin", false);
-                entryTag.putString("id", EntityType.getKey(type.getEntityType()).toString());
-                entryTag.putInt("variant", type.getVariantData());
+                entryTag.putString("id", EntityType.getKey(type).toString());
                 entryTag.putInt("counter", count);
                 morphCounter.add(entryTag);
             }

@@ -3,10 +3,10 @@ package dev.tocraft.remorphed.screen;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.compatibility.SkinShifterCompat;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.mixin.client.accessor.ScreenAccessor;
 import dev.tocraft.remorphed.screen.widget.*;
-import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.PlayerShape;
 import dev.tocraft.walkers.api.variant.ShapeType;
@@ -136,7 +136,7 @@ public class RemorphedMenu extends Screen {
 
             if (Remorphed.foundSkinShifter) {
                 populateUnlockedRenderPlayers(minecraft.player);
-                UUID currentSkin = SkinShifter.getCurrentSkin(minecraft.player);
+                UUID currentSkin = SkinShifterCompat.getCurrentSkin(minecraft.player);
 
                 unlockedSkins.sort((first, second) -> {
                     if (Objects.equals(first.id(), currentSkin) && currentShape != null) {
@@ -227,7 +227,7 @@ public class RemorphedMenu extends Screen {
                         GameProfile skinProfile = skinProfiles.get(listIndex);
                         PlayerSkin playerSkin = renderPlayers.get(skinProfile);
                         if (playerSkin != null) {
-                            boolean bl = Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.id()) && currentType == null;
+                            boolean bl = Objects.equals(SkinShifterCompat.getCurrentSkin(minecraft.player), skinProfile.id()) && currentType == null;
                             if (bl) currentRow = i;
                             row.add(new SkinWidget(
                                     0,

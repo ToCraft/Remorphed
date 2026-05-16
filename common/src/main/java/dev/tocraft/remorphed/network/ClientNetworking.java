@@ -13,6 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -35,13 +36,12 @@ public class ClientNetworking {
     @SuppressWarnings("unchecked")
     public static void handleUnlockedSyncPacket(ModernNetworking.Context context, @NotNull CompoundTag compound) {
         final UUID uuid = UUIDUtil.uuidFromIntArray(compound.getIntArray("uuid").orElseThrow());
-        final Map<ShapeType<?>, Integer> unlockedShapes = new HashMap<>();
+        final Map<EntityType<? extends @NotNull LivingEntity>, Integer> unlockedShapes = new HashMap<>();
         if (compound.contains("UnlockedShapes")) {
             compound.getListOrEmpty("UnlockedShapes").forEach(entryTag -> {
-                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(((CompoundTag) entryTag).getString("id").orElseThrow())).map(Holder::value).orElse(null);
-                int variant = ((CompoundTag) entryTag).getIntOr("variant", -1);
+                EntityType<? extends @NotNull LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(((CompoundTag) entryTag).getString("id").orElseThrow())).map(Holder::value).orElseThrow();
                 int killAmount = ((CompoundTag) entryTag).getIntOr("killAmount", 0);
-                unlockedShapes.put(ShapeType.from(eType, variant), killAmount);
+                unlockedShapes.put(eType, killAmount);
             });
         }
         final Map<UUID, Integer> unlockedSkins = new HashMap<>();
@@ -53,7 +53,7 @@ public class ClientNetworking {
             });
         }
 
-        final Map<ShapeType<?>, Integer> shapeCounter = new HashMap<>();
+        final Map<EntityType<? extends LivingEntity>, Integer> shapeCounter = new HashMap<>();
         final Map<UUID, Integer> skinCounter = new HashMap<>();
         if (compound.contains("MorphCounter")) {
             compound.getListOrEmpty("MorphCounter").forEach(entry -> {
@@ -64,8 +64,7 @@ public class ClientNetworking {
                     skinCounter.put(skinId, count);
                 } else {
                     Identifier typeId = Identifier.parse(((CompoundTag) entry).getString("id").orElseThrow());
-                    int typeVariantId = ((CompoundTag) entry).getIntOr("variant", -1);
-                    shapeCounter.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), count);
+                    shapeCounter.put((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), count);
                 }
             });
         }

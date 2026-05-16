@@ -1,9 +1,9 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.remorphed.compatibility.SkinShifterCompat;
 import dev.tocraft.remorphed.mixin.client.accessor.ClientPlayerAccessor;
 import dev.tocraft.remorphed.network.NetworkHandler;
-import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.walkers.api.PlayerShape;
 import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.fabricmc.api.EnvType;
@@ -58,7 +58,7 @@ public class PlayerWidget extends AbstractButton {
                 SwapPackets.sendSwapRequest();
                 parent.onClose();
             }
-            if (Remorphed.foundSkinShifter && SkinShifter.getCurrentSkin(Minecraft.getInstance().player) != Minecraft.getInstance().player.getUUID()) {
+            if (Remorphed.foundSkinShifter && SkinShifterCompat.getCurrentSkin(Minecraft.getInstance().player) != Minecraft.getInstance().player.getUUID()) {
                 NetworkHandler.sendResetSkinPacket();
                 parent.onClose();
             }

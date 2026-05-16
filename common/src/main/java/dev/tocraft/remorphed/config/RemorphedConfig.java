@@ -43,6 +43,8 @@ public class RemorphedConfig implements Config {
             put("minecraft:wither", 10);
         }
     };
+    @Comment("Whether the player can open the Variants menu or not.")
+    public boolean allow_variant_selection = true;
     @Comment("\n<<< Menu Customization >>>")
     public boolean show_traits_by_default = true;
     @Comment("scale the shapes in the menu")

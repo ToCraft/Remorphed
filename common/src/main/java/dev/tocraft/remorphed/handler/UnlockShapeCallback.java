@@ -25,7 +25,7 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
             if (!Remorphed.CONFIG.lockTransform && Remorphed.CONFIG.unlockFriendlyNormal) {
                 LivingEntity entityToBeUnlocked = type.create(player.level(), player);
                 if (!(entityToBeUnlocked instanceof Enemy)) {
-                    PlayerMorph.getUnlockedShapes(player).put(type, Remorphed.getKillToUnlock(type.getEntityType()));
+                    PlayerMorph.getUnlockedShapes(player).put(type.getEntityType(), Remorphed.getKillToUnlock(type.getEntityType()));
                 }
             }
             // check if entity is unlocked by remorphed, prevents native unlock mechanic by walkers

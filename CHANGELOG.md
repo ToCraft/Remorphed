@@ -6,6 +6,7 @@ remorphed 8.0
 - improve caching
 - fix remorphed hasShape & hasSkin command
 - fix killValue calculation
+- drop support for Walkers' "unlockEveryVariant". Use "allow_variant_selection" instead
 
 remorphed 7.1.1
 ================
