@@ -17,9 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Manages pre-loading and caching of entity render states for the Remorphed menu.
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeoutException;
 @SuppressWarnings("unused")
 @Environment(EnvType.CLIENT)
 public class EntityRenderCache {
-
     // Static caches for entity and player render states
     private static final Map<ShapeType<?>, CachedEntityData> ENTITY_CACHE = new ConcurrentHashMap<>();
     private static final Map<GameProfile, CachedPlayerSkin> PLAYER_CACHE = new ConcurrentHashMap<>();
@@ -91,40 +89,28 @@ public class EntityRenderCache {
     }
 
     /**
-     * Pre-loads all unlocked player skins for the given player.
-     * This should be called when the player joins a world.
-     *
-     * @param player The player whose unlocked skins to cache
+     * Pre-loads all unlocked player skins. Skin futures resolve on their own thread;
+     * we register a callback instead of blocking.
      */
     public static void preloadPlayerSkins(Player player) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null) {
-            return;
-        }
+        if (minecraft.level == null) return;
 
         List<GameProfile> unlockedSkins = Remorphed.getUnlockedSkins(player);
 
         for (GameProfile profile : unlockedSkins) {
-            // Skip player's own skin
-            if (profile.id().equals(player.getUUID())) {
-                continue;
-            }
+            if (profile.id().equals(player.getUUID())) continue;
+            if (PLAYER_CACHE.containsKey(profile)) continue;
 
-            // Skip if already cached (thread-safe check)
-            if (PLAYER_CACHE.containsKey(profile)) {
-                continue;
-            }
-
-            try {
-                // Create isolated player skin instance
-                PlayerSkin skin = Minecraft.getInstance().getSkinManager().get(profile).get(5, TimeUnit.SECONDS).orElseThrow(() -> new TimeoutException("Failed to get skin for profile: " + profile.name()));
-
-                // Use putIfAbsent to avoid race conditions
-                PLAYER_CACHE.putIfAbsent(profile, new CachedPlayerSkin(skin));
-            } catch (Exception e) {
-                Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load player skin for profile {}: {}",
-                        profile.name(), e.getMessage());
-            }
+            // Don't block — attach a callback instead
+            minecraft.getSkinManager().get(profile).thenAccept(optionalSkin ->
+                    optionalSkin.ifPresent(skin ->
+                            PLAYER_CACHE.putIfAbsent(profile, new CachedPlayerSkin(skin))
+                    )
+            ).exceptionally(ex -> {
+                Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load skin for {}: {}", profile.name(), ex.getMessage());
+                return null;
+            });
         }
     }
 
@@ -203,31 +189,24 @@ public class EntityRenderCache {
         }
     }
 
+
     /**
-     * Caches a single player skin on-demand.
-     * Used when a player unlocks a new skin while in-world.
-     *
-     * @param profile The game profile to cache
+     * On-demand skin cache — same non-blocking pattern.
      */
-    public static void cachePlayerSkin(GameProfile profile) {
-        if (PLAYER_CACHE.containsKey(profile)) {
-            return; // Already cached
-        }
+    public static CompletableFuture<Void> cachePlayerSkin(GameProfile profile) {
+        if (PLAYER_CACHE.containsKey(profile)) return CompletableFuture.completedFuture(null);
 
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null) {
-            return;
-        }
+        if (minecraft.level == null) return CompletableFuture.completedFuture(null);
 
-        try {
-            // Create isolated player skin instance
-            PlayerSkin skin = Minecraft.getInstance().getSkinManager().get(profile).get(5, TimeUnit.SECONDS).orElseThrow(() -> new TimeoutException("Failed to get skin for profile: " + profile.name()));
-
-            // Use putIfAbsent to avoid race conditions
-            PLAYER_CACHE.putIfAbsent(profile, new CachedPlayerSkin(skin));
-        } catch (Exception e) {
-            Remorphed.LOGGER.warn("[Remorphed] Failed to cache player skin on-demand: {}", profile.name(), e);
-        }
+        return minecraft.getSkinManager().get(profile).thenAccept(optionalSkin ->
+                optionalSkin.ifPresent(skin ->
+                        PLAYER_CACHE.putIfAbsent(profile, new CachedPlayerSkin(skin))
+                )
+        ).exceptionally(ex -> {
+            Remorphed.LOGGER.warn("[Remorphed] Failed to cache skin for {}: {}", profile.name(), ex.getMessage());
+            return null;
+        });
     }
 
     /**
@@ -255,5 +234,10 @@ public class EntityRenderCache {
      */
     public static int getCachedPlayerSkinCount() {
         return PLAYER_CACHE.size();
+    }
+
+    /** Non-null check without creating anything — used by the tick loop. */
+    public static boolean isCached(ShapeType<?> type) {
+        return ENTITY_CACHE.containsKey(type);
     }
 }

@@ -1,6 +1,7 @@
 package dev.tocraft.remorphed.handler.client;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.logging.LogUtils;
 import dev.tocraft.craftedcore.event.client.ClientTickEvents;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.screen.EntityPreloadScreen;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles pre-loading entity instances when the player joins a world.
@@ -22,55 +25,55 @@ import java.util.Set;
 public class EntityRenderCacheHandler implements ClientTickEvents.Client {
 
     private boolean wasInWorld = false;
-    private boolean hasPreloaded = false;
+    private boolean hasStartedPreload = false;
     private int ticksInWorld = 0;
+
+    // Incremental entity loading state
+    private List<ShapeType<?>> pendingShapes = null;
+    private int pendingIndex = 0;
+    private static final int ENTITIES_PER_TICK = 3; // Tune this — lower = smoother, slower
 
     @Override
     public void tick(Minecraft client) {
         boolean isInWorld = client.level != null && client.player != null;
 
-        // Detect transition from not-in-world to in-world (world join)
         if (!wasInWorld && isInWorld) {
-            // Reset state for new world
-            hasPreloaded = false;
+            hasStartedPreload = false;
             ticksInWorld = 0;
+            pendingShapes = null;
+            pendingIndex = 0;
         }
 
-        // Pre-load after being in world for a few ticks (ensures world is fully loaded)
-        if (isInWorld && !hasPreloaded) {
+        if (isInWorld && !hasStartedPreload) {
             ticksInWorld++;
-
-            // Wait 20 ticks (1 second) after joining to ensure everything is loaded
             if (ticksInWorld >= 20) {
-                hasPreloaded = true;
-                preloadForPlayer(client.player);
+                hasStartedPreload = true;
+                // Kick off skin loading immediately (non-blocking callbacks)
+                EntityRenderCache.preloadPlayerSkins(client.player);
+                // Initialize the incremental entity queue
+                pendingShapes = ShapeType.getAllTypes(client.player.level());
+                pendingIndex = 0;
+            }
+        }
+
+        // Process a small batch of entities per tick
+        if (pendingShapes != null && pendingIndex < pendingShapes.size() && isInWorld) {
+            int limit = Math.min(pendingIndex + ENTITIES_PER_TICK, pendingShapes.size());
+            while (pendingIndex < limit) {
+                ShapeType<?> type = pendingShapes.get(pendingIndex);
+                if (!EntityRenderCache.isCached(type)) {
+                    EntityRenderCache.cacheEntity(type, client.player);
+                }
+                pendingIndex++;
+            }
+
+            // All done
+            if (pendingIndex >= pendingShapes.size()) {
+                pendingShapes = null;
             }
         }
 
         wasInWorld = isInWorld;
-    }
-
-    /**
-     * Pre-loads entity instances for the given player.
-     * This runs on the main client thread.
-     *
-     * @param player The player to pre-load entities for
-     */
-    private void preloadForPlayer(LocalPlayer player) {
-        if (player == null) {
-            return;
-        }
-
-        try {
-            // Cache entity instances
-            EntityRenderCache.preloadEntities(player);
-            EntityRenderCache.preloadPlayerSkins(player);
-
-            // Start background pre-rendering
-            startPreRendering(player);
-        } catch (Exception e) {
-            // Silent - don't spam logs
-        }
     }
 
     private void startPreRendering(LocalPlayer player) {
@@ -99,10 +102,10 @@ public class EntityRenderCacheHandler implements ClientTickEvents.Client {
 
         if (!entitiesToRender.isEmpty()) {
             // Open invisible pre-render screen with shape types for ID calculation
-            Minecraft.getInstance().setScreen(new EntityPreloadScreen(
+            /*Minecraft.getInstance().setScreen(new EntityPreloadScreen(
                     entitiesToRender,
                     unlockedSkins
-            ));
+            ));*/
         }
     }
 }

@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -154,6 +155,22 @@ public class RemorphedMenu extends Screen {
                         }
                     }
                 });
+
+                List<GameProfile> validUnlocked = Remorphed.getUnlockedSkins(minecraft.player);
+                List<CompletableFuture<Void>> pending = validUnlocked.stream()
+                        .filter(p -> !p.id().equals(minecraft.player.getUUID()))
+                        .filter(p -> EntityRenderCache.getCachedPlayerSkin(p) == null)
+                        .map(EntityRenderCache::cachePlayerSkin)
+                        .toList();
+
+                if (!pending.isEmpty()) {
+                    CompletableFuture.allOf(pending.toArray(new CompletableFuture[0]))
+                            .thenRunAsync(() -> {
+                                populateUnlockedRenderPlayers(minecraft.player);
+                                // Re-trigger the search responder to rebuild the widget list
+                                searchBar.setValue(searchBar.getValue());
+                            }, Minecraft.getInstance()::execute); // marshal back to main thread
+                }
             }
         }
 
@@ -294,28 +311,13 @@ public class RemorphedMenu extends Screen {
         unlockedSkins.clear();
         renderPlayers.clear();
 
-        List<GameProfile> validUnlocked = Remorphed.getUnlockedSkins(player);
+        for (GameProfile profile : Remorphed.getUnlockedSkins(player)) {
+            if (profile.id().equals(player.getUUID())) continue;
 
-        for (GameProfile profile : validUnlocked) {
-            if (profile.id() != player.getUUID()) {
-                // Try to get from global cache first
-                EntityRenderCache.CachedPlayerSkin cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
-
-                if (cachedData != null) {
-                    // Cache hit! Use the pre-loaded player
-                    renderPlayers.put(profile, cachedData.skin());
-                    unlockedSkins.add(profile);
-                } else {
-                    // Cache miss - create, prepare, and cache player on-demand
-                    EntityRenderCache.cachePlayerSkin(profile);
-
-                    // Now retrieve the prepared player from cache
-                    cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
-                    if (cachedData != null) {
-                        renderPlayers.put(profile, cachedData.skin());
-                        unlockedSkins.add(profile);
-                    }
-                }
+            EntityRenderCache.CachedPlayerSkin cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
+            if (cachedData != null) {
+                renderPlayers.put(profile, cachedData.skin());
+                unlockedSkins.add(profile);
             }
         }
     }

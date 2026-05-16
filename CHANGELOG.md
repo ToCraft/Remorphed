@@ -3,6 +3,7 @@ remorphed 8.0
 
 - port to 26.1.2
 - add particles when morphing into a player
+- improve caching
 
 remorphed 7.1.1
 ================

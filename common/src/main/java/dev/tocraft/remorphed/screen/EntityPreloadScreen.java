@@ -84,7 +84,7 @@ public class EntityPreloadScreen extends Screen {
         if (currentIndex >= entitiesToRender.size()) {
             finishedTicks++;
             if (finishedTicks >= WAIT_AFTER_RENDER) {
-                Minecraft.getInstance().setScreen(new RemorphedMenu());
+                //Minecraft.getInstance().setScreen(new RemorphedMenu());
             }
         }
     }

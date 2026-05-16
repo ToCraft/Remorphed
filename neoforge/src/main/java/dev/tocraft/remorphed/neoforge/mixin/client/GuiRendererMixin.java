@@ -27,7 +27,7 @@ import java.util.Map;
 public abstract class GuiRendererMixin {
     @Shadow
     @Final
-    GuiRenderState renderState;
+    private GuiRenderState renderState;
 
     @Shadow
     @Final
