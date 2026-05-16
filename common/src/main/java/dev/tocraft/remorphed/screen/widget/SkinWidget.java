@@ -59,9 +59,9 @@ public class SkinWidget extends ShapeWidget {
             int leftPos = (int) (getX() + (float) this.getWidth() / 2);
             int topPos = getY();
             int k = leftPos - 20;
-            int l = topPos - 25;
+            int l = topPos - 35;
             int m = leftPos + 20;
-            int n = topPos + 35;
+            int n = topPos + 25;
             guiGraphics.skin(model, skin.body().texturePath(), size, -5, 30, -1.0625F, k, l, m, n);
         }
     }
