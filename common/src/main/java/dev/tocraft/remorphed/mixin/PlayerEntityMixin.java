@@ -1,7 +1,6 @@
 package dev.tocraft.remorphed.mixin;
 
 import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.impl.RemorphedPlayerDataProvider;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
 import dev.tocraft.walkers.api.variant.ShapeType;
@@ -31,23 +30,20 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import static com.ibm.icu.text.PluralRules.Operand.e;
-
 @SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused"})
 @Mixin(Player.class)
-public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
+public abstract class PlayerEntityMixin implements RemorphedPlayerDataProvider {
 
     @Shadow public abstract boolean isCreative();
 
-    @Unique private final Map<EntityType<? extends LivingEntity>, Integer> remorphed$unlockedShapes   = new ConcurrentHashMap<>();
-    @Unique private final Set<ShapeType<?>>                                remorphed$favoriteShapes    = new HashSet<>();
+    @Unique private final Map<EntityType<?>, Integer> remorphed$unlockedShapes   = new ConcurrentHashMap<>();
+    @Unique private final Set<EntityType<?>>                                remorphed$favoriteShapes    = new HashSet<>();
     @Unique private final Map<UUID, Integer>                               remorphed$unlockedSkins     = new ConcurrentHashMap<>();
     @Unique private final Set<UUID>                                        remorphed$favoriteSkins     = new CopyOnWriteArraySet<>();
-    @Unique private final Map<EntityType<? extends LivingEntity>, Integer> remorphed$shapeMorphCounter = new ConcurrentHashMap<>();
+    @Unique private final Map<EntityType<?>, Integer> remorphed$shapeMorphCounter = new ConcurrentHashMap<>();
     @Unique private final Map<UUID, Integer>                               remorphed$skinMorphCounter  = new ConcurrentHashMap<>();
 
-    @Unique @Nullable private ShapeType<?> remorphed$previousShape = null;
-    @Unique private final Map<EntityType<? extends LivingEntity>, ShapeType<?>> remorphed$defaultVariants = new ConcurrentHashMap<>();
+    @Unique private final Map<EntityType<?>, ShapeType<?>> remorphed$defaultVariants = new ConcurrentHashMap<>();
 
     @Unique private static final String UNLOCKED_SHAPES = "UnlockedShapes";
     @Unique private static final String FAVORITE_SHAPES = "FavoriteShapes";
@@ -56,17 +52,13 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique private static final String MORPH_COUNTER   = "MorphCounter";
     @Unique private static final String DEFAULT_VARIANTS = "DefaultVariants";
 
-    private PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level world) {
-        super(type, world);
-    }
-
     // -------------------------------------------------------------------------
     // Tick / NBT hooks
     // -------------------------------------------------------------------------
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void serverTick(CallbackInfo info) {
-        if (!this.level().isClientSide()) {
+        if (!((Player) (Object) this).level().isClientSide()) {
             Remorphed.sync((ServerPlayer) (Object) this);
         }
     }
@@ -104,8 +96,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         remorphed$favoriteShapes.forEach(shape -> {
             if (shape != null) {
                 CompoundTag e = new CompoundTag();
-                e.putString("id", EntityType.getKey(shape.getEntityType()).toString());
-                e.putInt("variant", shape.getVariantData());
+                e.putString("id", EntityType.getKey(shape).toString());
                 favoriteShapes.add(e);
             }
         });
@@ -155,7 +146,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
 
         ListTag defaultVariantsList = new ListTag();
         remorphed$defaultVariants.forEach((type, shape) -> {
-            if (shape != null && !Objects.equals(ShapeType.from(type), shape)) {
+            if (shape != null && !Objects.equals(ShapeType.from((EntityType<? extends LivingEntity>) type), shape)) {
                 CompoundTag e = new CompoundTag();
                 e.putString("entity_id", EntityType.getKey(type).toString());
                 e.putInt("variant", shape.getVariantData());
@@ -184,7 +175,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                 BuiltInRegistries.ENTITY_TYPE.get(typeId)
                         .map(Holder::value)
                         .ifPresent(type -> remorphed$unlockedShapes.put(
-                                (EntityType<? extends LivingEntity>) type, kills));
+                                type, kills));
             }
         });
 
@@ -194,8 +185,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                 int variant = e.getIntOr("variant", -1);
                 BuiltInRegistries.ENTITY_TYPE.get(typeId)
                         .map(Holder::value)
-                        .ifPresent(type -> remorphed$favoriteShapes.add(
-                                ShapeType.from((EntityType<? extends LivingEntity>) type, variant)));
+                        .ifPresent(type -> remorphed$favoriteShapes.add(type));
             }
         });
 
@@ -226,7 +216,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                     BuiltInRegistries.ENTITY_TYPE.get(typeId)
                             .map(Holder::value)
                             .ifPresent(type -> remorphed$shapeMorphCounter.put(
-                                    (EntityType<? extends LivingEntity>) type, count));
+                                    type, count));
                 }
             }
         });
@@ -238,8 +228,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                 Optional<Holder.Reference<@NotNull EntityType<?>>> type = BuiltInRegistries.ENTITY_TYPE.get(entityId);
                 Optional<Integer> variant = e.getInt("variant");
                 if (type.isPresent() && variant.isPresent()) {
-                    EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) type.get().value();
-                    ShapeType<?> shape = ShapeType.from(eType, variant.get());
+                    EntityType<?> eType = type.get().value();
+                    ShapeType<?> shape = ShapeType.from((EntityType<? extends LivingEntity>) eType, variant.get());
                     if (shape != null) {
                         remorphed$getDefaultVariants().put(eType, shape);
                     }
@@ -253,22 +243,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     // -------------------------------------------------------------------------
 
     @Unique @Override
-    public Map<EntityType<? extends LivingEntity>, Integer> remorphed$getUnlockedShapes() {
+    public Map<EntityType<?>, Integer> remorphed$getUnlockedShapes() {
         return remorphed$unlockedShapes;
     }
 
     @Unique @Override
-    public void remorphed$addKill(EntityType<? extends LivingEntity> type) {
+    public void remorphed$addKill(EntityType<?> type) {
         remorphed$unlockedShapes.merge(type, 1, Integer::sum);
     }
 
     @Unique @Override
-    public int remorphed$getKills(EntityType<? extends LivingEntity> type) {
+    public int remorphed$getKills(EntityType<?> type) {
         return remorphed$unlockedShapes.getOrDefault(type, 0);
     }
 
     @Unique @Override
-    public Set<ShapeType<?>> remorphed$getFavoriteShapes() {
+    public Set<EntityType<?>> remorphed$getFavoriteShapes() {
         return remorphed$favoriteShapes;
     }
 
@@ -293,7 +283,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     }
 
     @Unique @Override
-    public int remorphed$getCounter(EntityType<? extends LivingEntity> type) {
+    public int remorphed$getCounter(EntityType<?> type) {
         return remorphed$shapeMorphCounter.getOrDefault(type, 0);
     }
 
@@ -303,7 +293,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     }
 
     @Unique @Override
-    public Map<EntityType<? extends LivingEntity>, Integer> remorphed$getShapeCounter() {
+    public Map<EntityType<?>, Integer> remorphed$getShapeCounter() {
         return remorphed$shapeMorphCounter;
     }
 
@@ -317,33 +307,29 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     // -------------------------------------------------------------------------
 
     @Unique @Override
-    public void remorphed$handleSwap(ShapeType<? extends LivingEntity> to) {
+    public void remorphed$handleSwap(EntityType<?> to) {
         if (isCreative()) return;
 
         Player self = (Player) (Object) this;
-        // Use the outgoing entity type; fall back to `to` on first-ever morph
-        EntityType<? extends LivingEntity> fromType = remorphed$previousShape != null
-                ? remorphed$previousShape.getEntityType()
-                : to.getEntityType();
 
-        int counter   = remorphed$shapeMorphCounter.getOrDefault(fromType, 0) + 1;
-        int killValue = Remorphed.getKillValue(fromType);
+        int counter   = remorphed$shapeMorphCounter.getOrDefault(to, 0) + 1;
+        int killValue = Remorphed.getKillValue(to);
 
         if (killValue > 0 && counter >= killValue) {
             // Deduct one kill set from the outgoing type
-            int k = remorphed$unlockedShapes.getOrDefault(fromType, 0);
+            int k = remorphed$unlockedShapes.getOrDefault(to, 0);
             if (k <= Remorphed.CONFIG.killToUnlock) {
-                remorphed$unlockedShapes.remove(fromType);
+                remorphed$unlockedShapes.remove(to);
             } else {
-                remorphed$unlockedShapes.put(fromType, k - Remorphed.CONFIG.killToUnlock);
+                remorphed$unlockedShapes.put(to, k - Remorphed.CONFIG.killToUnlock);
             }
-            remorphed$shapeMorphCounter.remove(fromType);
+            remorphed$shapeMorphCounter.remove(to);
 
             if ((Object) this instanceof ServerPlayer sp && !Remorphed.canUseShape(sp, to)) {
                 PlayerShapeChanger.change2ndShape(sp, null);
             }
         } else {
-            remorphed$shapeMorphCounter.put(fromType, counter);
+            remorphed$shapeMorphCounter.put(to, counter);
         }
     }
 
@@ -368,12 +354,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     }
 
     @Unique @Override
-    public Map<EntityType<? extends LivingEntity>, ShapeType<?>> remorphed$getDefaultVariants() {
+    public Map<EntityType<?>, ShapeType<?>> remorphed$getDefaultVariants() {
         return remorphed$defaultVariants;
     }
 
     @Unique @Override
-    public void remorphed$setDefaultVariant(EntityType<? extends LivingEntity> entityType, ShapeType<?> shapeType) {
+    public void remorphed$setDefaultVariant(EntityType<?> entityType, ShapeType<?> shapeType) {
         if (shapeType == null) {
             remorphed$defaultVariants.remove(entityType);
         } else {

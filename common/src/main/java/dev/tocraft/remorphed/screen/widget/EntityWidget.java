@@ -44,7 +44,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
 
     @Override
     protected void sendFavoriteRequest(boolean isFavorite) {
-        NetworkHandler.sendFavoriteRequest(type, isFavorite);
+        NetworkHandler.sendFavoriteRequest(type.getEntityType(), isFavorite);
     }
 
     @Override
@@ -114,6 +114,6 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
 
     @Override
     void sendDeleteShapePacket() {
-        NetworkHandler.sendDeleteShapePacket(type);
+        NetworkHandler.sendDeleteShapePacket(type.getEntityType());
     }
 }

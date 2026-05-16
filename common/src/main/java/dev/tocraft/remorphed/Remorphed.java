@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@SuppressWarnings("resource")
 public class Remorphed {
     @ApiStatus.Internal
     public static final Logger LOGGER = LoggerFactory.getLogger(Remorphed.class);
@@ -223,7 +224,7 @@ public class Remorphed {
         CompoundTag compoundTag = new CompoundTag();
 
         // serialize current shape data to tag if it exists
-        Map<EntityType<? extends LivingEntity>, Integer> unlockedShapes = PlayerMorph.getUnlockedShapes(changed);
+        Map<EntityType<?>, Integer> unlockedShapes = PlayerMorph.getUnlockedShapes(changed);
         ListTag shapesList = new ListTag();
         unlockedShapes.forEach((shape, killAmount) -> {
             if (killAmount > 0 && shape != null) {

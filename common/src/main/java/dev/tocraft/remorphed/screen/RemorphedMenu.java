@@ -108,8 +108,8 @@ public class RemorphedMenu extends Screen {
                     }
                 }
                 // sort by favorite
-                boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first);
-                boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second);
+                boolean firstIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(first.getEntityType());
+                boolean secondIsFav = PlayerMorph.getFavoriteShapes(minecraft.player).contains(second.getEntityType());
                 if (firstIsFav == secondIsFav) {
                     return 0;
                 } else if (firstIsFav) {
@@ -244,6 +244,7 @@ public class RemorphedMenu extends Screen {
                         }
                     } else if (listIndex < skinProfiles.size() + rendered.size()) {
                         ShapeType<?> type = rendered.get(listIndex - skinProfiles.size());
+                        EntityType<?> eType = type.getEntityType();
                         Mob entity = renderEntities.get(type);
                         if (entity != null) {
                             boolean bl = type.equals(currentType);
@@ -256,9 +257,9 @@ public class RemorphedMenu extends Screen {
                                     (ShapeType<Mob>) type,
                                     entity,
                                     this,
-                                    PlayerMorph.getFavoriteShapes(minecraft.player).contains(type),
+                                    PlayerMorph.getFavoriteShapes(minecraft.player).contains(type.getEntityType()),
                                     bl,
-                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * (PlayerMorph.getKills(minecraft.player, type) / Remorphed.CONFIG.killToUnlock) - PlayerMorph.getCounter(minecraft.player, type)
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * (PlayerMorph.getKills(minecraft.player, eType) / Remorphed.CONFIG.killToUnlock) - PlayerMorph.getCounter(minecraft.player, (EntityType<? extends LivingEntity>) eType)
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());

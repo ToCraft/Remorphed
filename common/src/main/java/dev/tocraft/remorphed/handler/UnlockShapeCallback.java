@@ -11,13 +11,15 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
+import org.jetbrains.annotations.NotNull;
 
 public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
     @Override
     public InteractionResult unlock(ServerPlayer player, ShapeType<?> type) {
         if (type != null) {
+            EntityType<? extends @NotNull LivingEntity> eType = type.getEntityType();
             // Check if player has permission to unlock this entity type (only if permissions are enabled)
-            if (Remorphed.CONFIG.usePermissions && !PermissionManager.canMorphIntoType(player, type.getEntityType())) {
+            if (Remorphed.CONFIG.usePermissions && !PermissionManager.canMorphIntoType(player, eType)) {
                 return InteractionResult.FAIL;
             }
 
@@ -25,12 +27,12 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
             if (!Remorphed.CONFIG.lockTransform && Remorphed.CONFIG.unlockFriendlyNormal) {
                 LivingEntity entityToBeUnlocked = type.create(player.level(), player);
                 if (!(entityToBeUnlocked instanceof Enemy)) {
-                    PlayerMorph.getUnlockedShapes(player).put(type.getEntityType(), Remorphed.getKillToUnlock(type.getEntityType()));
+                    PlayerMorph.getUnlockedShapes(player).put(eType, Remorphed.getKillToUnlock(eType));
                 }
             }
             // check if entity is unlocked by remorphed, prevents native unlock mechanic by walkers
-            else if (!Remorphed.canUseShape(player, type)) {
-                if (!type.getEntityType().equals(EntityType.WOLF) || !Walkers.hasSpecialShape(player.getUUID())) {
+            else if (!Remorphed.canUseShape(player, eType)) {
+                if (!eType.equals(EntityType.WOLF) || !Walkers.hasSpecialShape(player.getUUID())) {
                     return InteractionResult.FAIL;
                 }
             }

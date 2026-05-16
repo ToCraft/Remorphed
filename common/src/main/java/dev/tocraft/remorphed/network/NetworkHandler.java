@@ -16,6 +16,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -58,17 +59,17 @@ public class NetworkHandler {
         if (is_entity) {
             String id = data.getString("id").orElseThrow();
             @SuppressWarnings("unchecked") EntityType<LivingEntity> type = (EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
-            PlayerMorph.handleSwap(context.getPlayer(), ShapeType.from(type));
+            PlayerMorph.handleSwap(context.getPlayer(), type);
         } else {
             String uuid = data.getString("uuid").orElseThrow();
             PlayerMorph.handleSwap(context.getPlayer(), UUID.fromString(uuid));
         }
     }
 
-    public static void sendDeleteShapePacket(ShapeType<?> type) {
+    public static void sendDeleteShapePacket(EntityType<?> type) {
         CompoundTag compound = new CompoundTag();
         compound.putBoolean("is_entity", true);
-        compound.putString("id", EntityType.getKey(type.getEntityType()).toString());
+        compound.putString("id", EntityType.getKey(type).toString());
 
         ModernNetworking.sendToServer(NetworkHandler.DELETE_SHAPE, compound);
     }
@@ -160,12 +161,12 @@ public class NetworkHandler {
     }
 
     public static void sendFavoriteSync(ServerPlayer player) {
-        Set<ShapeType<?>> favoriteShapes = PlayerMorph.getFavoriteShapes(player);
+        Set<EntityType<?>> favoriteShapes = PlayerMorph.getFavoriteShapes(player);
         Set<UUID> favoriteSkins = PlayerMorph.getFavoriteSkinIds(player);
         CompoundTag tag = new CompoundTag();
         ListTag shapeIdList = new ListTag();
         ListTag skinIdList = new ListTag();
-        favoriteShapes.forEach(type -> shapeIdList.add(type.writeCompound()));
+        favoriteShapes.forEach(type -> shapeIdList.add(StringTag.valueOf(EntityType.getKey(type).toString())));
         favoriteSkins.forEach(skin -> skinIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(skin))));
         tag.put("FavoriteShapes", shapeIdList);
         tag.put("FavoriteSkins", skinIdList);
@@ -174,10 +175,9 @@ public class NetworkHandler {
         ModernNetworking.sendToPlayer(player, NetworkHandler.FAVORITE_SYNC, tag);
     }
 
-    public static void sendFavoriteRequest(@NotNull ShapeType<? extends LivingEntity> type, boolean favorite) {
+    public static void sendFavoriteRequest(@NotNull EntityType<? extends LivingEntity> type, boolean favorite) {
         CompoundTag packet = new CompoundTag();
-        packet.putString("id", EntityType.getKey(type.getEntityType()).toString());
-        packet.putInt("variant", type.getVariantData());
+        packet.putString("id", EntityType.getKey(type).toString());
         packet.putBoolean("favorite", favorite);
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
@@ -207,21 +207,18 @@ public class NetworkHandler {
             });
         } else {
             EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(packet.getString("id").orElseThrow())).map(Holder::value).orElse(null);
-            int variant = packet.getIntOr("variant", -1);
 
-            ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {
-                @Nullable ShapeType<?> type = ShapeType.from(entityType, variant);
-
-                if (type != null) {
+            if (entityType != null) {
+                ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {
                     if (favorite) {
-                        PlayerMorph.getFavoriteShapes(context.getPlayer()).add(type);
+                        PlayerMorph.getFavoriteShapes(context.getPlayer()).add(entityType);
                     } else {
-                        PlayerMorph.getFavoriteShapes(context.getPlayer()).remove(type);
+                        PlayerMorph.getFavoriteShapes(context.getPlayer()).remove(entityType);
                     }
                     // resync favorites
                     sendFavoriteSync((ServerPlayer) context.getPlayer());
-                }
-            });
+                });
+            }
         }
     }
 

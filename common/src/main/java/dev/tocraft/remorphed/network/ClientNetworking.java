@@ -12,6 +12,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -96,7 +97,12 @@ public class ClientNetworking {
             PlayerMorph.getFavoriteSkinIds(player).clear();
             ListTag shapeIds = tag.getListOrEmpty("FavoriteShapes");
             ListTag skinIds = tag.getListOrEmpty("FavoriteSkins");
-            shapeIds.forEach(compound -> PlayerMorph.getFavoriteShapes(player).add(ShapeType.from((CompoundTag) compound)));
+            shapeIds.forEach(idTag -> {
+                if (idTag instanceof StringTag(String value)) {
+                    Optional<EntityType<?>> type = BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(value)).map(Holder.Reference::value);
+                    type.ifPresent(entityType -> PlayerMorph.getFavoriteShapes(player).add(entityType));
+                }
+            });
             skinIds.forEach(skinId -> PlayerMorph.getFavoriteSkinIds(player).add(UUIDUtil.uuidFromIntArray(skinId.asIntArray().orElseThrow())));
         });
     }

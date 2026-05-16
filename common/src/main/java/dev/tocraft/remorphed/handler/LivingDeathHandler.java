@@ -11,6 +11,8 @@ import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -19,16 +21,17 @@ public class LivingDeathHandler implements EntityEvents.LivingDeath {
     @Override
     public InteractionResult die(LivingEntity entity, DamageSource source) {
         if (!(entity instanceof Player) && source.getEntity() instanceof ServerPlayer killer) {
-            ShapeType<?> type = ShapeType.from(entity);
+            EntityType<?> type = entity.getType();
+            ShapeType<?> shapeType = ShapeType.from(entity);
             if (type != null && (!Walkers.CONFIG.blacklistPreventsUnlocking || !Walkers.isPlayerBlacklisted(killer.getUUID()))) {
                 // Check if player has permission to unlock this entity type (only if permissions are enabled)
-                boolean canUnlock = !Remorphed.CONFIG.usePermissions || PermissionManager.canMorphIntoType(killer, type.getEntityType());
+                boolean canUnlock = !Remorphed.CONFIG.usePermissions || PermissionManager.canMorphIntoType(killer, type);
                 if (canUnlock) {
-                    PlayerMorph.addKill(killer, type);
+                    PlayerMorph.addKill(killer, (EntityType<? extends LivingEntity>) type);
 
-                    if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type.getEntityType())) {
-                        PlayerShapeChanger.change2ndShape(killer, type);
-                        PlayerShape.updateShapes(killer, type.create(killer.level(), killer));
+                    if (Remorphed.CONFIG.autoTransform && PlayerMorph.getKills(killer, type) >= Remorphed.getKillToUnlock(type)) {
+                        PlayerShapeChanger.change2ndShape(killer, shapeType);
+                        PlayerShape.updateShapes(killer, shapeType.create(killer.level(), killer));
                     }
                 }
             }

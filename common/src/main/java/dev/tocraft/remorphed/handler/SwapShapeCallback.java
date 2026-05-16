@@ -18,8 +18,9 @@ public class SwapShapeCallback implements ShapeEvents.ShapeSwapCallback {
         if (to != null) {
             ShapeType<?> toType = ShapeType.from(to);
             LivingEntity previous = PlayerShape.getCurrentShape(player);
-            if (previous == null || !Objects.equals(previous.getType(), to.getType())) {
-                PlayerMorph.handleSwap(player, toType);
+            EntityType<? extends LivingEntity> toEType = (EntityType<? extends LivingEntity>) to.getType();
+            if (previous == null || !Objects.equals(previous.getType(), toEType)) {
+                PlayerMorph.handleSwap(player, toEType);
             } else {
                 PlayerMorph.setDefaultVariant(player, (EntityType<? extends LivingEntity>) previous.getType(), toType);
             }

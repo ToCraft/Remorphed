@@ -11,26 +11,26 @@ import java.util.UUID;
 public interface RemorphedPlayerDataProvider {
 
     // Kills keyed by EntityType — variants are never tracked separately
-    Map<EntityType<? extends LivingEntity>, Integer> remorphed$getUnlockedShapes();
-    void remorphed$addKill(EntityType<? extends LivingEntity> type);
-    int remorphed$getKills(EntityType<? extends LivingEntity> type);
+    Map<EntityType<?>, Integer> remorphed$getUnlockedShapes();
+    void remorphed$addKill(EntityType<?> type);
+    int remorphed$getKills(EntityType<?> type);
 
-    Set<ShapeType<?>> remorphed$getFavoriteShapes();
+    Set<EntityType<?>> remorphed$getFavoriteShapes();
 
     Map<UUID, Integer> remorphed$getUnlockedSkins();
     void remorphed$addKill(UUID skinId);
     int remorphed$getKills(UUID skinId);
     Set<UUID> remorphed$getFavoriteSkins();
 
-    int remorphed$getCounter(EntityType<? extends LivingEntity> type);
+    int remorphed$getCounter(EntityType<?> type);
     int remorphed$getCounter(UUID skinId);
 
-    void remorphed$handleSwap(ShapeType<? extends LivingEntity> to);
+    void remorphed$handleSwap(EntityType<?> to);
     void remorphed$handleSwap(UUID skinId);
 
-    Map<EntityType<? extends LivingEntity>, Integer> remorphed$getShapeCounter();
+    Map<EntityType<?>, Integer> remorphed$getShapeCounter();
     Map<UUID, Integer> remorphed$getSkinCounter();
 
-    Map<EntityType<? extends LivingEntity>, ShapeType<?>> remorphed$getDefaultVariants();
-    void remorphed$setDefaultVariant(EntityType<? extends LivingEntity> entityType, ShapeType<?> shapeType);
+    Map<EntityType<?>, ShapeType<?>> remorphed$getDefaultVariants();
+    void remorphed$setDefaultVariant(EntityType<?> entityType, ShapeType<?> shapeType);
 }

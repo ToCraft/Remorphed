@@ -4,32 +4,30 @@ import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PlayerMorph {
 
-    public static Map<EntityType<? extends @NotNull LivingEntity>, Integer> getUnlockedShapes(Player player) {
+    public static Map<EntityType<?>, Integer> getUnlockedShapes(Player player) {
         return provider(player).remorphed$getUnlockedShapes();
     }
 
-    public static void addKill(Player player, ShapeType<? extends LivingEntity> type) {
-        provider(player).remorphed$addKill(type.getEntityType());
+    public static void addKill(Player player, EntityType<?> type) {
+        provider(player).remorphed$addKill(type);
     }
 
-    public static int getKills(Player player, ShapeType<? extends LivingEntity> type) {
+    public static int getKills(Player player, ShapeType<?> type) {
         return provider(player).remorphed$getKills(type.getEntityType());
     }
 
     public static int getKills(Player player, EntityType<?> type) {
-        return provider(player).remorphed$getKills((EntityType<? extends LivingEntity>) type);
+        return provider(player).remorphed$getKills(type);
     }
 
-    public static Set<ShapeType<?>> getFavoriteShapes(Player player) {
+    public static Set<EntityType<?>> getFavoriteShapes(Player player) {
         return provider(player).remorphed$getFavoriteShapes();
     }
 
@@ -57,7 +55,7 @@ public class PlayerMorph {
         return provider(player).remorphed$getFavoriteSkins();
     }
 
-    public static void handleSwap(Player player, ShapeType<? extends LivingEntity> type) {
+    public static void handleSwap(Player player, EntityType<?> type) {
         provider(player).remorphed$handleSwap(type);
     }
 
@@ -65,15 +63,15 @@ public class PlayerMorph {
         provider(player).remorphed$handleSwap(skinId);
     }
 
-    public static int getCounter(Player player, ShapeType<? extends LivingEntity> type) {
-        return provider(player).remorphed$getCounter(type.getEntityType());
+    public static int getCounter(Player player, EntityType<?> type) {
+        return provider(player).remorphed$getCounter(type);
     }
 
     public static int getCounter(Player player, UUID skinId) {
         return provider(player).remorphed$getCounter(skinId);
     }
 
-    public static Map<EntityType<? extends LivingEntity>, Integer> getShapeCounter(Player player) {
+    public static Map<EntityType<?>, Integer> getShapeCounter(Player player) {
         return provider(player).remorphed$getShapeCounter();
     }
 
@@ -85,11 +83,11 @@ public class PlayerMorph {
         return (RemorphedPlayerDataProvider) player;
     }
 
-    public static Map<EntityType<? extends LivingEntity>, ShapeType<?>> getDefaultVariants(Player player) {
+    public static Map<EntityType<?>, ShapeType<?>> getDefaultVariants(Player player) {
         return provider(player).remorphed$getDefaultVariants();
     }
 
-    public static void setDefaultVariant(Player player, EntityType<? extends LivingEntity> entityType, ShapeType<?> shapeType) {
+    public static void setDefaultVariant(Player player, EntityType<?> entityType, ShapeType<?> shapeType) {
         provider(player).remorphed$setDefaultVariant(entityType, shapeType);
     }
 }
