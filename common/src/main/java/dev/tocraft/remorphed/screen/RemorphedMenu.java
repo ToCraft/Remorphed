@@ -240,7 +240,7 @@ public class RemorphedMenu extends Screen {
                                     this,
                                     PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
                                     bl,
-                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.CONFIG.playerKillValue < 1 ? -1 : Remorphed.CONFIG.playerKillValue * PlayerMorph.getPlayerKills(minecraft.player, skinProfile.id()) - PlayerMorph.getCounter(minecraft.player, skinProfile.id())
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.CONFIG.playerKillValue < 1 ? -1 : Remorphed.CONFIG.playerKillValue * (PlayerMorph.getPlayerKills(minecraft.player, skinProfile.id()) / Remorphed.CONFIG.killToUnlockPlayers) - PlayerMorph.getCounter(minecraft.player, skinProfile.id())
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid skin profile: {}", skinProfile);
@@ -261,7 +261,7 @@ public class RemorphedMenu extends Screen {
                                     this,
                                     PlayerMorph.getFavoriteShapes(minecraft.player).contains(type),
                                     bl,
-                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * PlayerMorph.getKills(minecraft.player, type) - PlayerMorph.getCounter(minecraft.player, type)
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.getKillValue(type.getEntityType()) < 1 ? -1 : Remorphed.getKillValue(type.getEntityType()) * (PlayerMorph.getKills(minecraft.player, type) / Remorphed.CONFIG.killToUnlock) - PlayerMorph.getCounter(minecraft.player, type)
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid shape type: {}", type.getEntityType().getDescriptionId());

@@ -326,10 +326,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             }
 
             // remove one kill
-            if (k <= 1) {
+            if (k <= Remorphed.CONFIG.killToUnlock) {
                 int k2 = remorphed$unlockedShapes.containsKey(killType) ? remorphed$unlockedShapes.remove(killType) : 0;
             } else {
-                remorphed$unlockedShapes.put(killType, k - 1);
+                remorphed$unlockedShapes.put(killType, k - Remorphed.CONFIG.killToUnlock);
             }
 
             // reset counter
@@ -364,13 +364,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         }
 
         int counter = remorphed$SkinMorphCounter.getOrDefault(skinId, 0) + 1;
-        counter++;
         int killValue = Remorphed.CONFIG.playerKillValue;
         if (killValue > 0 && counter >= killValue) {
             // reset counter
             remorphed$SkinMorphCounter.remove(skinId);
             // remove one kill
-            int k = remorphed$getKills(skinId) - 1;
+            int k = remorphed$getKills(skinId) - Remorphed.CONFIG.killToUnlockPlayers;
             if (k <= 0) {
                 remorphed$unlockedSkins.remove(skinId);
             } else {

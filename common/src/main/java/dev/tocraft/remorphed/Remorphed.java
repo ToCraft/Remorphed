@@ -180,16 +180,8 @@ public class Remorphed {
         return Remorphed.CONFIG.killValueByType.getOrDefault(EntityType.getKey(type).toString(), Remorphed.CONFIG.killValue);
     }
 
-    public static int getKillValue(Player player, EntityType<?> type) {
-        return getKillValue(type);
-    }
-
     public static int getPlayerKillRequirement(Player player) {
         return CONFIG.killToUnlockPlayers;
-    }
-
-    public static int getPlayerKillValue(Player player) {
-        return CONFIG.playerKillValue;
     }
 
     public static void sync(ServerPlayer player) {

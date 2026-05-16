@@ -5,6 +5,7 @@ remorphed 8.0
 - add particles when morphing into a player
 - improve caching
 - fix remorphed hasShape & hasSkin command
+- fix killValue calculation
 
 remorphed 7.1.1
 ================
