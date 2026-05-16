@@ -19,10 +19,6 @@ public class PlayerMorph {
         provider(player).remorphed$addKill(type);
     }
 
-    public static int getKills(Player player, ShapeType<?> type) {
-        return provider(player).remorphed$getKills(type.getEntityType());
-    }
-
     public static int getKills(Player player, EntityType<?> type) {
         return provider(player).remorphed$getKills(type);
     }
