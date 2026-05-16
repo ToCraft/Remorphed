@@ -3,7 +3,6 @@ package dev.tocraft.remorphed.screen;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.impl.FakeClientPlayer;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.mixin.client.accessor.ScreenAccessor;
 import dev.tocraft.remorphed.screen.widget.*;
@@ -14,20 +13,24 @@ import dev.tocraft.walkers.api.variant.ShapeType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +49,10 @@ public class RemorphedMenu extends Screen {
     private final List<ShapeType<?>> unlockedShapes = new CopyOnWriteArrayList<>();
     private final List<GameProfile> unlockedSkins = new CopyOnWriteArrayList<>();
     private final Map<ShapeType<?>, Mob> renderEntities = new ConcurrentHashMap<>();
-    private final Map<GameProfile, FakeClientPlayer> renderPlayers = new ConcurrentHashMap<>();
+    private final Map<GameProfile, PlayerSkin> renderPlayers = new ConcurrentHashMap<>();
+
+    private final PlayerModel MODEL_WIDE = new PlayerModel(minecraft.getEntityModels().bakeLayer(ModelLayers.PLAYER), false);
+    private final PlayerModel MODEL_SLIM = new PlayerModel(minecraft.getEntityModels().bakeLayer(ModelLayers.PLAYER), true);
 
 
     private final SearchWidget searchBar = createSearchBar();
@@ -76,7 +82,7 @@ public class RemorphedMenu extends Screen {
         linearLayout.addChild(helpButton);
         linearLayout.addChild(playerButton);
 
-        if (minecraft != null && minecraft.player != null && Walkers.hasSpecialShape(minecraft.player.getUUID())) {
+        if (minecraft.player != null && Walkers.hasSpecialShape(minecraft.player.getUUID())) {
             linearLayout.addChild(specialShapeButton);
         }
     }
@@ -84,7 +90,7 @@ public class RemorphedMenu extends Screen {
     protected void addContents() {
         this.list = this.layout.addToContents(new ShapeListWidget(this.minecraft, this.width, this.layout));
 
-        if (minecraft != null && minecraft.player != null) {
+        if (minecraft.player != null) {
             populateUnlockedRenderEntities(minecraft.player);
 
             ShapeType<? extends LivingEntity> currentShape = ShapeType.from(PlayerShape.getCurrentShape(minecraft.player));
@@ -132,15 +138,15 @@ public class RemorphedMenu extends Screen {
                 UUID currentSkin = SkinShifter.getCurrentSkin(minecraft.player);
 
                 unlockedSkins.sort((first, second) -> {
-                    if (Objects.equals(first.getId(), currentSkin) && currentShape != null) {
+                    if (Objects.equals(first.id(), currentSkin) && currentShape != null) {
                         return -1;
-                    } else if (Objects.equals(second.getId(), currentSkin) && currentShape != null) {
+                    } else if (Objects.equals(second.id(), currentSkin) && currentShape != null) {
                         return 1;
                     } else {
-                        boolean firstIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(first.getId());
-                        boolean secondIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(second.getId());
+                        boolean firstIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(first.id());
+                        boolean secondIsFav = PlayerMorph.getFavoriteSkinIds(minecraft.player).contains(second.id());
                         if (firstIsFav == secondIsFav) {
-                            return first.getName().compareTo(second.getName());
+                            return first.name().compareTo(second.name());
                         } else if (firstIsFav) {
                             return -1;
                         } else {
@@ -163,7 +169,7 @@ public class RemorphedMenu extends Screen {
                     .toList();
             List<GameProfile> filteredSkins = unlockedSkins
                     .stream()
-                    .filter(skin -> text.isEmpty() || skin.getName().toUpperCase().contains(text.toUpperCase()) || skin.getId().toString().contains(text.toUpperCase()))
+                    .filter(skin -> text.isEmpty() || skin.name().toUpperCase().contains(text.toUpperCase()) || skin.id().toString().contains(text.toUpperCase()))
                     .toList();
 
             populateShapeWidgets(filteredShapes, filteredSkins);
@@ -174,15 +180,18 @@ public class RemorphedMenu extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // make the background DARK
-        renderTransparentBackground(guiGraphics);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
+    }
+
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractTransparentBackground(graphics);
     }
 
     @SuppressWarnings("unchecked")
     private void populateShapeWidgets(@NotNull List<ShapeType<?>> rendered, @NotNull List<GameProfile> skinProfiles) {
-        if (this.list != null && minecraft != null && minecraft.player != null) {
+        if (this.list != null && minecraft.player != null) {
             this.list.clearEntries();
 
             // add widget for each entity to be rendered
@@ -199,9 +208,9 @@ public class RemorphedMenu extends Screen {
 
                     if (Remorphed.foundSkinShifter && listIndex < skinProfiles.size()) {
                         GameProfile skinProfile = skinProfiles.get(listIndex);
-                        AbstractClientPlayer fakePlayer = renderPlayers.get(skinProfile);
-                        if (fakePlayer != null) {
-                            boolean bl = Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.getId()) && currentType == null;
+                        PlayerSkin playerSkin = renderPlayers.get(skinProfile);
+                        if (playerSkin != null) {
+                            boolean bl = Objects.equals(SkinShifter.getCurrentSkin(minecraft.player), skinProfile.id()) && currentType == null;
                             if (bl) currentRow = i;
                             row.add(new SkinWidget(
                                     0,
@@ -209,11 +218,12 @@ public class RemorphedMenu extends Screen {
                                     0,
                                     0,
                                     skinProfile,
-                                    (FakeClientPlayer) fakePlayer,
+                                    playerSkin,
+                                    playerSkin.model() == PlayerModelType.WIDE ? MODEL_WIDE : MODEL_SLIM,
                                     this,
                                     PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
                                     bl,
-                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.CONFIG.playerKillValue < 1 ? -1 : Remorphed.CONFIG.playerKillValue * PlayerMorph.getPlayerKills(minecraft.player, skinProfile.getId()) - PlayerMorph.getCounter(minecraft.player, skinProfile.getId())
+                                    Remorphed.canUseEveryShape(minecraft.player) || Remorphed.CONFIG.playerKillValue < 1 ? -1 : Remorphed.CONFIG.playerKillValue * PlayerMorph.getPlayerKills(minecraft.player, skinProfile.id()) - PlayerMorph.getCounter(minecraft.player, skinProfile.id())
                             ));
                         } else {
                             Remorphed.LOGGER.error("invalid skin profile: {}", skinProfile);
@@ -225,7 +235,6 @@ public class RemorphedMenu extends Screen {
                             boolean bl = type.equals(currentType);
                             if (bl) currentRow = i;
                             row.add(new EntityWidget<>(
-                                    i * Remorphed.CONFIG.shapes_per_row + j,
                                     0,
                                     0,
                                     0,
@@ -288,13 +297,13 @@ public class RemorphedMenu extends Screen {
         List<GameProfile> validUnlocked = Remorphed.getUnlockedSkins(player);
 
         for (GameProfile profile : validUnlocked) {
-            if (profile.getId() != player.getUUID()) {
+            if (profile.id() != player.getUUID()) {
                 // Try to get from global cache first
-                EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
+                EntityRenderCache.CachedPlayerSkin cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
 
-                if (cachedData != null && cachedData.entity() instanceof FakeClientPlayer cachedPlayer) {
+                if (cachedData != null) {
                     // Cache hit! Use the pre-loaded player
-                    renderPlayers.put(profile, cachedPlayer);
+                    renderPlayers.put(profile, cachedData.skin());
                     unlockedSkins.add(profile);
                 } else {
                     // Cache miss - create, prepare, and cache player on-demand
@@ -302,8 +311,8 @@ public class RemorphedMenu extends Screen {
 
                     // Now retrieve the prepared player from cache
                     cachedData = EntityRenderCache.getCachedPlayerSkin(profile);
-                    if (cachedData != null && cachedData.entity() instanceof FakeClientPlayer cachedPlayer) {
-                        renderPlayers.put(profile, cachedPlayer);
+                    if (cachedData != null) {
+                        renderPlayers.put(profile, cachedData.skin());
                         unlockedSkins.add(profile);
                     }
                 }
@@ -383,12 +392,12 @@ public class RemorphedMenu extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener child : children()) {
-            if (child.keyPressed(keyCode, scanCode, modifiers)) {
+            if (child.keyPressed(event)) {
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 }

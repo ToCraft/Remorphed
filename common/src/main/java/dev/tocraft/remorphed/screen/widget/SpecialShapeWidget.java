@@ -11,11 +11,12 @@ import dev.tocraft.walkers.network.impl.SwapVariantPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
@@ -48,7 +49,7 @@ public class SpecialShapeWidget extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/wolf.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 15, 15, 15, 15);
 
         if (!isCurrent && !isAvailable) {
@@ -62,7 +63,7 @@ public class SpecialShapeWidget extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(@NotNull InputWithModifiers input) {
         UUID profileId = Minecraft.getInstance().getUser().getProfileId();
         if (!isCurrent && isAvailable && Walkers.hasSpecialShape(profileId)) {
             // get variant range

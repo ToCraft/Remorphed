@@ -17,18 +17,22 @@ import dev.tocraft.remorphed.handler.UnlockShapeCallback;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.remorphed.permission.PermissionManager;
+import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
 import dev.tocraft.walkers.api.platform.ApiLevel;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.fabricmc.api.EnvType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.ProfileResolver;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
@@ -66,7 +70,7 @@ public class Remorphed {
 
         VersionChecker.registerModrinthChecker(MODID, "remorphed", Component.literal("Remorphed"));
 
-        if (PlatformData.getEnv() == EnvType.CLIENT) new RemorphedClient().initialize();
+        if (PlatformData.getEnv() == PlatformData.Env.CLIENT) new RemorphedClient().initialize();
 
         NetworkHandler.registerPacketReceiver();
 
@@ -163,7 +167,7 @@ public class Remorphed {
     @Contract("_ -> new")
     public static @NotNull List<GameProfile> getUnlockedSkins(Player player) {
         int killRequirement = getPlayerKillRequirement(player);
-        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= killRequirement || killRequirement == 0) && killRequirement != -1).map(id -> SkinPlayerData.getSkinProfile(id).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).toList());
+        return new ArrayList<>(PlayerMorph.getUnlockedSkinIds(player).keySet().stream().filter(skinId -> (PlayerMorph.getPlayerKills(player, skinId) >= killRequirement || killRequirement == 0) && killRequirement != -1).map(id -> getGameProfile(player, id)).filter(Optional::isPresent).map(Optional::get).toList());
     }
 
     public static int getKillToUnlock(EntityType<?> type) {
@@ -251,8 +255,18 @@ public class Remorphed {
         ModernNetworking.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, compoundTag);
     }
 
+    public static @NotNull Optional<GameProfile> getGameProfile(Player owner, UUID uuid) {
+        // get ProfileResolver depending on Env
+        final ProfileResolver profileResolver = switch (PlatformData.getEnv()) {
+            case CLIENT -> Minecraft.getInstance().services().profileResolver();
+            case SERVER -> ((ServerPlayer) owner).level().getServer().services().profileResolver();
+        };
+
+        return SkinPlayerData.getSkinProfile(profileResolver, uuid);
+    }
+
     @Contract("_ -> new")
-    public static @NotNull ResourceLocation id(String name) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, name);
+    public static @NotNull Identifier id(String name) {
+        return Identifier.fromNamespaceAndPath(MODID, name);
     }
 }

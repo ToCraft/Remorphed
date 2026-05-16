@@ -22,9 +22,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -43,8 +44,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registry, CommandSelection selection) {
 
-        LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(Remorphed.MODID)
-                .requires(source -> source.hasPermission(0)).build();
+        LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(Remorphed.MODID).build();
 
         rootNode.addChild(ListPermissionsCommand.createNode());
 
@@ -55,7 +55,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .requires(source -> {
                     // Console usage (no player entity) - allow if has permission level 2+
                     if (source.getEntity() == null) {
-                        return source.hasPermission(2);
+                        return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
@@ -94,7 +94,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .requires(source -> {
                     // Console usage (no player entity) - allow if has permission level 2+
                     if (source.getEntity() == null) {
-                        return source.hasPermission(2);
+                        return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
@@ -134,7 +134,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .requires(source -> {
                     // Console usage (no player entity) - allow if has permission level 2+
                     if (source.getEntity() == null) {
-                        return source.hasPermission(2);
+                        return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
@@ -159,7 +159,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                 .requires(source -> {
                     // Console usage (no player entity) - allow if has permission level 2+
                     if (source.getEntity() == null) {
-                        return source.hasPermission(2);
+                        return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                     }
                     // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                     if (source.getEntity() instanceof ServerPlayer player) {
@@ -198,13 +198,13 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     .requires(source -> {
                         // Console usage (no player entity) - allow if has permission level 2+
                         if (source.getEntity() == null) {
-                            return source.hasPermission(2);
+                            return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
                             // If permissions are disabled, allow command usage based on permission level
                             if (!Remorphed.CONFIG.usePermissions) {
-                                return player.hasPermissions(2);
+                                return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                             }
                             return PermissionManager.canUseCommandOnSelf(player, "removeSkin") ||
                                     PermissionManager.canUseCommandOnOthers(player, "removeSkin");
@@ -216,26 +216,24 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        SkinPlayerData.getSkinProfile(playerUUID).thenAccept(playerProfile -> {
-                                            if (playerProfile.isEmpty()) {
-                                                context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
-                                            } else {
-                                                removeSkin(context.getSource(), player, playerProfile.get());
-                                            }
-                                        });
+                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerUUID);
+                                        if (playerProfile.isEmpty()) {
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
+                                        } else {
+                                            removeSkin(context.getSource(), player, playerProfile.get());
+                                        }
                                         return 1;
                                     }))
                             .then(Commands.argument("playerName", MessageArgument.message())
                                     .executes(context -> {
                                         String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        SkinPlayerData.getSkinProfile(playerName).thenAccept(playerProfile -> {
-                                            if (playerProfile.isEmpty()) {
-                                                context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
-                                            } else {
-                                                removeSkin(context.getSource(), player, playerProfile.get());
-                                            }
-                                        });
+                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerName);
+                                        if (playerProfile.isEmpty()) {
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
+                                        } else {
+                                            removeSkin(context.getSource(), player, playerProfile.get());
+                                        }
                                         return 1;
                                     }))).build();
 
@@ -243,13 +241,13 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     .requires(source -> {
                         // Console usage (no player entity) - allow if has permission level 2+
                         if (source.getEntity() == null) {
-                            return source.hasPermission(2);
+                            return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
                             // If permissions are disabled, allow command usage based on permission level
                             if (!Remorphed.CONFIG.usePermissions) {
-                                return player.hasPermissions(2);
+                                return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                             }
                             return PermissionManager.canUseCommandOnSelf(player, "addSkin") ||
                                     PermissionManager.canUseCommandOnOthers(player, "addSkin");
@@ -261,26 +259,24 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        SkinPlayerData.getSkinProfile(playerUUID).thenAccept(playerProfile -> {
-                                            if (playerProfile.isEmpty()) {
-                                                context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
-                                            } else {
-                                                addSkin(context.getSource(), player, playerProfile.get());
-                                            }
-                                        });
+                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerUUID);
+                                        if (playerProfile.isEmpty()) {
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
+                                        } else {
+                                            addSkin(context.getSource(), player, playerProfile.get());
+                                        }
                                         return 1;
                                     }))
                             .then(Commands.argument("playerName", MessageArgument.message())
                                     .executes(context -> {
                                         String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        SkinPlayerData.getSkinProfile(playerName).thenAccept(playerProfile -> {
-                                            if (playerProfile.isEmpty()) {
-                                                context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
-                                            } else {
-                                                addSkin(context.getSource(), player, playerProfile.get());
-                                            }
-                                        });
+                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerName);
+                                        if (playerProfile.isEmpty()) {
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
+                                        } else {
+                                            addSkin(context.getSource(), player, playerProfile.get());
+                                        }
                                         return 1;
                                     }))).build();
 
@@ -288,13 +284,13 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     .requires(source -> {
                         // Console usage (no player entity) - allow if has permission level 2+
                         if (source.getEntity() == null) {
-                            return source.hasPermission(2);
+                            return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
                             // If permissions are disabled, allow command usage based on permission level
                             if (!Remorphed.CONFIG.usePermissions) {
-                                return player.hasPermissions(2);
+                                return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                             }
                             return PermissionManager.canUseCommandOnSelf(player, "clearSkins") ||
                                     PermissionManager.canUseCommandOnOthers(player, "clearSkins");
@@ -314,13 +310,13 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                     .requires(source -> {
                         // Console usage (no player entity) - allow if has permission level 2+
                         if (source.getEntity() == null) {
-                            return source.hasPermission(2);
+                            return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                         }
                         // Player usage - check if they can use command at all (will check target-specific permissions in execution)
                         if (source.getEntity() instanceof ServerPlayer player) {
                             // If permissions are disabled, allow command usage based on permission level
                             if (!Remorphed.CONFIG.usePermissions) {
-                                return player.hasPermissions(2);
+                                return player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
                             }
                             return PermissionManager.canUseCommandOnSelf(player, "hasSkin") ||
                                     PermissionManager.canUseCommandOnOthers(player, "hasSkin");
@@ -332,27 +328,24 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        SkinPlayerData.getSkinProfile(playerUUID).thenAccept(playerProfile -> {
-                                            if (playerProfile.isEmpty()) {
-                                                context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
-                                            } else {
-                                                hasSkin(context.getSource(), player, playerProfile.get());
-                                            }
-                                        });
+                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerUUID);
+                                        if (playerProfile.isEmpty()) {
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
+                                        } else {
+                                            hasSkin(context.getSource(), player, playerProfile.get());
+                                        }
                                         return 1;
                                     }))
                             .then(Commands.argument("playerName", MessageArgument.message())
                                     .executes(context -> {
                                         String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        CompletableFuture.runAsync(() -> {
-                                            GameProfile playerProfile = SkinPlayerData.getSkinProfile(playerName).getNow(Optional.empty()).orElse(null);
-                                            if (playerProfile == null) {
-                                                context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
-                                            } else {
-                                                hasSkin(context.getSource(), player, playerProfile);
-                                            }
-                                        });
+                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerName);
+                                        if (playerProfile.isEmpty()) {
+                                            context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
+                                        } else {
+                                            hasSkin(context.getSource(), player, playerProfile.get());
+                                        }
                                         return 1;
                                     }))).build();
 
@@ -367,7 +360,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
 
     }
 
-    private static int hasShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static int hasShape(@NotNull CommandSourceStack source, ServerPlayer player, Identifier id, @Nullable CompoundTag nbt) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
             // If permissions are disabled, allow all players to use commands
@@ -393,7 +386,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         return 0;
     }
 
-    private static void removeShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static void removeShape(@NotNull CommandSourceStack source, ServerPlayer player, Identifier id, @Nullable CompoundTag nbt) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
             // If permissions are disabled, allow all players to use commands
@@ -413,7 +406,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".removeShape", name, player.getName()), true);
     }
 
-    private static void addShape(@NotNull CommandSourceStack source, ServerPlayer player, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static void addShape(@NotNull CommandSourceStack source, ServerPlayer player, Identifier id, @Nullable CompoundTag nbt) {
         // Check permissions if executed by a player
         if (source.getEntity() instanceof ServerPlayer executor) {
             // If permissions are disabled, allow all players to use commands
@@ -453,7 +446,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
     }
 
     @SuppressWarnings("unchecked")
-    private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, ResourceLocation id, @Nullable CompoundTag nbt) {
+    private static ShapeType<LivingEntity> getType(ServerLevel serverLevel, Identifier id, @Nullable CompoundTag nbt) {
         ShapeType<LivingEntity> type = ShapeType.from((EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(id).map(Holder::value).orElse(null));
 
         if (nbt != null) {
@@ -480,12 +473,12 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             }
         }
 
-        if (PlayerMorph.getUnlockedSkinIds(player).containsKey(playerProfile.getId())) {
+        if (PlayerMorph.getUnlockedSkinIds(player).containsKey(playerProfile.id())) {
             source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_success",
-                    player.getName(), playerProfile.getName()), true);
+                    player.getName(), playerProfile.name()), true);
 
         } else
-            source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_fail", player.getName(), playerProfile.getName()), true);
+            source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_fail", player.getName(), playerProfile.name()), true);
 
     }
 
@@ -501,9 +494,9 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             }
         }
 
-        PlayerMorph.getUnlockedSkinIds(player).remove(playerProfile.getId());
+        PlayerMorph.getUnlockedSkinIds(player).remove(playerProfile.id());
 
-        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".removeSkin", playerProfile.getName(), player.getName()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".removeSkin", playerProfile.name(), player.getName()), true);
     }
 
     private static void addSkin(@NotNull CommandSourceStack source, ServerPlayer player, @NotNull GameProfile playerProfile) {
@@ -518,9 +511,9 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             }
         }
 
-        PlayerMorph.getUnlockedSkinIds(player).put(playerProfile.getId(), Remorphed.CONFIG.killToUnlockPlayers);
+        PlayerMorph.getUnlockedSkinIds(player).put(playerProfile.id(), Remorphed.CONFIG.killToUnlockPlayers);
 
-        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".addSkin", player.getName(), playerProfile.getName()), true);
+        source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".addSkin", player.getName(), playerProfile.name()), true);
     }
 
     private static void clearSkins(@NotNull CommandSourceStack source, ServerPlayer player) {

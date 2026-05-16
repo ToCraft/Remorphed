@@ -2,18 +2,19 @@ plugins {
     id("dev.tocraft.modmaster.common")
 }
 
-loom {
-    accessWidenerPath = file("src/main/resources/remorphed.accessWidener")
+dependencies {
+    compileOnly("org.spongepowered:mixin:0.8.5")
+    compileOnly("io.github.llamalad7:mixinextras-common:${property("mixinextras_version")}")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:${property("mixinextras_version")}")
+
+    compileOnly("dev.tocraft:craftedcore:${property("craftedcore_version")}") {
+        exclude(group = "me.shedaniel.cloth")
+    }
+    compileOnly("dev.tocraft:walkers:${property("woodwalkers_version")}") {
+        exclude("dev.tocraft", "craftedcore")
+    }
+    compileOnly("dev.tocraft:skinshifter:${property("skinshifter_version")}") {
+        exclude("dev.tocraft", "craftedcore")
+    }
 }
 
-dependencies {
-    modApi("dev.tocraft:craftedcore:${rootProject.properties["craftedcore_version"]}") {
-        exclude("me.shedaniel.cloth")
-    }
-    modApi("dev.tocraft:walkers:${rootProject.properties["woodwalkers_version"]}") {
-        exclude("dev.tocraft", "craftedcore")
-    }
-    modApi("dev.tocraft:skinshifter:${rootProject.properties["skinshifter_version"]}") {
-        exclude("dev.tocraft", "craftedcore")
-    }
-}

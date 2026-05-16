@@ -7,7 +7,7 @@
     "PlayerEntityMixin"
   ],
   "client": [
-    "client.accessor.GuiGraphicsAccessor",
+    "client.accessor.ClientPlayerAccessor",
     "client.accessor.ScreenAccessor"
   ],
   "injectors": {

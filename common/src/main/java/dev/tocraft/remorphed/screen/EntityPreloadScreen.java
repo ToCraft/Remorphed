@@ -3,10 +3,11 @@ package dev.tocraft.remorphed.screen;
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.RemorphedClient;
+import dev.tocraft.walkers.screen.hud.VariantMenu;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Mob;
@@ -42,7 +43,7 @@ public class EntityPreloadScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         // Don't call super.render() - no background, no widgets, nothing visible
 
         // Render a batch of entities far off-screen
@@ -57,15 +58,11 @@ public class EntityPreloadScreen extends Screen {
             int row = listIndex / Remorphed.CONFIG.shapes_per_row;
             int col = listIndex % Remorphed.CONFIG.shapes_per_row;
 
-            // Calculate ID using the SAME formula as RemorphedMenu
-            int id = row * Remorphed.CONFIG.shapes_per_row + col;
-
             try {
                 // Render at reasonable size but off-screen to force texture loading
                 int size = (int) (Remorphed.CONFIG.entity_size * (1 / (Math.max(entity.getBbHeight(), entity.getBbWidth()))));
 
-                RemorphedClient.renderEntityInInventory(
-                        id,  // Use calculated grid ID
+                VariantMenu.renderEntityOnScreen(
                         guiGraphics,
                         -10000, -10000,  // Off-screen
                         -9900, -9900,
@@ -98,7 +95,7 @@ public class EntityPreloadScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         // Don't render ANY background - keep it completely transparent/invisible
     }
 }

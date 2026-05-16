@@ -1,6 +1,7 @@
 package dev.tocraft.remorphed.impl;
 
 import com.mojang.authlib.GameProfile;
+import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.world.entity.EntityType;
@@ -44,7 +45,7 @@ public class PlayerMorph {
     }
 
     public static Set<GameProfile> getFavoriteSkins(Player player) {
-        return getFavoriteSkinIds(player).stream().map(p -> SkinPlayerData.getSkinProfile(p).getNow(Optional.empty()).orElse(null)).filter(Objects::nonNull).collect(Collectors.toSet());
+        return getFavoriteSkinIds(player).stream().map(p -> Remorphed.getGameProfile(player, p)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
     }
 
     public static Set<UUID> getFavoriteSkinIds(Player player) {

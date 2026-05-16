@@ -17,7 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,14 +29,14 @@ import java.util.UUID;
 
 // TODO: Add custom morph to normal Packet and disable walkers' morphing
 public class NetworkHandler {
-    public static final ResourceLocation MORPH_REQUEST = Remorphed.id("morph_request");
-    public static final ResourceLocation UNLOCKED_SYNC = Remorphed.id("unlocked_sync");
-    public static final ResourceLocation FAVORITE_SYNC = Remorphed.id("favorite_sync");
-    public static final ResourceLocation FAVORITE_UPDATE = Remorphed.id("favorite_update");
-    public static final ResourceLocation RESET_SKIN = Remorphed.id("reset_skin");
-    public static final ResourceLocation PERMISSION_CHECK = Remorphed.id("permission_check");
-    public static final ResourceLocation PERMISSION_RESPONSE = Remorphed.id("permission_response");
-    public static final ResourceLocation DELETE_SHAPE = Remorphed.id("delete_shape");
+    public static final Identifier MORPH_REQUEST = Remorphed.id("morph_request");
+    public static final Identifier UNLOCKED_SYNC = Remorphed.id("unlocked_sync");
+    public static final Identifier FAVORITE_SYNC = Remorphed.id("favorite_sync");
+    public static final Identifier FAVORITE_UPDATE = Remorphed.id("favorite_update");
+    public static final Identifier RESET_SKIN = Remorphed.id("reset_skin");
+    public static final Identifier PERMISSION_CHECK = Remorphed.id("permission_check");
+    public static final Identifier PERMISSION_RESPONSE = Remorphed.id("permission_response");
+    public static final Identifier DELETE_SHAPE = Remorphed.id("delete_shape");
 
     public static void registerPacketReceiver() {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.MORPH_REQUEST, NetworkHandler::handleMorphRequestPacket);
@@ -55,7 +55,7 @@ public class NetworkHandler {
         if (is_entity) {
             String id = data.getString("id").orElseThrow();
             int v = data.getIntOr("variant", -1);
-            @SuppressWarnings("unchecked") EntityType<LivingEntity> type = (EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(ResourceLocation.parse(id));
+            @SuppressWarnings("unchecked") EntityType<LivingEntity> type = (EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
             PlayerMorph.handleSwap(context.getPlayer(), ShapeType.from(type, v));
         } else {
             String uuid = data.getString("uuid").orElseThrow();
@@ -74,7 +74,7 @@ public class NetworkHandler {
 
     public static void sendDeleteShapePacket(UUID uuid) {
         CompoundTag compound = new CompoundTag();
-        compound.putBoolean("is_entity", true);
+        compound.putBoolean("is_entity", false);
         compound.putString("uuid", uuid.toString());
 
         ModernNetworking.sendToServer(NetworkHandler.DELETE_SHAPE, compound);
@@ -116,17 +116,17 @@ public class NetworkHandler {
 
     public static <T extends LivingEntity> void sendSwapSkinRequest(@NotNull GameProfile playerProfile) {
         CompoundTag compound = new CompoundTag();
-        compound.putIntArray("playerUUID", UUIDUtil.uuidToIntArray(playerProfile.getId()));
+        compound.putIntArray("playerUUID", UUIDUtil.uuidToIntArray(playerProfile.id()));
 
         ModernNetworking.sendToServer(NetworkHandler.MORPH_REQUEST, compound);
     }
 
     @SuppressWarnings({"DataFlowIssue", "unchecked"})
     private static void handleMorphRequestPacket(ModernNetworking.@NotNull Context context, CompoundTag compound) {
-        context.getPlayer().getServer().execute(() -> {
+        ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {
             // check if player is blacklisted
             if (Walkers.isPlayerBlacklisted(context.getPlayer().getUUID()) && Walkers.CONFIG.blacklistPreventsMorphing) {
-                context.getPlayer().displayClientMessage(Component.translatable("walkers.player_blacklisted"), true);
+                context.getPlayer().sendSystemMessage(Component.translatable("walkers.player_blacklisted"));
                 return;
             }
 
@@ -135,7 +135,7 @@ public class NetworkHandler {
                 SkinShifter.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
                 PlayerMorph.handleSwap(context.getPlayer(), targetSkinUUID);
             } else {
-                ResourceLocation typeId = ResourceLocation.parse(compound.getString("id").orElseThrow());
+                Identifier typeId = Identifier.parse(compound.getString("id").orElseThrow());
                 int typeVariant = compound.getIntOr("variant", -1);
 
                 EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null);
@@ -180,7 +180,7 @@ public class NetworkHandler {
 
     public static void sendFavoriteRequest(@NotNull GameProfile playerProfile, boolean favorite) {
         CompoundTag packet = new CompoundTag();
-        packet.putIntArray("playerUUID", UUIDUtil.uuidToIntArray(playerProfile.getId()));
+        packet.putIntArray("playerUUID", UUIDUtil.uuidToIntArray(playerProfile.id()));
         packet.putBoolean("favorite", favorite);
         ModernNetworking.sendToServer(FAVORITE_UPDATE, packet);
     }
@@ -192,7 +192,7 @@ public class NetworkHandler {
         if (packet.contains("playerUUID")) {
             UUID skinId = UUIDUtil.uuidFromIntArray(packet.getIntArray("playerUUID").orElseThrow());
 
-            context.getPlayer().getServer().execute(() -> {
+            ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {
                 if (favorite) {
                     PlayerMorph.getFavoriteSkinIds(context.getPlayer()).add(skinId);
                 } else {
@@ -202,10 +202,10 @@ public class NetworkHandler {
                 sendFavoriteSync((ServerPlayer) context.getPlayer());
             });
         } else {
-            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(packet.getString("id").orElseThrow())).map(Holder::value).orElse(null);
+            EntityType<? extends LivingEntity> entityType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(packet.getString("id").orElseThrow())).map(Holder::value).orElse(null);
             int variant = packet.getIntOr("variant", -1);
 
-            context.getPlayer().getServer().execute(() -> {
+            ((ServerPlayer) context.getPlayer()).level().getServer().execute(() -> {
                 @Nullable ShapeType<?> type = ShapeType.from(entityType, variant);
 
                 if (type != null) {

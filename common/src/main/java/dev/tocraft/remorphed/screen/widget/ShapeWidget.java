@@ -1,14 +1,19 @@
 package dev.tocraft.remorphed.screen.widget;
 
 import dev.tocraft.remorphed.Remorphed;
+import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 public abstract class ShapeWidget extends AbstractButton {
@@ -30,7 +35,7 @@ public abstract class ShapeWidget extends AbstractButton {
 
     protected abstract void sendSwap2ndShapeRequest();
 
-    protected abstract void renderShape(GuiGraphics guiGraphics);
+    protected abstract void extractShape(GuiGraphicsExtractor guiGraphics);
 
     protected void setCrashed() {
         this.crashed = true;
@@ -50,9 +55,10 @@ public abstract class ShapeWidget extends AbstractButton {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         // Add to favorites
         if (active && visible && isHovered() && Minecraft.getInstance().player != null) {
+            int button = event.button();
             if (button == 1) {
                 isFavorite = !isFavorite;
                 sendFavoriteRequest(isFavorite);
@@ -62,11 +68,11 @@ public abstract class ShapeWidget extends AbstractButton {
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         if (!crashed) {
             // make the widget is even DARKER when hovered
             if (isHoveredOrFocused()) {
@@ -77,12 +83,12 @@ public abstract class ShapeWidget extends AbstractButton {
             if (Remorphed.displayDataInMenu && availability > 0) {
                 String s = String.valueOf(availability);
                 int w = parent.getFont().width(s);
-                guiGraphics.drawString(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), -1, false);
+                guiGraphics.text(parent.getFont(), s, getX() + getWidth() - w - getWidth() / 8, (int) (getY() + getHeight() * 0.125), -1, false);
             } else if (availability == 0) {
                 guiGraphics.blit(RenderPipelines.GUI_TEXTURED, Remorphed.id("textures/gui/deleted.png"), getX(), getY(), 0, 0, getWidth(), getHeight(), 48, 32, 48, 32);
             }
 
-            renderShape(guiGraphics);
+            extractShape(guiGraphics);
 
             // Render selected outline
             if (isCurrent) {
@@ -96,7 +102,7 @@ public abstract class ShapeWidget extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(@NotNull InputWithModifiers input) {
         // switch to new shape
         if (!isCurrent) {
             // Update 2nd Shape
@@ -108,12 +114,12 @@ public abstract class ShapeWidget extends AbstractButton {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (this.active && this.visible && isHovered() && keyCode == GLFW.GLFW_KEY_X && availability != -1) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
+        if (this.active && this.visible && isHovered() && event.key() == GLFW.GLFW_KEY_X && availability != -1) {
             deletePoint();
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     abstract void sendDeleteShapePacket();

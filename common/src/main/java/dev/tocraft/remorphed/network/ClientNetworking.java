@@ -12,7 +12,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -38,7 +38,7 @@ public class ClientNetworking {
         final Map<ShapeType<?>, Integer> unlockedShapes = new HashMap<>();
         if (compound.contains("UnlockedShapes")) {
             compound.getListOrEmpty("UnlockedShapes").forEach(entryTag -> {
-                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(((CompoundTag) entryTag).getString("id").orElseThrow())).map(Holder::value).orElse(null);
+                EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(((CompoundTag) entryTag).getString("id").orElseThrow())).map(Holder::value).orElse(null);
                 int variant = ((CompoundTag) entryTag).getIntOr("variant", -1);
                 int killAmount = ((CompoundTag) entryTag).getIntOr("killAmount", 0);
                 unlockedShapes.put(ShapeType.from(eType, variant), killAmount);
@@ -63,7 +63,7 @@ public class ClientNetworking {
                     UUID skinId = UUIDUtil.uuidFromIntArray(((CompoundTag) entry).getIntArray("uuid").orElseThrow());
                     skinCounter.put(skinId, count);
                 } else {
-                    ResourceLocation typeId = ResourceLocation.parse(((CompoundTag) entry).getString("id").orElseThrow());
+                    Identifier typeId = Identifier.parse(((CompoundTag) entry).getString("id").orElseThrow());
                     int typeVariantId = ((CompoundTag) entry).getIntOr("variant", -1);
                     shapeCounter.put(ShapeType.from((EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.get(typeId).map(Holder::value).orElse(null), typeVariantId), count);
                 }

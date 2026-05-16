@@ -1,6 +1,7 @@
 package dev.tocraft.remorphed.permission;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.tocraft.craftedcore.permission.PermissionChecker;
+import dev.tocraft.remorphed.Remorphed;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -19,9 +20,8 @@ public class PermissionManager {
      * @param permission The permission node to check
      * @return true if the player has the permission
      */
-    @ExpectPlatform
     public static boolean hasPermission(@NotNull ServerPlayer player, @NotNull String permission) {
-        throw new AssertionError();
+        return PermissionChecker.hasPermission(player, Remorphed.MODID, permission);
     }
 
 

@@ -2,7 +2,6 @@ package dev.tocraft.remorphed.screen;
 
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.impl.FakeClientPlayer;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,11 +12,14 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Manages pre-loading and caching of entity render states for the Remorphed menu.
@@ -31,7 +33,7 @@ public class EntityRenderCache {
 
     // Static caches for entity and player render states
     private static final Map<ShapeType<?>, CachedEntityData> ENTITY_CACHE = new ConcurrentHashMap<>();
-    private static final Map<GameProfile, CachedEntityData> PLAYER_CACHE = new ConcurrentHashMap<>();
+    private static final Map<GameProfile, CachedPlayerSkin> PLAYER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Data container for cached entity information
@@ -39,6 +41,12 @@ public class EntityRenderCache {
      * EntityRenderState objects are mutable and get updated by the rendering system.
      */
     public record CachedEntityData(LivingEntity entity) {
+    }
+
+    /**
+     * Data container for cached player skins
+     */
+    public record CachedPlayerSkin(PlayerSkin skin) {
     }
 
     /**
@@ -98,7 +106,7 @@ public class EntityRenderCache {
 
         for (GameProfile profile : unlockedSkins) {
             // Skip player's own skin
-            if (profile.getId().equals(player.getUUID())) {
+            if (profile.id().equals(player.getUUID())) {
                 continue;
             }
 
@@ -108,18 +116,14 @@ public class EntityRenderCache {
             }
 
             try {
-                // Create isolated fake player instance
-                FakeClientPlayer fakePlayer = new FakeClientPlayer(minecraft.level, profile);
+                // Create isolated player skin instance
+                PlayerSkin skin = Minecraft.getInstance().getSkinManager().get(profile).get(5, TimeUnit.SECONDS).orElseThrow(() -> new TimeoutException("Failed to get skin for profile: " + profile.name()));
 
-                // Make player invulnerable (no setNoAi for player entities)
-                fakePlayer.setInvulnerable(true);
-
-                // Cache the ENTITY itself (not render state!)
                 // Use putIfAbsent to avoid race conditions
-                PLAYER_CACHE.putIfAbsent(profile, new CachedEntityData(fakePlayer));
+                PLAYER_CACHE.putIfAbsent(profile, new CachedPlayerSkin(skin));
             } catch (Exception e) {
                 Remorphed.LOGGER.warn("[Remorphed] Failed to pre-load player skin for profile {}: {}",
-                        profile.getName(), e.getMessage());
+                        profile.name(), e.getMessage());
             }
         }
     }
@@ -165,7 +169,7 @@ public class EntityRenderCache {
      * @return The cached data, or null if not cached
      */
     @Nullable
-    public static CachedEntityData getCachedPlayerSkin(GameProfile profile) {
+    public static CachedPlayerSkin getCachedPlayerSkin(GameProfile profile) {
         return PLAYER_CACHE.get(profile);
     }
 
@@ -216,13 +220,13 @@ public class EntityRenderCache {
         }
 
         try {
-            FakeClientPlayer fakePlayer = new FakeClientPlayer(minecraft.level, profile);
-            fakePlayer.setInvulnerable(true);
+            // Create isolated player skin instance
+            PlayerSkin skin = Minecraft.getInstance().getSkinManager().get(profile).get(5, TimeUnit.SECONDS).orElseThrow(() -> new TimeoutException("Failed to get skin for profile: " + profile.name()));
 
             // Use putIfAbsent to avoid race conditions
-            PLAYER_CACHE.putIfAbsent(profile, new CachedEntityData(fakePlayer));
+            PLAYER_CACHE.putIfAbsent(profile, new CachedPlayerSkin(skin));
         } catch (Exception e) {
-            Remorphed.LOGGER.warn("[Remorphed] Failed to cache player skin on-demand: {}", profile.getName(), e);
+            Remorphed.LOGGER.warn("[Remorphed] Failed to cache player skin on-demand: {}", profile.name(), e);
         }
     }
 

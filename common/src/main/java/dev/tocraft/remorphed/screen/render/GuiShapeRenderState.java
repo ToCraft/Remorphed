@@ -1,8 +1,8 @@
 package dev.tocraft.remorphed.screen.render;
 
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

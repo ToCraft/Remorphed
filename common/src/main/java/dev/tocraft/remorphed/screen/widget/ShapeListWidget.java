@@ -4,18 +4,19 @@ import dev.tocraft.remorphed.Remorphed;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.input.KeyEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @SuppressWarnings("UnusedReturnValue")
 @Environment(EnvType.CLIENT)
-public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidget.ShapeRow> {
+public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidget.@NotNull ShapeRow> {
     private static final int ITEM_HEIGHT = 35;
 
     public ShapeListWidget(Minecraft minecraft, int width, @NotNull HeaderAndFooterLayout layout) {
@@ -27,7 +28,7 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
     }
 
     public int rowHeight() {
-        return itemHeight;
+        return defaultEntryHeight;
     }
 
     @Override
@@ -43,16 +44,16 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
         }
 
         @Override
-        public void render(@NotNull GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float delta) {
+        public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovering, float delta) {
             for (int i = 0; i < widgets.length; i++) {
                 ShapeWidget widget = widgets[i];
 
                 if (widget != null) {
-                    int w = width / Remorphed.CONFIG.shapes_per_row;
+                    int w = getContentWidth() / Remorphed.CONFIG.shapes_per_row;
 
-                    widget.setPosition(left + w * i, top);
-                    widget.setSize(w, height);
-                    widget.render(guiGraphics, mouseX, mouseY, delta);
+                    widget.setPosition(getContentX() + w * i, getContentY());
+                    widget.setSize(w, getContentHeight());
+                    widget.extractRenderState(guiGraphics, mouseX, mouseY, delta);
                 }
             }
         }
@@ -68,13 +69,13 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
         }
 
         @Override
-        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        public boolean keyPressed(@NotNull KeyEvent event) {
             for (GuiEventListener child : children()) {
-                if (child.keyPressed(keyCode, scanCode, modifiers)) {
+                if (child.keyPressed(event)) {
                     return true;
                 }
             }
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(event);
         }
     }
 
@@ -84,16 +85,16 @@ public class ShapeListWidget extends ContainerObjectSelectionList<ShapeListWidge
     }
 
     @Override
-    protected void renderListBackground(GuiGraphics guiGraphics) {
+    protected void extractListBackground(GuiGraphicsExtractor graphics) {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         for (ShapeRow child : children()) {
-            if (child.keyPressed(keyCode, scanCode, modifiers)) {
+            if (child.keyPressed(event)) {
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 }

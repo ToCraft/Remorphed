@@ -7,12 +7,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
@@ -74,18 +76,23 @@ public class RemorphedHelpScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderTransparentBackground(guiGraphics);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractTransparentBackground(graphics);
+    }
+
+    @Override
+    public boolean keyPressed(@NotNull KeyEvent event) {
+        int keyCode = event.key();
         if (keyCode < 257 && keyCode != 32) {
             onClose();
             return true;
         } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(event);
         }
     }
 

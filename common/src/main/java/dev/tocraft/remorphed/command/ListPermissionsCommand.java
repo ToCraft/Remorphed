@@ -5,6 +5,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -14,7 +15,7 @@ public class ListPermissionsCommand {
 
     public static LiteralCommandNode<CommandSourceStack> createNode() {
         return Commands.literal("list-permissions")
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .executes(context -> {
                     listAllPermissions(context.getSource());
                     return 1;
