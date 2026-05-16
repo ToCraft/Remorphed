@@ -2,7 +2,6 @@ package dev.tocraft.remorphed.impl;
 
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;

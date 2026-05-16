@@ -1,11 +1,9 @@
 package dev.tocraft.remorphed.screen.widget;
 
-import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.mixin.client.accessor.ClientPlayerAccessor;
 import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.skinshifter.SkinShifter;
-import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.api.PlayerShape;
 import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.fabricmc.api.EnvType;
@@ -17,16 +15,10 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
 public class PlayerWidget extends AbstractButton {
@@ -76,11 +68,5 @@ public class PlayerWidget extends AbstractButton {
     @Override
     public void updateWidgetNarration(NarrationElementOutput builder) {
 
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private static Optional<CompletableFuture<Optional<PlayerSkin>>> getPlayerSkin(Player player) {
-        Optional<GameProfile> profileFuture = SkinPlayerData.getSkinProfile(player);
-        return profileFuture.map(gameProfile -> Minecraft.getInstance().getSkinManager().get(gameProfile));
     }
 }

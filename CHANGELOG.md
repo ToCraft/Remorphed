@@ -4,6 +4,7 @@ remorphed 8.0
 - port to 26.1.2
 - add particles when morphing into a player
 - improve caching
+- fix remorphed hasShape & hasSkin command
 
 remorphed 7.1.1
 ================

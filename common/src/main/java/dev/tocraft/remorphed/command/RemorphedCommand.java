@@ -8,7 +8,6 @@ import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.permission.PermissionManager;
 import dev.tocraft.skinshifter.SkinShifter;
-import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.api.PlayerShapeChanger;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.commands.CommandBuildContext;
@@ -216,7 +215,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerUUID);
+                                        Optional<GameProfile> playerProfile = context.getSource().getServer().services().profileResolver().fetchById(playerUUID);
                                         if (playerProfile.isEmpty()) {
                                             context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
                                         } else {
@@ -228,7 +227,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerName);
+                                        Optional<GameProfile> playerProfile = context.getSource().getServer().services().profileResolver().fetchByName(playerName);
                                         if (playerProfile.isEmpty()) {
                                             context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
                                         } else {
@@ -259,7 +258,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerUUID);
+                                        Optional<GameProfile> playerProfile = context.getSource().getServer().services().profileResolver().fetchById(playerUUID);
                                         if (playerProfile.isEmpty()) {
                                             context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
                                         } else {
@@ -271,7 +270,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerName);
+                                        Optional<GameProfile> playerProfile = context.getSource().getServer().services().profileResolver().fetchByName(playerName);
                                         if (playerProfile.isEmpty()) {
                                             context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
                                         } else {
@@ -328,7 +327,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         UUID playerUUID = UuidArgument.getUuid(context, "playerUUID");
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerUUID);
+                                        Optional<GameProfile> playerProfile = context.getSource().getServer().services().profileResolver().fetchById(playerUUID);
                                         if (playerProfile.isEmpty()) {
                                             context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerUUID), true);
                                         } else {
@@ -340,7 +339,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
                                     .executes(context -> {
                                         String playerName = MessageArgument.getMessage(context, "playerName").getString();
                                         ServerPlayer player = EntityArgument.getPlayer(context, "player");
-                                        Optional<GameProfile> playerProfile = SkinPlayerData.getSkinProfile(context.getSource().getServer().services().profileResolver(), playerName);
+                                        Optional<GameProfile> playerProfile = context.getSource().getServer().services().profileResolver().fetchByName(playerName);
                                         if (playerProfile.isEmpty()) {
                                             context.getSource().sendSuccess(() -> Component.translatable("skinshifter.invalid_player", playerName), true);
                                         } else {
@@ -375,7 +374,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
         ShapeType<LivingEntity> type = getType(source.getLevel(), id, nbt);
         Component name = Component.translatable(type.getEntityType().getDescriptionId());
 
-        if (PlayerMorph.getUnlockedShapes(player).containsKey(type)) {
+        if (Remorphed.getUnlockedShapes(player).contains(type)) {
             source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasShape_success",
                     player.getName(), name), true);
 
@@ -473,7 +472,7 @@ public class RemorphedCommand implements CommandEvents.CommandRegistration {
             }
         }
 
-        if (PlayerMorph.getUnlockedSkinIds(player).containsKey(playerProfile.id())) {
+        if (Remorphed.getUnlockedSkins(player).contains(playerProfile)) {
             source.sendSuccess(() -> Component.translatable(Remorphed.MODID + ".hasSkin_success",
                     player.getName(), playerProfile.name()), true);
 

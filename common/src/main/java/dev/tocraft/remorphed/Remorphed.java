@@ -17,7 +17,6 @@ import dev.tocraft.remorphed.handler.UnlockShapeCallback;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.remorphed.permission.PermissionManager;
-import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
 import dev.tocraft.walkers.api.platform.ApiLevel;
@@ -261,7 +260,7 @@ public class Remorphed {
             case SERVER -> ((ServerPlayer) owner).level().getServer().services().profileResolver();
         };
 
-        return SkinPlayerData.getSkinProfile(profileResolver, uuid);
+        return profileResolver.fetchById(uuid);
     }
 
     @Contract("_ -> new")
