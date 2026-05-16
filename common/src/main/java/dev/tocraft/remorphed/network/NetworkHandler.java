@@ -38,6 +38,7 @@ public class NetworkHandler {
     public static final Identifier PERMISSION_CHECK = Remorphed.id("permission_check");
     public static final Identifier PERMISSION_RESPONSE = Remorphed.id("permission_response");
     public static final Identifier DELETE_SHAPE = Remorphed.id("delete_shape");
+    public static final Identifier DEFAULT_VARIANT_SYNC = Remorphed.id("default_variant_sync");
 
     public static void registerPacketReceiver() {
         ModernNetworking.registerReceiver(ModernNetworking.Side.C2S, NetworkHandler.MORPH_REQUEST, NetworkHandler::handleMorphRequestPacket);
@@ -49,6 +50,7 @@ public class NetworkHandler {
         ModernNetworking.registerType(UNLOCKED_SYNC);
         ModernNetworking.registerType(FAVORITE_SYNC);
         ModernNetworking.registerType(PERMISSION_RESPONSE);
+        ModernNetworking.registerType(DEFAULT_VARIANT_SYNC);
     }
 
     private static void handleDeleteShapePacket(ModernNetworking.Context context, CompoundTag data) {
@@ -223,5 +225,18 @@ public class NetworkHandler {
                 }
             });
         }
+    }
+
+    public static void sendDefaultVariantSync(ServerPlayer player) {
+        CompoundTag tag = new CompoundTag();
+        ListTag list = new ListTag();
+        PlayerMorph.getDefaultVariants(player).forEach((type, shape) -> {
+            CompoundTag e = new CompoundTag();
+            e.putString("entity_id", EntityType.getKey(type).toString());
+            e.putInt("variant", shape.getVariantData());
+            list.add(e);
+        });
+        tag.put("DefaultVariants", list);
+        ModernNetworking.sendToPlayer(player, DEFAULT_VARIANT_SYNC, tag);
     }
 }

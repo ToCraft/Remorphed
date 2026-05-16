@@ -31,6 +31,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.ibm.icu.text.PluralRules.Operand.e;
+
 @SuppressWarnings({"DataFlowIssue", "resource", "ControlFlowStatementWithoutBraces", "unused"})
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements RemorphedPlayerDataProvider {
@@ -45,12 +47,14 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
     @Unique private final Map<UUID, Integer>                               remorphed$skinMorphCounter  = new ConcurrentHashMap<>();
 
     @Unique @Nullable private ShapeType<?> remorphed$previousShape = null;
+    @Unique private final Map<EntityType<? extends LivingEntity>, ShapeType<?>> remorphed$defaultVariants = new ConcurrentHashMap<>();
 
     @Unique private static final String UNLOCKED_SHAPES = "UnlockedShapes";
     @Unique private static final String FAVORITE_SHAPES = "FavoriteShapes";
     @Unique private static final String UNLOCKED_SKINS  = "UnlockedSkins";
     @Unique private static final String FAVORITE_SKINS  = "FavoriteSkins";
     @Unique private static final String MORPH_COUNTER   = "MorphCounter";
+    @Unique private static final String DEFAULT_VARIANTS = "DefaultVariants";
 
     private PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level world) {
         super(type, world);
@@ -149,6 +153,17 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         });
         if (!morphCounter.isEmpty()) tag.put(MORPH_COUNTER, morphCounter);
 
+        ListTag defaultVariantsList = new ListTag();
+        remorphed$defaultVariants.forEach((type, shape) -> {
+            if (shape != null && !Objects.equals(ShapeType.from(type), shape)) {
+                CompoundTag e = new CompoundTag();
+                e.putString("entity_id", EntityType.getKey(type).toString());
+                e.putInt("variant", shape.getVariantData());
+                defaultVariantsList.add(e);
+            }
+        });
+        if (!defaultVariantsList.isEmpty()) tag.put(DEFAULT_VARIANTS, defaultVariantsList);
+
         return tag;
     }
 
@@ -212,6 +227,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
                             .map(Holder::value)
                             .ifPresent(type -> remorphed$shapeMorphCounter.put(
                                     (EntityType<? extends LivingEntity>) type, count));
+                }
+            }
+        });
+
+        remorphed$defaultVariants.clear();
+        tag.getListOrEmpty(DEFAULT_VARIANTS).forEach(entry -> {
+            if (entry instanceof CompoundTag e) {
+                Identifier entityId = Identifier.parse(e.getString("entity_id").orElseThrow());
+                Optional<Holder.Reference<@NotNull EntityType<?>>> type = BuiltInRegistries.ENTITY_TYPE.get(entityId);
+                Optional<Integer> variant = e.getInt("variant");
+                if (type.isPresent() && variant.isPresent()) {
+                    EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) type.get().value();
+                    ShapeType<?> shape = ShapeType.from(eType, variant.get());
+                    if (shape != null) {
+                        remorphed$getDefaultVariants().put(eType, shape);
+                    }
                 }
             }
         });
@@ -281,16 +312,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
         return remorphed$skinMorphCounter;
     }
 
-    @Unique @Override
-    public @Nullable ShapeType<?> remorphed$getPreviousShape() {
-        return remorphed$previousShape;
-    }
-
-    @Unique @Override
-    public void remorphed$setPreviousShape(@Nullable ShapeType<?> shape) {
-        remorphed$previousShape = shape;
-    }
-
     // -------------------------------------------------------------------------
     // Swap handling — trivially simple now, no variant logic anywhere
     // -------------------------------------------------------------------------
@@ -343,6 +364,20 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Remorphe
             }
         } else {
             remorphed$skinMorphCounter.put(skinId, counter);
+        }
+    }
+
+    @Unique @Override
+    public Map<EntityType<? extends LivingEntity>, ShapeType<?>> remorphed$getDefaultVariants() {
+        return remorphed$defaultVariants;
+    }
+
+    @Unique @Override
+    public void remorphed$setDefaultVariant(EntityType<? extends LivingEntity> entityType, ShapeType<?> shapeType) {
+        if (shapeType == null) {
+            remorphed$defaultVariants.remove(entityType);
+        } else {
+            remorphed$defaultVariants.put(entityType, shapeType);
         }
     }
 }

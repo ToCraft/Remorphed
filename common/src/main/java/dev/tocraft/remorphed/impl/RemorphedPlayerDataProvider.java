@@ -22,7 +22,6 @@ public interface RemorphedPlayerDataProvider {
     int remorphed$getKills(UUID skinId);
     Set<UUID> remorphed$getFavoriteSkins();
 
-    // Counter keyed by EntityType for the same reason
     int remorphed$getCounter(EntityType<? extends LivingEntity> type);
     int remorphed$getCounter(UUID skinId);
 
@@ -32,6 +31,6 @@ public interface RemorphedPlayerDataProvider {
     Map<EntityType<? extends LivingEntity>, Integer> remorphed$getShapeCounter();
     Map<UUID, Integer> remorphed$getSkinCounter();
 
-    @org.jetbrains.annotations.Nullable ShapeType<?> remorphed$getPreviousShape();
-    void remorphed$setPreviousShape(@org.jetbrains.annotations.Nullable ShapeType<?> shape);
+    Map<EntityType<? extends LivingEntity>, ShapeType<?>> remorphed$getDefaultVariants();
+    void remorphed$setDefaultVariant(EntityType<? extends LivingEntity> entityType, ShapeType<?> shapeType);
 }

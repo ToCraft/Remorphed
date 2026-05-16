@@ -84,4 +84,12 @@ public class PlayerMorph {
     private static RemorphedPlayerDataProvider provider(Player player) {
         return (RemorphedPlayerDataProvider) player;
     }
+
+    public static Map<EntityType<? extends LivingEntity>, ShapeType<?>> getDefaultVariants(Player player) {
+        return provider(player).remorphed$getDefaultVariants();
+    }
+
+    public static void setDefaultVariant(Player player, EntityType<? extends LivingEntity> entityType, ShapeType<?> shapeType) {
+        provider(player).remorphed$setDefaultVariant(entityType, shapeType);
+    }
 }

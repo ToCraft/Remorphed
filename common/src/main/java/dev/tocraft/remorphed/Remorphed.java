@@ -249,6 +249,7 @@ public class Remorphed {
 
         compoundTag.putIntArray("uuid", UUIDUtil.uuidToIntArray(changed.getUUID()));
         ModernNetworking.sendToPlayer(packetTarget, NetworkHandler.UNLOCKED_SYNC, compoundTag);
+        NetworkHandler.sendDefaultVariantSync(packetTarget);
     }
 
     public static @NotNull Optional<GameProfile> getGameProfile(Player owner, UUID uuid) {

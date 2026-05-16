@@ -13,6 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
@@ -31,6 +33,7 @@ public class ClientNetworking {
                 ClientNetworking::handleUnlockedSyncPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.S2C, NetworkHandler.FAVORITE_SYNC, ClientNetworking::handleFavoriteSyncPacket);
         ModernNetworking.registerReceiver(ModernNetworking.Side.S2C, NetworkHandler.PERMISSION_RESPONSE, PermissionCheckPacket::handlePermissionResponse);
+        ModernNetworking.registerReceiver(ModernNetworking.Side.S2C, NetworkHandler.DEFAULT_VARIANT_SYNC, ClientNetworking::handleDefaultVariantSyncPacket);
     }
 
     @SuppressWarnings("unchecked")
@@ -104,5 +107,28 @@ public class ClientNetworking {
         } else {
             context.queue(() -> packet.apply(context.getPlayer()));
         }
+    }
+
+    private static void handleDefaultVariantSyncPacket(ModernNetworking.Context context, CompoundTag tag) {
+        Map<EntityType<? extends LivingEntity>, ShapeType<?>> defaults = new HashMap<>();
+        tag.getListOrEmpty("DefaultVariants").forEach(entry -> {
+            if (entry instanceof CompoundTag e) {
+                Identifier entityId = Identifier.parse(e.getString("entity_id").orElseThrow());
+                Optional<Holder.Reference<@NotNull EntityType<?>>> type = BuiltInRegistries.ENTITY_TYPE.get(entityId);
+                Optional<Integer> variant = e.getInt("variant");
+                if (type.isPresent() && variant.isPresent()) {
+                    EntityType<? extends LivingEntity> eType = (EntityType<? extends LivingEntity>) type.get().value();
+                    ShapeType<?> shape = ShapeType.from(eType, variant.get());
+                    if (shape != null) {
+                        defaults.put(eType, shape);
+                    }
+                }
+            }
+        });
+
+        runOrQueue(context, player -> {
+            PlayerMorph.getDefaultVariants(player).clear();
+            PlayerMorph.getDefaultVariants(player).putAll(defaults);
+        });
     }
 }
