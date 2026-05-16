@@ -17,20 +17,19 @@ import dev.tocraft.remorphed.handler.UnlockShapeCallback;
 import dev.tocraft.remorphed.impl.PlayerMorph;
 import dev.tocraft.remorphed.network.NetworkHandler;
 import dev.tocraft.remorphed.permission.PermissionManager;
-import dev.tocraft.skinshifter.SkinShifter;
 import dev.tocraft.skinshifter.data.SkinPlayerData;
 import dev.tocraft.walkers.Walkers;
 import dev.tocraft.walkers.api.events.ShapeEvents;
 import dev.tocraft.walkers.api.platform.ApiLevel;
 import dev.tocraft.walkers.api.variant.ShapeType;
-import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ProfileResolver;
 import net.minecraft.world.entity.EntityType;
@@ -268,5 +267,14 @@ public class Remorphed {
     @Contract("_ -> new")
     public static @NotNull Identifier id(String name) {
         return Identifier.fromNamespaceAndPath(MODID, name);
+    }
+
+    public static void spawnWalkersParticles(Player player) {
+        // spawn particles
+        if (Walkers.CONFIG.emit_particles && !player.isSpectator() && player.level() instanceof ServerLevel l) {
+            l.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1, player.getZ(), 25, .5, 1.0, .5, .75);
+            l.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1, player.getZ(), 25, .5, 1.0, .5, .75);
+            l.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(), 25, .5, 1.0, .5, .7);
+        }
     }
 }

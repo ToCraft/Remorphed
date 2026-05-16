@@ -24,6 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -132,6 +133,9 @@ public class NetworkHandler {
 
             if (compound.contains("playerUUID") && Remorphed.foundSkinShifter) {
                 UUID targetSkinUUID = UUIDUtil.uuidFromIntArray(compound.getIntArray("playerUUID").orElseThrow());
+                if (!Objects.equals(targetSkinUUID, SkinShifter.getCurrentSkin(context.getPlayer()))) {
+                    Remorphed.spawnWalkersParticles(context.getPlayer());
+                }
                 SkinShifter.setSkin((ServerPlayer) context.getPlayer(), targetSkinUUID);
                 PlayerMorph.handleSwap(context.getPlayer(), targetSkinUUID);
             } else {
