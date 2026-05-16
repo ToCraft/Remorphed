@@ -7,6 +7,7 @@ remorphed 8.0
 - fix remorphed hasShape & hasSkin command
 - fix killValue calculation
 - drop support for Walkers' "unlockEveryVariant". Use "allow_variant_selection" instead
+- always shows the last used variant in the menu
 
 remorphed 7.1.1
 ================

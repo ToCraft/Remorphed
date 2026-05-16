@@ -31,6 +31,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.level.storage.ValueInput;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -121,13 +122,9 @@ public class RemorphedMenu extends Screen {
 
             // filter unlocked
             List<ShapeType<?>> newUnlocked = new ArrayList<>();
-            Set<EntityType<?>> seenTypes = new HashSet<>();
             for (ShapeType<?> shapeType : unlockedShapes) {
-                if (!seenTypes.contains(shapeType.getEntityType())) {
-                    if (currentShape == null || shapeType.equals(currentShape) || shapeType.getEntityType() != currentShape.getEntityType() || shapeType.getVariantData() == currentShape.getVariantData()) { // only add the current variant, NOT the default one (additionally)
-                        newUnlocked.add(shapeType);
-                        seenTypes.add(shapeType.getEntityType());
-                    }
+                if (currentShape == null || shapeType.equals(currentShape) || shapeType.getEntityType() != currentShape.getEntityType() || shapeType.getVariantData() == currentShape.getVariantData()) { // only add the current variant, NOT the default one (additionally)
+                    newUnlocked.add(shapeType);
                 }
             }
 
@@ -283,25 +280,27 @@ public class RemorphedMenu extends Screen {
         unlockedShapes.clear();
         renderEntities.clear();
 
-        List<ShapeType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
+        List<EntityType<?>> validUnlocked = Remorphed.getUnlockedShapes(player);
 
-        for (ShapeType<?> type : validUnlocked) {
+        for (EntityType<?> type : validUnlocked) {
             // Try to get from global cache first
-            EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedEntity(type);
+            ShapeType<?> shapeType = PlayerMorph.getDefaultVariants(player).get(type);
+            if (shapeType == null) shapeType = ShapeType.from((EntityType<? extends LivingEntity>) type);
+            EntityRenderCache.CachedEntityData cachedData = EntityRenderCache.getCachedEntity(shapeType);
 
             if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
                 // Cache hit! Use the pre-loaded entity
-                renderEntities.put(type, cachedMob);
-                unlockedShapes.add(type);
+                renderEntities.put(shapeType, cachedMob);
+                unlockedShapes.add(shapeType);
             } else {
                 // Cache miss - create, prepare, and cache entity on-demand
-                EntityRenderCache.cacheEntity(type, player);
+                EntityRenderCache.cacheEntity(shapeType, player);
 
                 // Now retrieve the prepared entity from cache
-                cachedData = EntityRenderCache.getCachedEntity(type);
+                cachedData = EntityRenderCache.getCachedEntity(shapeType);
                 if (cachedData != null && cachedData.entity() instanceof Mob cachedMob) {
-                    renderEntities.put(type, cachedMob);
-                    unlockedShapes.add(type);
+                    renderEntities.put(shapeType, cachedMob);
+                    unlockedShapes.add(shapeType);
                 }
             }
         }

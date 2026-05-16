@@ -1,22 +1,11 @@
 package dev.tocraft.remorphed.handler.client;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.logging.LogUtils;
 import dev.tocraft.craftedcore.event.client.ClientTickEvents;
-import dev.tocraft.remorphed.Remorphed;
-import dev.tocraft.remorphed.screen.EntityPreloadScreen;
 import dev.tocraft.remorphed.screen.EntityRenderCache;
 import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.Mob;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Handles pre-loading entity instances when the player joins a world.
@@ -74,38 +63,5 @@ public class EntityRenderCacheHandler implements ClientTickEvents.Client {
         }
 
         wasInWorld = isInWorld;
-    }
-
-    private void startPreRendering(LocalPlayer player) {
-        List<ShapeType<?>> currentUnlockedShapes = Remorphed.getUnlockedShapes(player);
-        List<GameProfile> unlockedSkins = Remorphed.getUnlockedSkins(player);
-
-        // Apply the SAME filtering logic as RemorphedMenu lines 118-126
-        // This filters to one variant per entity type for the CURRENT mode (survival/creative)
-        List<ShapeType<?>> currentFilteredShapes = new ArrayList<>();
-        Set<net.minecraft.world.entity.EntityType<?>> seenTypes = new HashSet<>();
-        for (ShapeType<?> shapeType : currentUnlockedShapes) {
-            if (seenTypes.add(shapeType.getEntityType())) {
-                currentFilteredShapes.add(shapeType);
-            }
-        }
-
-        // Gather entities for the current filtered list (for correct ID mapping)
-        List<Mob> entitiesToRender = new ArrayList<>();
-
-        for (ShapeType<?> type : currentFilteredShapes) {
-            EntityRenderCache.CachedEntityData cached = EntityRenderCache.getCachedEntity(type);
-            if (cached != null && cached.entity() instanceof Mob mob) {
-                entitiesToRender.add(mob);
-            }
-        }
-
-        if (!entitiesToRender.isEmpty()) {
-            // Open invisible pre-render screen with shape types for ID calculation
-            /*Minecraft.getInstance().setScreen(new EntityPreloadScreen(
-                    entitiesToRender,
-                    unlockedSkins
-            ));*/
-        }
     }
 }

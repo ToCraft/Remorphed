@@ -24,6 +24,7 @@ import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -31,9 +32,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ProfileResolver;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -159,15 +163,34 @@ public class Remorphed {
         return canUseEveryShape(player) || !Remorphed.CONFIG.lockTransform && (type == null || Remorphed.getKillToUnlock(player, type) <= 0 || PlayerMorph.getKills(player, type) >= Remorphed.getKillToUnlock(player, type));
     }
 
-    public static List<ShapeType<?>> getUnlockedShapes(Player player) {
+    public static List<EntityType<?>> getUnlockedShapes(Player player) {
         // Always filter by canUseShape to respect entity type permissions
-        List<ShapeType<?>> unlocked = new ArrayList<>();
-        for (ShapeType<?> shapeType : ShapeType.getAllTypes(player.level())) {
+        List<EntityType<?>> unlocked = new ArrayList<>();
+        for (EntityType<?> shapeType : getAllTypes(player.level())) {
             if (!unlocked.contains(shapeType) && canUseShape(player, shapeType)) {
                 unlocked.add(shapeType);
             }
         }
         return unlocked;
+    }
+
+    private static final List<EntityType<?>> LIVING_TYPE_CASH = new ArrayList<>();
+
+    private static @NotNull List<EntityType<?>> getAllTypes(Level world) {
+        if (LIVING_TYPE_CASH.isEmpty()) {
+            for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+                try {
+                    Entity instance = type.create(world, EntitySpawnReason.LOAD);
+                    if (instance instanceof LivingEntity) {
+                        LIVING_TYPE_CASH.add(type);
+                    }
+                } catch (Exception e) {
+                    Remorphed.LOGGER.error("{}: Caught an exception while getting shape types for entity type + {}: {}", ShapeType.class.getSimpleName(), type.toShortString(), e);
+                }
+            }
+        }
+
+        return LIVING_TYPE_CASH;
     }
 
     @Contract("_ -> new")

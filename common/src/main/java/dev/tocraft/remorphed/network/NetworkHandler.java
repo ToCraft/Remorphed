@@ -57,9 +57,8 @@ public class NetworkHandler {
         boolean is_entity = data.getBoolean("is_entity").orElse(true);
         if (is_entity) {
             String id = data.getString("id").orElseThrow();
-            int v = data.getIntOr("variant", -1);
             @SuppressWarnings("unchecked") EntityType<LivingEntity> type = (EntityType<LivingEntity>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
-            PlayerMorph.handleSwap(context.getPlayer(), ShapeType.from(type, v));
+            PlayerMorph.handleSwap(context.getPlayer(), ShapeType.from(type));
         } else {
             String uuid = data.getString("uuid").orElseThrow();
             PlayerMorph.handleSwap(context.getPlayer(), UUID.fromString(uuid));
@@ -70,7 +69,6 @@ public class NetworkHandler {
         CompoundTag compound = new CompoundTag();
         compound.putBoolean("is_entity", true);
         compound.putString("id", EntityType.getKey(type.getEntityType()).toString());
-        compound.putInt("variant", type.getVariantData());
 
         ModernNetworking.sendToServer(NetworkHandler.DELETE_SHAPE, compound);
     }
