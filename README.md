@@ -1,52 +1,64 @@
-> [!IMPORTANT]  
-> Due to changes in Mojang's code, this mod **will not support Minecraft 1.21.9 or newer**. If you are a developer with skills in Minecraft modding, you are absolutely welcome to port this mod and create a PR.
+> **Want to morph into other players too?** Install [SkinShifter](https://modrinth.com/mod/skinshifter).
 
----
-
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ToCraft/Remorphed/build.yml?style=for-the-badge)](https://github.com/ToCraft/Remorphed/actions/workflows/build.yml)
-[![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.tocraft.dev%2Fpublic%2Fdev%2Ftocraft%2Fremorphed%2Fmaven-metadata.xml&style=for-the-badge&label=Remorphed)](https://maven.tocraft.dev/#/public/dev/tocraft/remorphed)
-[![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/ToCraft)
+![Banner](assets/Banner.png)
 
 # ReMorphed
 
-ReMorphed is a morph-like mod based on Identity which aims to bring the well-known kill-to-unlock method to new
-minecraft versions.
+**The definitive morph mod for modern Minecraft.** Kill mobs to unlock their form — then use their traits, abilities, and movement. ReMorphed has been in active development for 3 years and goes far beyond a simple port.
 
-<strong>This features a menu (what walkers doesn't), new unlock-mechanics and the possibility of more than two
-shape!</strong>
+> ReMorphed is built on [Walkers](https://modrinth.com/mod/woodwalkers) and [CraftedCore](https://modrinth.com/mod/crafted-core) —it started as a fork of the Identity mod and developed into something entirely own.
+> It is a ground-up reimplementation with a full **Trait System**, a proper morph **menu**, and ongoing compatibility work.
 
-> This mod is also compatible with [SkinShifter](https://github.com/ToCraft/SkinShifter/), where you can transform into
-> other players!
+![Teaser](assets/teaser.gif)
 
-## Download
+## Why ReMorphed?
 
-[CurseForge](https://curseforge.com/minecraft/mc-mods/remorphed)
+| Feature                            | ReMorphed                                                              | other Morph mods / Identity ports |
+|------------------------------------|------------------------------------------------------------------------|-----------------------------------|
+| In-game morph menu                 | ✅                                                                      | Partial                           |
+| balanced gameplay                  | ✅ (unlocked mobs "vanish" after 5x morphing per kill)                  | ❌                                 |
+| Morph into Players                 | ✅ (with [SkinShifter](https://modrinth.com/mod/skinshifter) installed) | ❌                                 |
+| Trait System (passive abilities)   | ✅                                                                      | ❌                                 |
+| highly configurable                | ✅                                                                      | ❌                                 |
+| highly customizable via Data Packs | ✅                                                                      | ❌                                 |
+| detailed wiki guides for players   | ✅                                                                      | ❌                                 |
+| Active development                 | ✅ since 2023                                                           | Varies                            |
+| modern, easy to understand API     | ✅                                                                      | ❌                                 |
+| License                            | LGPL-3.0 (open)                                                        | Often All Right Reserved          |
+| FOSS                               | ✅ Free forever & public source code                                    | Varies                            |
 
-[Modrinth](https://modrinth.com/mod/remorphed)
-
----
-
-**ReMorphed Requires CraftedCore & Walkers**
-
-[CraftedCore (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/crafted-core)
-[CraftedCore (Modrinth)](https://modrinth.com/mod/crafted-core)
-
-[Walkers (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/woodwalkers)
-[Walkers (Modrinth)](https://modrinth.com/mod/woodwalkers)
-
----
-
-### Kill mobs to transform into them!
-
-This mod allows you to unlock mobs as shapes by killing them.
+... and many other features!
 
 ## Getting Started
 
-Search for a mob in the wilderness and kill it. After killing it, you're able to select it in the Menu (open it by
-pressing `^`). After selecting it, you can transform into it, just like in the Woodwalkers-mod, by pressing `G`.
-**Note: The previous unlocking method from Woodwalkers doesn't work with this addon installed! This unlock mechanic
-works as a replacement.**
+1. **Hunt** — find a mob in the wild and kill it.
+2. **Unlock** — the mob is now saved to your collection.
+3. **Open the Menu** — press `^` to browse your unlocked morphs.
+4. **Transform** — select a morph and press `G` to shift.
+
+> ⚠️ **Note:** Woodwalkers' built-in unlock method is disabled when ReMorphed is installed. This mod replaces it entirely.
+
+![Menu](assets/menu.png)
+
+## Trait System
+
+Each mob form comes with its own passive traits — not just the shape. Swim faster as a fish, climb walls as a spider, survive falls as a cat. The trait system is ReMorphed's core feature and is continuously expanded.
+Most traits have a unique symbol so you know which mob has which traits! The symbols are explained in the [wiki](https://github.com/ToCraft/woodwalkers-mod/wiki/Traits).
+
+![Traits](assets/traits.png)
+
+## Requirements
+
+| Mod | CurseForge | Modrinth |
+|---|---|---|
+| CraftedCore | [Download](https://www.curseforge.com/minecraft/mc-mods/crafted-core) | [Download](https://modrinth.com/mod/crafted-core) |
+| Walkers | [Download](https://www.curseforge.com/minecraft/mc-mods/woodwalkers) | [Download](https://modrinth.com/mod/woodwalkers) |
+
+## Download ReMorphed
+
+[![CurseForge](https://img.shields.io/badge/CurseForge-Download-orange?style=for-the-badge&logo=curseforge)](https://curseforge.com/minecraft/mc-mods/remorphed)
+[![Modrinth](https://img.shields.io/badge/Modrinth-Download-green?style=for-the-badge&logo=modrinth)](https://modrinth.com/mod/remorphed)
 
 ## License
 
-ReMorphed is licensed under LGPL-3.0 license. 
+ReMorphed is licensed under [LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.html) — free to use, modify, and include in modpacks.
