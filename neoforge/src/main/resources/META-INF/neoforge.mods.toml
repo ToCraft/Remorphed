@@ -16,7 +16,8 @@ credits = "Original mod by Draylar"
 description = '''
 Transform like in the old-school morph mod!
 '''
-logoFile = "pack.png"
+iconFile = "pack.png"
+bannerFile = "banner.png"
 
 [[dependencies.remorphed]]
 modId = "minecraft"

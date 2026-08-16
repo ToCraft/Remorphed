@@ -1,7 +1,8 @@
 remorphed 8.1
 ================
 
-- port to 26.2
+- **port to 26.2**
+- add banner to NeoForge meta
 
 remorphed 8.0
 ================
