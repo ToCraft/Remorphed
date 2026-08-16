@@ -9,10 +9,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.MagmaCube;
-import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerSkin;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -72,6 +72,7 @@ public class EntityRenderCache {
             try {
                 // Create isolated entity instance
                 Entity entity = type.create(minecraft.level, player);
+                entity.setId(-1);
 
                 if (entity instanceof Mob mob) {
                     // Make entity completely static and isolated
@@ -119,16 +120,14 @@ public class EntityRenderCache {
      *
      * @param mob The mob to prepare
      */
-    private static void prepareStaticEntity(Mob mob) {
+    private static void prepareStaticEntity(@NotNull Mob mob) {
         // Disable AI and make invulnerable to prevent any updates
         mob.setNoAi(true);
         mob.setInvulnerable(true);
 
         // Fix slimes and magma cubes - set to smallest size
-        if (mob instanceof Slime slime) {
+        if (mob instanceof AbstractCubeMob slime) {
             slime.setSize(1, true);
-        } else if (mob instanceof MagmaCube magmaCube) {
-            magmaCube.setSize(1, true);
         }
 
         // Enable glowing effect for menu display
@@ -178,6 +177,7 @@ public class EntityRenderCache {
 
         try {
             Entity entity = type.create(minecraft.level, player);
+            entity.setId(-1);
 
             if (entity instanceof Mob mob) {
                 prepareStaticEntity(mob);

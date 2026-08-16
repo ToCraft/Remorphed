@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
@@ -106,9 +105,7 @@ public class EntityWidget<T extends LivingEntity> extends ShapeWidget {
         } catch (Exception e) {
             Remorphed.LOGGER.error("Error while rendering {}", ShapeType.createTooltipText(entity).getString(), e);
             setCrashed();
-            MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-            immediate.endBatch();
-            RenderSystem.getModelViewStack().popMatrix();
+            Minecraft.getInstance().gameRenderer.renderBuffers().stagedVertexBuffer().endDraw();
         }
     }
 

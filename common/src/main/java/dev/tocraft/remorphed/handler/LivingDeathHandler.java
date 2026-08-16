@@ -15,11 +15,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class LivingDeathHandler implements EntityEvents.LivingDeath {
     @SuppressWarnings("ConstantValue")
     @Override
-    public InteractionResult die(LivingEntity entity, DamageSource source) {
+    public InteractionResult die(LivingEntity entity, @NotNull DamageSource source) {
         if (source.getEntity() instanceof ServerPlayer killer) {
             if (!(entity instanceof Player)) {
                 EntityType<?> type = entity.getType();

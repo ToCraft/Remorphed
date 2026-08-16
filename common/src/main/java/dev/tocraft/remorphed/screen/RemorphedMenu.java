@@ -21,8 +21,10 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
@@ -53,8 +55,8 @@ public class RemorphedMenu extends Screen {
     private final Map<ShapeType<?>, Mob> renderEntities = new ConcurrentHashMap<>();
     private final Map<GameProfile, PlayerSkin> renderPlayers = new ConcurrentHashMap<>();
 
-    private final PlayerModel MODEL_WIDE = new PlayerModel(minecraft.getEntityModels().bakeLayer(ModelLayers.PLAYER), false);
-    private final PlayerModel MODEL_SLIM = new PlayerModel(minecraft.getEntityModels().bakeLayer(ModelLayers.PLAYER), true);
+    private final Model.Simple wideModel;
+    private final Model.Simple slimModel;
 
 
     private final SearchWidget searchBar = createSearchBar();
@@ -65,6 +67,8 @@ public class RemorphedMenu extends Screen {
 
     public RemorphedMenu() {
         super(Component.literal("ReMorphed Menu"));
+        this.wideModel = new Model.Simple(this.minecraft.getEntityModels().bakeLayer(ModelLayers.PLAYER), RenderTypes::entityTranslucent);
+        this.slimModel = new Model.Simple(this.minecraft.getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM), RenderTypes::entityTranslucent);
     }
 
     protected void init() {
@@ -233,7 +237,7 @@ public class RemorphedMenu extends Screen {
                                     0,
                                     skinProfile,
                                     playerSkin,
-                                    playerSkin.model() == PlayerModelType.WIDE ? MODEL_WIDE : MODEL_SLIM,
+                                    playerSkin.model() == PlayerModelType.WIDE ? this.wideModel : this.slimModel,
                                     this,
                                     PlayerMorph.getFavoriteSkins(minecraft.player).contains(skinProfile),
                                     bl,
@@ -352,7 +356,7 @@ public class RemorphedMenu extends Screen {
     }
 
     private @NotNull Button createHelpButton() {
-        Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> Minecraft.getInstance().setScreen(new RemorphedHelpScreen()));
+        Button.Builder helpButton = Button.builder(Component.nullToEmpty("?"), (widget) -> Minecraft.getInstance().gui.setScreen(new RemorphedHelpScreen()));
 
         helpButton.size(20, 20);
         helpButton.tooltip(Tooltip.create(Component.translatable(Remorphed.MODID + ".help")));

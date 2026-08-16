@@ -9,6 +9,7 @@ import dev.tocraft.walkers.api.variant.ShapeType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,7 @@ public class UnlockShapeCallback implements ShapeEvents.UnlockShapeCallback {
             }
             // check if entity is unlocked by remorphed, prevents native unlock mechanic by walkers
             else if (!Remorphed.canUseShape(player, eType)) {
-                if (!eType.equals(EntityType.WOLF) || !Walkers.hasSpecialShape(player.getUUID())) {
+                if (!eType.equals(EntityTypes.WOLF) || !Walkers.hasSpecialShape(player.getUUID())) {
                     return InteractionResult.FAIL;
                 }
             }

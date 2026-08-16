@@ -6,17 +6,18 @@ import dev.tocraft.remorphed.screen.RemorphedMenu;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class KeyPressHandler implements ClientTickEvents.Client {
     @Override
-    public void tick(Minecraft client) {
+    public void tick(@NotNull Minecraft client) {
         assert client.player != null;
 
         if (RemorphedClient.MENU_KEY.consumeClick()) {
             // Open menu directly - menu access is not restricted by permissions
             // as it can be easily bypassed client-side
-            Minecraft.getInstance().setScreen(new RemorphedMenu());
+            Minecraft.getInstance().gui.setScreen(new RemorphedMenu());
         }
     }
 }

@@ -20,6 +20,7 @@ import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +45,7 @@ public class SpecialShapeWidget extends AbstractButton {
             wolf.saveWithoutId(out);
         }
         this.isCurrent = out.buildResult().getBooleanOr("isSpecial", false);
-        this.isAvailable = Minecraft.getInstance().player != null && Remorphed.canUseShape(Minecraft.getInstance().player, EntityType.WOLF);
+        this.isAvailable = Minecraft.getInstance().player != null && Remorphed.canUseShape(Minecraft.getInstance().player, EntityTypes.WOLF);
         setTooltip(Tooltip.create(Component.translatable(isAvailable ? "remorphed.special_shape_available" : "remorphed.special_shape_unavailable")));
     }
 
@@ -67,10 +68,10 @@ public class SpecialShapeWidget extends AbstractButton {
         UUID profileId = Minecraft.getInstance().getUser().getProfileId();
         if (!isCurrent && isAvailable && Walkers.hasSpecialShape(profileId)) {
             // get variant range
-            TypeProvider<Wolf> typeProvider = TypeProviderRegistry.getProvider(EntityType.WOLF);
+            TypeProvider<Wolf> typeProvider = TypeProviderRegistry.getProvider(EntityTypes.WOLF);
             int range = typeProvider != null ? typeProvider.size(Minecraft.getInstance().level) : -1;
             // swap to variant
-            NetworkHandler.sendSwap2ndShapeRequest(Objects.requireNonNull(ShapeType.from(EntityType.WOLF, -1)));
+            NetworkHandler.sendSwap2ndShapeRequest(Objects.requireNonNull(ShapeType.from(EntityTypes.WOLF, -1)));
             SwapVariantPackets.sendSwapRequest(range);
             parent.onClose();
         }

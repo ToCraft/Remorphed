@@ -72,7 +72,7 @@ public class RemorphedHelpScreen extends Screen {
     }
 
     protected void addFooter() {
-        this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, (button) -> Minecraft.getInstance().setScreen(new RemorphedMenu())).width(200).build());
+        this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, (button) -> Minecraft.getInstance().gui.setScreen(new RemorphedMenu())).width(200).build());
     }
 
     @Override
