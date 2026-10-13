@@ -3,6 +3,10 @@ package dev.tocraft.remorphed.screen;
 import com.mojang.authlib.GameProfile;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.walkers.api.variant.ShapeType;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -14,11 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages pre-loading and caching of entity render states for the Remorphed menu.
@@ -123,7 +122,7 @@ public class EntityRenderCache {
     private static void prepareStaticEntity(@NotNull Mob mob) {
         // Disable AI and make invulnerable to prevent any updates
         mob.setNoAi(true);
-        mob.setInvulnerable(true);
+        mob.setPermanentlyInvulnerable(true);
 
         // Fix slimes and magma cubes - set to smallest size
         if (mob instanceof AbstractCubeMob slime) {

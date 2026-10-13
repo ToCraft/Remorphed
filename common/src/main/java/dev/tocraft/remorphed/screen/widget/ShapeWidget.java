@@ -1,5 +1,6 @@
 package dev.tocraft.remorphed.screen.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.tocraft.remorphed.Remorphed;
 import dev.tocraft.walkers.network.impl.SwapPackets;
 import net.minecraft.client.Minecraft;
@@ -13,7 +14,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 public abstract class ShapeWidget extends AbstractButton {
     private final Screen parent;
@@ -114,7 +114,7 @@ public abstract class ShapeWidget extends AbstractButton {
 
     @Override
     public boolean keyPressed(@NotNull KeyEvent event) {
-        if (this.active && this.visible && isHovered() && event.key() == GLFW.GLFW_KEY_X && availability != -1) {
+        if (this.active && this.visible && isHovered() && event.key() == InputConstants.KEY_X && availability != -1) {
             deletePoint();
             return true;
         }

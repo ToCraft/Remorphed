@@ -13,13 +13,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class RemorphedClient {
     public static final KeyMapping.Category REMORPHED_CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("remorphed", "category"));
-    public static final KeyMapping MENU_KEY = new KeyMapping("key.remorphed_menu", InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_B, REMORPHED_CATEGORY);
+    public static final KeyMapping MENU_KEY = new KeyMapping("key.remorphed_menu", InputConstants.Type.KEYBOARD,
+            InputConstants.KEY_B, REMORPHED_CATEGORY);
 
     public void initialize() {
         KeyBindingRegistry.register(MENU_KEY);
